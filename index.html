@@ -172,7 +172,8 @@
         // Desabilitar listeners em tempo real para economizar leituras
         db.settings({
             cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
-            experimentalForceLongPolling: false // Desabilita long polling
+            experimentalForceLongPolling: false, // Desabilita long polling
+            merge: true // Evita warning de override de configurações
         });
         
         const auth = firebase.auth();
