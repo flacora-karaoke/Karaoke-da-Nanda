@@ -171,6 +171,31 @@ Pronto para uso!
     <script src="prevent-duplicates.js"></script>
 
     <script>
+        // Verificação de senha de acesso
+        function checkAccess() {
+            const password = prompt('🔐 Digite a senha de administrador para acessar as funcionalidades de expansão do banco:');
+            
+            if (!password) {
+                alert('❌ Acesso negado! Esta página será fechada.');
+                window.close();
+                return false;
+            }
+            
+            const correctPasswordHash = 'karaoke2024'; // Senha: karaoke2024
+            if (password !== correctPasswordHash) {
+                alert('❌ Senha incorreta! Acesso negado. Esta página será fechada.');
+                window.close();
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Verificar acesso antes de continuar
+        if (!checkAccess()) {
+            throw new Error('Acesso negado');
+        }
+        
         // Configuração do Firebase - usando configurações centralizadas
         if (!window.firebaseConfig || !validateConfig(window.firebaseConfig)) {
             alert('❌ Configurações do Firebase não encontradas ou inválidas!');

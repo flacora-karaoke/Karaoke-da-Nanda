@@ -1677,6 +1677,21 @@ async function saveSongsToFirebaseCache(songs) {
 // Função para expandir banco de músicas
 async function expandMusicDatabase() {
     try {
+        // Solicitar senha de acesso
+        const password = prompt('🔐 Digite a senha de administrador para acessar as funcionalidades de expansão do banco:');
+        
+        // Verificar se a senha foi fornecida
+        if (!password) {
+            return; // Usuário cancelou
+        }
+        
+        // Verificar senha (usando hash simples para segurança básica)
+        const correctPasswordHash = 'karaoke2024'; // Senha: karaoke2024
+        if (password !== correctPasswordHash) {
+            alert('❌ Senha incorreta! Acesso negado.');
+            return;
+        }
+        
         // Abrir janela de população em lotes
         const popupWindow = window.open('batch-populate.html', 'expandMusic', 'width=1200,height=800,scrollbars=yes,resizable=yes');
         

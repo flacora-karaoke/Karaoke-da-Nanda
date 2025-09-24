@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Teste Completo de APIs - YouTube</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            text-align: center;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+        
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .summary {
+            display: none;
+            padding: 20px 30px;
+            background: #e9ecef;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .summary-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .summary-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .working { color: #28a745; }
+        .quota { color: #ffc107; }
+        .error { color: #dc3545; }
+        .total { color: #007bff; }
+        
+        .apis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            padding: 30px;
+        }
+        
+        .api-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border-left: 5px solid #6c757d;
+        }
+        
+        .api-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .api-card.working {
+            border-left-color: #28a745;
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        }
+        
+        .api-card.quota-exceeded {
+            border-left-color: #ffc107;
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+        }
+        
+        .api-card.error {
+            border-left-color: #dc3545;
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+        }
+        
+        .api-card.testing {
+            border-left-color: #007bff;
+            background: linear-gradient(135deg, #cce7ff, #b3d9ff);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .api-header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .api-title {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+        
+        .api-status {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .status-working {
+            background: #28a745;
+            color: white;
+        }
+        
+        .status-quota {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .status-error {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .status-testing {
+            background: #007bff;
+            color: white;
+        }
+        
+        .status-unknown {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .api-details {
+            padding: 20px;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+        
+        .error-details {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .log {
+            background: #212529;
+            color: #fff;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px 0;
+        }
+        
+        .log-info { color: #17a2b8; }
+        .log-success { color: #28a745; }
+        .log-warning { color: #ffc107; }
+        .log-error { color: #dc3545; }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .solutions {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .solutions h4 {
+            color: #0056b3;
+            margin-bottom: 15px;
+        }
+        
+        .solutions ul {
+            margin-left: 20px;
+        }
+        
+        .solutions li {
+            margin: 8px 0;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Teste Completo de APIs</h1>
+            <p>Diagnóstico avançado das chaves da API do YouTube</p>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" onclick="testAllAPIs()" id="testBtn">
+                🚀 Testar Todas as APIs
+            </button>
+            <button class="btn" onclick="clearResults()" id="clearBtn">
+                🗑️ Limpar Resultados
+            </button>
+            <div class="progress-bar" id="progressBar" style="display: none;">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+        
+        <div class="summary" id="summary">
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-number working" id="workingCount">0</div>
+                    <div>✅ Funcionando</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-number quota" id="quotaCount">0</div>
+                    <div>⚠️ Quota Excedida</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-number error" id="errorCount">0</div>
+                    <div>❌ Com Erro</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-number total" id="totalCount">0</div>
+                    <div>📊 Total</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="apis-grid" id="apisGrid">
+            <!-- APIs serão inseridas aqui dinamicamente -->
+        </div>
+        
+        <div class="log" id="log">
+            <div class="log-entry log-info">🚀 Carregando teste de APIs...</div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        let apiResults = [];
+        let isTestingInProgress = false;
+        
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function updateProgress(current, total) {
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            
+            if (total > 0) {
+                progressBar.style.display = 'block';
+                const percentage = (current / total) * 100;
+                progressFill.style.width = percentage + '%';
+            } else {
+                progressBar.style.display = 'none';
+            }
+        }
+
+        function updateSummary() {
+            const working = apiResults.filter(r => r.status === 'working').length;
+            const quota = apiResults.filter(r => r.status === 'quota-exceeded').length;
+            const error = apiResults.filter(r => r.status === 'error').length;
+            const total = apiResults.length;
+
+            document.getElementById('workingCount').textContent = working;
+            document.getElementById('quotaCount').textContent = quota;
+            document.getElementById('errorCount').textContent = error;
+            document.getElementById('totalCount').textContent = total;
+            
+            document.getElementById('summary').style.display = 'block';
+        }
+
+        function createAPICard(index, key) {
+            const maskedKey = key.substring(0, 8) + '...' + key.substring(key.length - 4);
+            
+            return `
+                <div class="api-card" id="card-${index}">
+                    <div class="api-header">
+                        <div class="api-title">🔑 API #${index + 1}</div>
+                        <div class="api-status status-unknown" id="status-${index}">Aguardando</div>
+                    </div>
+                    <div class="api-details" id="details-${index}">
+                        <strong>Chave:</strong> ${maskedKey}<br>
+                        <strong>Status:</strong> Não testada<br>
+                        <strong>Última verificação:</strong> Nunca
+                    </div>
+                </div>
+            `;
+        }
+
+        function getErrorAnalysis(error) {
+            if (!error || !error.errors) return '';
+            
+            let analysis = '<div class="solutions"><h4>🔍 Análise Detalhada do Erro:</h4><ul>';
+            
+            error.errors.forEach(err => {
+                switch(err.reason) {
+                    case 'quotaExceeded':
+                        analysis += '<li><strong>📊 Quota Excedida:</strong> Limite diário da API atingido. Aguarde até amanhã ou use outra chave.</li>';
+                        break;
+                    case 'accessNotConfigured':
+                        analysis += '<li><strong>⚙️ API Não Configurada:</strong> YouTube Data API v3 não está habilitada no projeto do Google Cloud Console.</li>';
+                        break;
+                    case 'keyInvalid':
+                        analysis += '<li><strong>🔑 Chave Inválida:</strong> A chave de API não é válida ou foi revogada.</li>';
+                        break;
+                    case 'ipRefererBlocked':
+                        analysis += '<li><strong>🚫 IP/Referrer Bloqueado:</strong> Restrições de IP ou domínio aplicadas na chave.</li>';
+                        break;
+                    case 'forbidden':
+                        analysis += '<li><strong>🔒 Acesso Negado:</strong> Permissões insuficientes ou projeto desativado.</li>';
+                        break;
+                    case 'userRateLimitExceeded':
+                        analysis += '<li><strong>⏱️ Rate Limit:</strong> Muitas requisições em pouco tempo.</li>';
+                        break;
+                    case 'dailyLimitExceeded':
+                        analysis += '<li><strong>📅 Limite Diário:</strong> Limite diário de requisições excedido.</li>';
+                        break;
+                    default:
+                        analysis += `<li><strong>❓ Erro Desconhecido:</strong> ${err.reason} - ${err.message || 'Sem detalhes'}</li>`;
+                }
+            });
+            
+            analysis += '</ul></div>';
+            return analysis;
+        }
+
+        function getSolutions(errorCode, errorReason) {
+            let solutions = '<div class="solutions"><h4>💡 Soluções Recomendadas:</h4><ul>';
+            
+            if (errorCode === 403) {
+                if (errorReason === 'quotaExceeded') {
+                    solutions += `
+                        <li>Aguardar até amanhã (quotas resetam à meia-noite PST)</li>
+                        <li>Criar novos projetos no Google Cloud Console</li>
+                        <li>Gerar novas chaves de API</li>
+                        <li>Usar menos requisições por dia</li>
+                    `;
+                } else if (errorReason === 'accessNotConfigured') {
+                    solutions += `
+                        <li>Acessar Google Cloud Console</li>
+                        <li>Ir em "APIs & Services" > "Library"</li>
+                        <li>Procurar por "YouTube Data API v3"</li>
+                        <li>Clicar em "Enable"</li>
+                    `;
+                } else {
+                    solutions += `
+                        <li>Verificar se YouTube Data API v3 está habilitada</li>
+                        <li>Verificar restrições da chave (IP, domínio, etc.)</li>
+                        <li>Verificar se o projeto tem faturamento ativo</li>
+                        <li>Tentar gerar uma nova chave de API</li>
+                        <li>Verificar se o projeto não foi suspenso</li>
+                    `;
+                }
+            } else {
+                solutions += `
+                    <li>Verificar conectividade com a internet</li>
+                    <li>Tentar novamente em alguns minutos</li>
+                    <li>Verificar se a chave está correta</li>
+                `;
+            }
+            
+            solutions += '</ul></div>';
+            return solutions;
+        }
+
+        async function testSingleAPI(index, key) {
+            const card = document.getElementById(`card-${index}`);
+            const status = document.getElementById(`status-${index}`);
+            const details = document.getElementById(`details-${index}`);
+            const maskedKey = key.substring(0, 8) + '...' + key.substring(key.length - 4);
+
+            // Marcar como testando
+            card.className = 'api-card testing';
+            status.className = 'api-status status-testing';
+            status.textContent = 'Testando...';
+            
+            addLog(`🧪 Testando API #${index + 1}...`, 'info');
+
+            try {
+                const testUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=test&maxResults=1&key=${key}`;
+                const response = await fetch(testUrl);
+                const data = await response.json();
+
+                const now = new Date().toLocaleTimeString();
+                let result = {
+                    index: index,
+                    key: maskedKey,
+                    status: 'unknown',
+                    message: '',
+                    timestamp: now,
+                    fullError: data.error || null
+                };
+
+                if (response.ok && !data.error) {
+                    // API funcionando
+                    result.status = 'working';
+                    result.message = 'API funcionando normalmente';
+                    
+                    card.className = 'api-card working';
+                    status.className = 'api-status status-working';
+                    status.textContent = '✅ Funcionando';
+                    
+                    details.innerHTML = `
+                        <strong>Chave:</strong> ${maskedKey}<br>
+                        <strong>Status:</strong> ✅ Funcionando normalmente<br>
+                        <strong>Última verificação:</strong> ${now}<br>
+                        <strong>Resultados encontrados:</strong> ${data.items ? data.items.length : 0}<br>
+                        <strong>Quota usada:</strong> ~1 unidade
+                    `;
+                    
+                    addLog(`✅ API #${index + 1} está funcionando perfeitamente!`, 'success');
+                    
+                } else if (response.status === 403 || (data.error && data.error.code === 403)) {
+                    // Verificar se é quota excedida ou erro de permissão
+                    const isQuotaExceeded = data.error && data.error.errors && 
+                        data.error.errors.some(e => e.reason === 'quotaExceeded' || e.reason === 'dailyLimitExceeded');
+                    
+                    if (isQuotaExceeded) {
+                        result.status = 'quota-exceeded';
+                        result.message = 'Quota diária excedida';
+                        
+                        card.className = 'api-card quota-exceeded';
+                        status.className = 'api-status status-quota';
+                        status.textContent = '⚠️ Quota Excedida';
+                        
+                        details.innerHTML = `
+                            <strong>Chave:</strong> ${maskedKey}<br>
+                            <strong>Status:</strong> ⚠️ Quota diária excedida<br>
+                            <strong>Última verificação:</strong> ${now}<br>
+                            <strong>Erro:</strong> ${data.error.message}<br>
+                            ${getErrorAnalysis(data.error)}
+                            ${getSolutions(403, 'quotaExceeded')}
+                        `;
+                        
+                        addLog(`⚠️ API #${index + 1} - Quota excedida`, 'warning');
+                    } else {
+                        result.status = 'error';
+                        result.message = 'Erro de permissão (403)';
+                        
+                        card.className = 'api-card error';
+                        status.className = 'api-status status-error';
+                        status.textContent = '❌ Erro 403';
+                        
+                        const errorReason = data.error && data.error.errors && data.error.errors[0] ? 
+                            data.error.errors[0].reason : 'forbidden';
+                        
+                        details.innerHTML = `
+                            <strong>Chave:</strong> ${maskedKey}<br>
+                            <strong>Status:</strong> ❌ Erro de permissão<br>
+                            <strong>Última verificação:</strong> ${now}<br>
+                            <strong>Código do erro:</strong> ${data.error ? data.error.code : response.status}<br>
+                            <strong>Mensagem:</strong> ${data.error ? data.error.message : 'Acesso negado'}<br>
+                            ${data.error ? `<div class="error-details">Detalhes completos:\n${JSON.stringify(data.error, null, 2)}</div>` : ''}
+                            ${getErrorAnalysis(data.error)}
+                            ${getSolutions(403, errorReason)}
+                        `;
+                        
+                        addLog(`❌ API #${index + 1} - Erro de permissão: ${data.error ? data.error.message : 'Acesso negado'}`, 'error');
+                    }
+                } else {
+                    // Outro tipo de erro
+                    result.status = 'error';
+                    result.message = `Erro HTTP ${response.status}`;
+                    
+                    card.className = 'api-card error';
+                    status.className = 'api-status status-error';
+                    status.textContent = `❌ Erro ${response.status}`;
+                    
+                    details.innerHTML = `
+                        <strong>Chave:</strong> ${maskedKey}<br>
+                        <strong>Status:</strong> ❌ Erro HTTP ${response.status}<br>
+                        <strong>Última verificação:</strong> ${now}<br>
+                        <strong>Erro:</strong> ${data.error ? data.error.message : response.statusText}<br>
+                        ${data.error ? `<div class="error-details">Detalhes:\n${JSON.stringify(data.error, null, 2)}</div>` : ''}
+                        ${getSolutions(response.status, 'unknown')}
+                    `;
+                    
+                    addLog(`❌ API #${index + 1} - Erro HTTP ${response.status}: ${data.error ? data.error.message : response.statusText}`, 'error');
+                }
+
+                return result;
+
+            } catch (error) {
+                const now = new Date().toLocaleTimeString();
+                const result = {
+                    index: index,
+                    key: maskedKey,
+                    status: 'error',
+                    message: `Erro de rede: ${error.message}`,
+                    timestamp: now,
+                    fullError: error
+                };
+
+                card.className = 'api-card error';
+                status.className = 'api-status status-error';
+                status.textContent = '❌ Erro de Rede';
+                
+                details.innerHTML = `
+                    <strong>Chave:</strong> ${maskedKey}<br>
+                    <strong>Status:</strong> ❌ Erro de conexão<br>
+                    <strong>Última verificação:</strong> ${now}<br>
+                    <strong>Erro:</strong> ${error.message}<br>
+                    <div class="error-details">Stack trace:\n${error.stack}</div>
+                    ${getSolutions(0, 'network')}
+                `;
+                
+                addLog(`❌ API #${index + 1} - Erro de rede: ${error.message}`, 'error');
+                return result;
+            }
+        }
+
+        async function testAllAPIs() {
+            if (isTestingInProgress) {
+                addLog('⚠️ Teste já está em andamento!', 'warning');
+                return;
+            }
+
+            if (!window.YOUTUBE_API_KEYS || window.YOUTUBE_API_KEYS.length === 0) {
+                addLog('❌ Nenhuma chave de API encontrada no config.js!', 'error');
+                return;
+            }
+
+            isTestingInProgress = true;
+            apiResults = [];
+            
+            const testBtn = document.getElementById('testBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            
+            testBtn.disabled = true;
+            testBtn.textContent = '🔄 Testando...';
+            clearBtn.disabled = true;
+
+            const totalAPIs = window.YOUTUBE_API_KEYS.length;
+            addLog(`🚀 Iniciando teste de ${totalAPIs} chaves de API...`, 'info');
+
+            // Criar cards para todas as APIs
+            const apisGrid = document.getElementById('apisGrid');
+            apisGrid.innerHTML = '';
+            
+            window.YOUTUBE_API_KEYS.forEach((key, index) => {
+                apisGrid.innerHTML += createAPICard(index, key);
+            });
+
+            // Testar cada API sequencialmente
+            for (let i = 0; i < window.YOUTUBE_API_KEYS.length; i++) {
+                updateProgress(i, totalAPIs);
+                const result = await testSingleAPI(i, window.YOUTUBE_API_KEYS[i]);
+                apiResults.push(result);
+                updateSummary();
+                
+                // Pequena pausa entre os testes para não sobrecarregar
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+
+            updateProgress(totalAPIs, totalAPIs);
+            
+            // Finalizar teste
+            const working = apiResults.filter(r => r.status === 'working').length;
+            const quota = apiResults.filter(r => r.status === 'quota-exceeded').length;
+            const error = apiResults.filter(r => r.status === 'error').length;
+            
+            addLog(`🎉 Teste concluído! Funcionando: ${working}, Quota excedida: ${quota}, Erro: ${error}`, 'info');
+            
+            if (working === 0) {
+                addLog('🚨 ATENÇÃO: Nenhuma API está funcionando! Verifique as soluções recomendadas.', 'error');
+            } else if (working < totalAPIs / 2) {
+                addLog('⚠️ Menos da metade das APIs estão funcionando. Considere verificar as configurações.', 'warning');
+            } else {
+                addLog('✅ Boa parte das APIs está funcionando normalmente!', 'success');
+            }
+
+            testBtn.disabled = false;
+            testBtn.textContent = '🚀 Testar Todas as APIs';
+            clearBtn.disabled = false;
+            isTestingInProgress = false;
+            
+            setTimeout(() => {
+                updateProgress(0, 0);
+            }, 2000);
+        }
+
+        function clearResults() {
+            apiResults = [];
+            document.getElementById('apisGrid').innerHTML = '';
+            document.getElementById('summary').style.display = 'none';
+            document.getElementById('log').innerHTML = '<div class="log-entry log-info">🚀 Resultados limpos. Pronto para novo teste!</div>';
+            updateProgress(0, 0);
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.YOUTUBE_API_KEYS && window.YOUTUBE_API_KEYS.length > 0) {
+                addLog(`📋 Encontradas ${window.YOUTUBE_API_KEYS.length} chaves de API`, 'info');
+                addLog('✅ Interface carregada. Clique em "Testar Todas as APIs" para iniciar!', 'success');
+            } else {
+                addLog('❌ Erro: Nenhuma chave de API encontrada!', 'error');
+            }
+        });
+    </script>
+</body>
+</html>

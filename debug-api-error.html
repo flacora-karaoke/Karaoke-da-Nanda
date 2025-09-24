@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug API Error - YouTube</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .error-details {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .test-result {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.success { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Debug API Error - YouTube</h1>
+        <p>Este teste vai fazer uma requisição detalhada para obter informações específicas sobre o erro 403.</p>
+        
+        <button onclick="testAPIDetailed()">🧪 Testar API com Detalhes</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        async function testAPIDetailed() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>🔄 Testando...</p>';
+            
+            // Pegar a primeira chave para teste
+            const apiKey = window.YOUTUBE_API_KEYS[0];
+            const maskedKey = apiKey.substring(0, 8) + '...' + apiKey.substring(apiKey.length - 4);
+            
+            try {
+                const testUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=test&maxResults=1&key=${apiKey}`;
+                
+                console.log('🔗 URL de teste:', testUrl);
+                
+                const response = await fetch(testUrl);
+                const data = await response.json();
+                
+                let html = `
+                    <div class="test-result">
+                        <h3>📊 Resultado do Teste</h3>
+                        <p><strong>Chave testada:</strong> ${maskedKey}</p>
+                        <p><strong>Status HTTP:</strong> <span class="status ${response.ok ? 'success' : 'error'}">${response.status} ${response.statusText}</span></p>
+                        <p><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>
+                    </div>
+                `;
+                
+                if (data.error) {
+                    html += `
+                        <div class="error-details">
+                            <h4>❌ Detalhes do Erro:</h4>
+                            <strong>Código:</strong> ${data.error.code}
+                            <strong>Mensagem:</strong> ${data.error.message}
+                            
+                            <strong>Erros específicos:</strong>
+                            ${JSON.stringify(data.error.errors, null, 2)}
+                            
+                            <strong>Resposta completa:</strong>
+                            ${JSON.stringify(data, null, 2)}
+                        </div>
+                    `;
+                    
+                    // Análise específica do erro
+                    if (data.error.code === 403) {
+                        html += `
+                            <div class="test-result">
+                                <h4>🔍 Análise do Erro 403:</h4>
+                        `;
+                        
+                        if (data.error.errors) {
+                            data.error.errors.forEach(err => {
+                                switch(err.reason) {
+                                    case 'quotaExceeded':
+                                        html += '<p>📊 <strong>Quota excedida:</strong> Limite diário da API atingido</p>';
+                                        break;
+                                    case 'accessNotConfigured':
+                                        html += '<p>⚙️ <strong>API não configurada:</strong> YouTube Data API v3 não está habilitada no projeto</p>';
+                                        break;
+                                    case 'keyInvalid':
+                                        html += '<p>🔑 <strong>Chave inválida:</strong> A chave de API não é válida ou foi revogada</p>';
+                                        break;
+                                    case 'ipRefererBlocked':
+                                        html += '<p>🚫 <strong>IP/Referrer bloqueado:</strong> Restrições de IP ou domínio aplicadas</p>';
+                                        break;
+                                    case 'forbidden':
+                                        html += '<p>🔒 <strong>Acesso negado:</strong> Permissões insuficientes ou projeto desativado</p>';
+                                        break;
+                                    default:
+                                        html += `<p>❓ <strong>Erro desconhecido:</strong> ${err.reason} - ${err.message}</p>`;
+                                }
+                            });
+                        }
+                        
+                        html += `
+                                <h5>💡 Soluções Recomendadas:</h5>
+                                <ul>
+                                    <li>Verificar se YouTube Data API v3 está habilitada no Google Cloud Console</li>
+                                    <li>Verificar restrições da chave de API (IP, domínio, etc.)</li>
+                                    <li>Verificar se o projeto tem faturamento ativo</li>
+                                    <li>Verificar se a chave não foi revogada</li>
+                                    <li>Tentar gerar uma nova chave de API</li>
+                                </ul>
+                            </div>
+                        `;
+                    }
+                } else {
+                    html += `
+                        <div class="test-result">
+                            <h4>✅ API Funcionando!</h4>
+                            <p>Resultados encontrados: ${data.items ? data.items.length : 0}</p>
+                        </div>
+                    `;
+                }
+                
+                resultsDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="error-details">
+                        <h4>💥 Erro de Rede:</h4>
+                        ${error.message}
+                        
+                        Stack trace:
+                        ${error.stack}
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
