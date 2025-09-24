@@ -40,6 +40,17 @@ let favorites = [];
 let currentGenre = 'all'; // Variável para controlar o gênero atual
 let currentSort = 'title'; // Variável para controlar a ordenação atual
 
+// Variáveis para controle das chaves da API do YouTube
+let currentKeyIndex = 0;
+let keyUsageCount = {};
+
+// Inicializar contadores de uso das chaves
+if (typeof window.YOUTUBE_API_KEYS !== 'undefined') {
+    window.YOUTUBE_API_KEYS.forEach((key, index) => {
+        keyUsageCount[index] = 0;
+    });
+}
+
 // Constantes para imagens
 const KARAOKE_PLACEHOLDER = 'THUMBNAIL.JPG'; // Usando a thumbnail mencionada pelo usuário
 
@@ -65,6 +76,68 @@ const addToFavoritesBtn = document.getElementById('addToFavorites');
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
+
+// ========================================
+// FUNÇÕES DE CONTROLE DAS CHAVES DA API
+// ========================================
+
+// Função para obter a próxima chave disponível
+function getNextAPIKey() {
+    if (typeof window.YOUTUBE_API_KEYS === 'undefined' || !window.YOUTUBE_API_KEYS.length) {
+        console.log('⚠️ Nenhuma chave de API disponível!');
+        return null;
+    }
+    
+    // Converter objeto para array para usar map
+    const keyUsageArray = Object.keys(keyUsageCount).map(index => ({
+        index: parseInt(index),
+        count: keyUsageCount[index]
+    }));
+    
+    // Encontrar chaves disponíveis (não esgotadas)
+    const availableKeys = keyUsageArray
+        .filter(key => key.count < 9500) // Deixar margem de segurança
+        .sort((a, b) => a.count - b.count) // Ordenar por menor uso
+        .map(key => key.index);
+    
+    if (availableKeys.length === 0) {
+        console.log('⚠️ Todas as chaves esgotaram suas cotas!');
+        return null;
+    }
+    
+    // Usar a primeira chave disponível com menor uso
+    currentKeyIndex = parseInt(availableKeys[0]);
+    
+    console.log(`🔑 Tentando chave ${currentKeyIndex + 1}/${window.YOUTUBE_API_KEYS.length} (uso atual: ${keyUsageCount[currentKeyIndex]})`);
+    
+    return window.YOUTUBE_API_KEYS[currentKeyIndex];
+}
+
+// Função para incrementar o uso de uma chave
+function incrementKeyUsage() {
+    keyUsageCount[currentKeyIndex]++;
+    console.log(`📊 Chave ${currentKeyIndex + 1} usada ${keyUsageCount[currentKeyIndex]} vezes`);
+}
+
+// Função para marcar uma chave como esgotada
+function markKeyAsExhausted(keyIndex) {
+    if (keyUsageCount.hasOwnProperty(keyIndex)) {
+        keyUsageCount[keyIndex] = 10000; // Marcar como esgotada (acima do limite)
+        console.log(`⚠️ Chave ${keyIndex + 1} marcada como esgotada`);
+    }
+}
+
+// Função para registrar uma chamada bem-sucedida da API
+function recordSuccessfulAPICall(keyIndex) {
+    if (keyUsageCount.hasOwnProperty(keyIndex)) {
+        keyUsageCount[keyIndex]++;
+        console.log(`✅ Chave ${keyIndex + 1} usada com sucesso (${keyUsageCount[keyIndex]} usos)`);
+    }
+}
+
+// ========================================
+// INICIALIZAÇÃO DA APLICAÇÃO
+// ========================================
 
 // Inicializar favoritos do Firebase na inicialização
 async function initializeApp() {
@@ -523,7 +596,12 @@ async function searchYouTubeVideo(title, artist) {
     console.log(`🔍 Buscando: ${query}`);
     
     let attempts = 0;
-    const maxAttempts = YOUTUBE_API_KEYS.length;
+    const maxAttempts = window.YOUTUBE_API_KEYS ? window.YOUTUBE_API_KEYS.length : 0;
+    
+    if (maxAttempts === 0) {
+        console.log(`⚠️ Nenhuma chave de API configurada para "${title}" - usando fallback`);
+        return createFallbackVideoData(title, artist);
+    }
     
     while (attempts < maxAttempts) {
         const currentKey = getNextAPIKey();
@@ -744,19 +822,22 @@ function handleSearch() {
 
 async function searchYouTubeAndDisplay(query) {
     try {
+        console.log('🔍 Iniciando busca no YouTube para:', query);
         const results = await searchYouTubeDirectly(query);
         
-        if (results.length > 0) {
+        if (results && results.length > 0) {
+            console.log(`✅ Encontrados ${results.length} resultados`);
             allSongs = results;
             filteredSongs = results;
             currentPage = 1;
             renderSongs();
             renderPagination();
         } else {
+            console.log('⚠️ Nenhum resultado encontrado');
             showError('Nenhum resultado encontrado no YouTube.');
         }
     } catch (error) {
-        console.error('Erro na busca do YouTube:', error);
+        console.error('❌ Erro na busca do YouTube:', error);
         showError('Erro ao buscar no YouTube. Tente novamente.');
     }
 }
@@ -765,7 +846,12 @@ async function searchYouTubeDirectly(query) {
     console.log(`🔍 Tentando buscar no YouTube: ${query}`);
     
     let attempts = 0;
-    const maxAttempts = YOUTUBE_API_KEYS.length;
+    const maxAttempts = window.YOUTUBE_API_KEYS ? window.YOUTUBE_API_KEYS.length : 0;
+    
+    if (maxAttempts === 0) {
+        console.log('⚠️ Nenhuma chave de API do YouTube configurada');
+        return createFallbackResults(query);
+    }
     
     while (attempts < maxAttempts) {
         const currentKey = getNextAPIKey();
@@ -825,7 +911,11 @@ async function searchYouTubeDirectly(query) {
     // Se chegou aqui, usar fallback
     console.log('🔄 API do YouTube indisponível - ativando sistema de fallback');
     
-    // Criar fallback com informações da busca
+    return createFallbackResults(query);
+}
+
+// Função auxiliar para criar resultados de fallback
+function createFallbackResults(query) {
     const fallbackResults = [{
         id: { videoId: 'fallback_' + Date.now() },
         snippet: {
