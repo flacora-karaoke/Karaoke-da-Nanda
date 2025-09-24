@@ -388,12 +388,14 @@ body {
 
 /* Indicadores para músicas em modo offline */
 .song-card.offline {
-    border: 2px solid #ff9800;
-    background: rgba(255, 152, 0, 0.1);
+    /* Removido: border e background para melhor UX */
+    /* border: 2px solid #ff9800; */
+    /* background: rgba(255, 152, 0, 0.1); */
 }
 
 .song-card.offline::before {
-    background: linear-gradient(135deg, #ff9800, #f57c00);
+    /* Removido: gradiente laranja para melhor UX */
+    /* background: linear-gradient(135deg, #ff9800, #f57c00); */
 }
 
 .offline-badge {

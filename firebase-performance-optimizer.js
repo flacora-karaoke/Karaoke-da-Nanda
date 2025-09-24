@@ -42,6 +42,13 @@ class FirebasePerformanceOptimizer {
             const songs = [];
             snapshot.forEach(doc => {
                 const data = doc.data();
+                
+                // Verificar se os dados essenciais existem
+                if (!data.title || !data.artist) {
+                    console.warn('⚠️ Documento com dados incompletos:', doc.id, data);
+                    return; // Pular este documento
+                }
+                
                 const song = {
                     id: doc.id,
                     ...data
@@ -203,12 +210,18 @@ class FirebasePerformanceOptimizer {
     }
 
     createDuplicateKey(title, artist) {
-        const normalizeText = (text) => 
-            text.toLowerCase()
+        const normalizeText = (text) => {
+            // Verificar se o texto existe e não é undefined/null
+            if (!text || typeof text !== 'string') {
+                console.warn('⚠️ Texto inválido recebido:', text);
+                return '';
+            }
+            return text.toLowerCase()
                 .normalize('NFD')
                 .replace(/[\u0300-\u036f]/g, '')
                 .replace(/[^\w\s]/g, '')
                 .trim();
+        };
         
         return `${normalizeText(title)}|${normalizeText(artist)}`;
     }

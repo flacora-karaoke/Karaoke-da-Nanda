@@ -149,16 +149,19 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     
+    <!-- Configuração Centralizada -->
+    <script src="config.js"></script>
+    
     <!-- Firebase Configuration -->
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCCwVRf1FxGDPpN0DcG1RohR6JniQheN3Q",
-            authDomain: "karaokehub-5b1bc.firebaseapp.com",
-            projectId: "karaokehub-5b1bc",
-            storageBucket: "karaokehub-5b1bc.firebasestorage.app",
-            messagingSenderId: "155863546905",
-            appId: "1:155863546905:web:cb0d719b05c9e2d03e3e88"
-        };
+        // Verificar se as configurações estão válidas
+        if (!validateConfig()) {
+            console.error('❌ Configurações não encontradas ou inválidas!');
+            console.log('📋 Para configurar o projeto:');
+            console.log('1. Copie .env.example para .env');
+            console.log('2. Configure suas chaves reais no arquivo .env');
+            console.log('3. Ou use saveConfig() no console para salvar temporariamente');
+        }
         
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Teste de Configurações - Karaoke Hub</title>
+    <script src="config.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .success { border-left-color: #4CAF50; }
+        .error { border-left-color: #f44336; }
+        .warning { border-left-color: #ff9800; }
+        pre {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #5a6fd8; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Teste de Configurações Centralizadas</h1>
+    
+    <div class="test-section" id="config-status">
+        <h3>1. Status das Configurações</h3>
+        <div id="configResult">Verificando...</div>
+    </div>
+
+    <div class="test-section" id="firebase-status">
+        <h3>2. Configuração do Firebase</h3>
+        <div id="firebaseResult">Verificando...</div>
+    </div>
+
+    <div class="test-section" id="youtube-status">
+        <h3>3. Chaves da API do YouTube</h3>
+        <div id="youtubeResult">Verificando...</div>
+    </div>
+
+    <div class="test-section">
+        <h3>4. Ações</h3>
+        <button onclick="testConfigurations()">🔄 Testar Novamente</button>
+        <button onclick="showConfigInstructions()">📋 Ver Instruções</button>
+        <button onclick="saveTestConfig()">💾 Salvar Configuração de Teste</button>
+    </div>
+
+    <div class="test-section" id="instructions" style="display: none;">
+        <h3>📋 Instruções de Configuração</h3>
+        <p>Para configurar o projeto corretamente:</p>
+        <ol>
+            <li>Copie o arquivo <code>.env.example</code> para <code>.env</code></li>
+            <li>Edite o arquivo <code>.env</code> com suas chaves reais</li>
+            <li>Ou use o botão "Salvar Configuração de Teste" para uma configuração temporária</li>
+        </ol>
+    </div>
+
+    <script>
+        function testConfigurations() {
+            // Testar se config.js foi carregado
+            const configSection = document.getElementById('config-status');
+            const configResult = document.getElementById('configResult');
+            
+            if (typeof window.firebaseConfig === 'undefined' || typeof window.YOUTUBE_API_KEYS === 'undefined') {
+                configResult.innerHTML = '❌ Configurações não carregadas! Verifique se config.js está funcionando.';
+                configSection.className = 'test-section error';
+            } else {
+                configResult.innerHTML = '✅ Configurações carregadas com sucesso!';
+                configSection.className = 'test-section success';
+            }
+
+            // Testar configuração do Firebase
+            const firebaseSection = document.getElementById('firebase-status');
+            const firebaseResult = document.getElementById('firebaseResult');
+            
+            if (window.firebaseConfig && validateConfig(window.firebaseConfig)) {
+                firebaseResult.innerHTML = `
+                    ✅ Configuração do Firebase válida!<br>
+                    <pre>${JSON.stringify(window.firebaseConfig, null, 2)}</pre>
+                `;
+                firebaseSection.className = 'test-section success';
+            } else {
+                firebaseResult.innerHTML = '❌ Configuração do Firebase inválida ou não encontrada!';
+                firebaseSection.className = 'test-section error';
+            }
+
+            // Testar chaves do YouTube
+            const youtubeSection = document.getElementById('youtube-status');
+            const youtubeResult = document.getElementById('youtubeResult');
+            
+            if (window.YOUTUBE_API_KEYS && Array.isArray(window.YOUTUBE_API_KEYS) && window.YOUTUBE_API_KEYS.length > 0) {
+                const validKeys = window.YOUTUBE_API_KEYS.filter(key => key && key.length > 10);
+                youtubeResult.innerHTML = `
+                    ✅ ${validKeys.length} chaves do YouTube encontradas!<br>
+                    <small>Total de chaves: ${window.YOUTUBE_API_KEYS.length}</small><br>
+                    <pre>${JSON.stringify(window.YOUTUBE_API_KEYS, null, 2)}</pre>
+                `;
+                youtubeSection.className = validKeys.length > 0 ? 'test-section success' : 'test-section warning';
+            } else {
+                youtubeResult.innerHTML = '❌ Chaves do YouTube não encontradas ou inválidas!';
+                youtubeSection.className = 'test-section error';
+            }
+        }
+
+        function showConfigInstructions() {
+            const instructions = document.getElementById('instructions');
+            instructions.style.display = instructions.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function saveTestConfig() {
+            const testConfig = {
+                FIREBASE_API_KEY: 'AIzaSyCCwVRf1FxGDPpN0DcG1RohR6JniQheN3Q',
+                FIREBASE_AUTH_DOMAIN: 'karaokehub-5b1bc.firebaseapp.com',
+                FIREBASE_PROJECT_ID: 'karaokehub-5b1bc',
+                FIREBASE_STORAGE_BUCKET: 'karaokehub-5b1bc.firebasestorage.app',
+                FIREBASE_MESSAGING_SENDER_ID: '155863546905',
+                FIREBASE_APP_ID: '1:155863546905:web:cb0d719b05c9e2d03e3e88',
+                YOUTUBE_API_KEYS: [
+                    'AIzaSyDu-crlw3bxZnAjro1Afdo57WX_GFiykaE',
+                    'AIzaSyCxwTtmGkxVvEBGhqpzpqKFZ4u0zKKW6Gg',
+                    'AIzaSyDvtd3Y3PXgGDF0AZCGXFDZWmS8rN4Xlcw'
+                ],
+                NODE_ENV: 'development',
+                CACHE_DURATION_MINUTES: 5,
+                DEBUG_MODE: true
+            };
+            
+            localStorage.setItem('app_config', JSON.stringify(testConfig));
+            alert('✅ Configuração de teste salva! Recarregue a página para aplicar.');
+        }
+
+        // Executar teste automaticamente ao carregar
+        window.addEventListener('load', function() {
+            setTimeout(testConfigurations, 500);
+        });
+    </script>
+</body>
+</html>

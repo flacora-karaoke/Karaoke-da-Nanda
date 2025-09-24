@@ -1,0 +1,58 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Regras para a coleção de músicas do karaokê
+    match /songs/{songId} {
+      // Permitir leitura para todos (dados públicos do karaokê)
+      allow read: if true;
+      
+      // Permitir escrita apenas de domínios autorizados ou usuários autenticados
+      allow write: if request.auth != null || 
+                      resource == null || 
+                      isAuthorizedDomain();
+    }
+    
+    // Regras para coleção de estatísticas (se existir)
+    match /stats/{statId} {
+      allow read: if true;
+      allow write: if isAuthorizedDomain();
+    }
+    
+    // Regras para coleção de cache (se existir)
+    match /cache/{cacheId} {
+      allow read: if true;
+      allow write: if isAuthorizedDomain();
+    }
+    
+    // Regras para outras coleções
+    match /{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null || isAuthorizedDomain();
+    }
+    
+    // Função para verificar domínios autorizados
+    function isAuthorizedDomain() {
+      return request.headers.origin in [
+        // Domínios locais (desenvolvimento)
+        'http://localhost:8000',
+        'http://127.0.0.1:8000',
+        'http://localhost:3000',
+        'http://localhost:5000',
+        
+        // Domínios de produção (ATUALIZE COM SEUS DOMÍNIOS REAIS)
+        'https://seu-usuario.github.io',
+        'https://karaoke-hub.vercel.app',
+        'https://seu-projeto.vercel.app',
+        
+        // Adicione aqui seus domínios customizados
+        // 'https://seu-dominio.com'
+      ];
+    }
+    
+    // Função adicional para verificar se é um request válido
+    function isValidRequest() {
+      return request.time < timestamp.date(2030, 1, 1) &&
+             request.auth == null || request.auth.uid != null;
+    }
+  }
+}

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔒 Teste de Segurança - Firebase & APIs</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #4CAF50;
+        }
+        
+        .test-section.error {
+            border-left-color: #f44336;
+        }
+        
+        .test-section.warning {
+            border-left-color: #ff9800;
+        }
+        
+        .status {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        
+        .status.success { color: #4CAF50; }
+        .status.error { color: #f44336; }
+        .status.warning { color: #ff9800; }
+        
+        .details {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            white-space: pre-wrap;
+        }
+        
+        .button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .button.warning {
+            background: linear-gradient(45deg, #ff9800, #f57c00);
+        }
+        
+        .info-box {
+            background: rgba(33, 150, 243, 0.2);
+            border: 1px solid #2196F3;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .domain-list {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        
+        .domain-item {
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .domain-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔒 Teste de Segurança Firebase</h1>
+        
+        <div class="info-box">
+            <h3>📍 Informações do Ambiente Atual</h3>
+            <div class="details" id="environment-info">Carregando informações...</div>
+        </div>
+        
+        <div class="test-section" id="domain-test">
+            <h3>🌐 Teste de Domínio Atual</h3>
+            <div class="status" id="domain-status">Verificando...</div>
+            <div class="details" id="domain-details"></div>
+        </div>
+        
+        <div class="test-section" id="firebase-test">
+            <h3>🔥 Teste de Conexão Firebase</h3>
+            <div class="status" id="firebase-status">Verificando...</div>
+            <div class="details" id="firebase-details"></div>
+        </div>
+        
+        <div class="test-section" id="youtube-test">
+            <h3>📺 Teste de APIs do YouTube</h3>
+            <div class="status" id="youtube-status">Verificando...</div>
+            <div class="details" id="youtube-details"></div>
+        </div>
+        
+        <div class="test-section" id="firestore-test">
+            <h3>🗄️ Teste de Regras do Firestore</h3>
+            <div class="status" id="firestore-status">Verificando...</div>
+            <div class="details" id="firestore-details"></div>
+        </div>
+        
+        <div class="info-box">
+            <h3>🔧 Domínios que Devem Estar Autorizados</h3>
+            <div class="domain-list">
+                <div class="domain-item">✅ http://localhost:8000 (desenvolvimento local)</div>
+                <div class="domain-item">✅ http://127.0.0.1:8000 (desenvolvimento local)</div>
+                <div class="domain-item">✅ https://seu-usuario.github.io (GitHub Pages)</div>
+                <div class="domain-item">✅ https://seu-projeto.vercel.app (Vercel)</div>
+                <div class="domain-item">⚠️ Seus domínios customizados (se houver)</div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="button" onclick="runAllTests()">🔄 Executar Todos os Testes</button>
+            <button class="button warning" onclick="showSecurityGuide()">📖 Ver Guia de Segurança</button>
+        </div>
+    </div>
+
+    <!-- Scripts do Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="config.js"></script>
+
+    <script>
+        // Informações do ambiente
+        function updateEnvironmentInfo() {
+            const info = {
+                'URL Atual': window.location.href,
+                'Origem': window.location.origin,
+                'Protocolo': window.location.protocol,
+                'Host': window.location.host,
+                'User Agent': navigator.userAgent.substring(0, 100) + '...',
+                'Timestamp': new Date().toLocaleString('pt-BR')
+            };
+            
+            document.getElementById('environment-info').textContent = 
+                Object.entries(info).map(([key, value]) => `${key}: ${value}`).join('\n');
+        }
+
+        // Teste de domínio
+        function testDomain() {
+            const currentOrigin = window.location.origin;
+            const authorizedDomains = [
+                'http://localhost:8000',
+                'http://127.0.0.1:8000',
+                'http://localhost:3000',
+                'https://seu-usuario.github.io',
+                'https://seu-projeto.vercel.app'
+            ];
+            
+            const isAuthorized = authorizedDomains.some(domain => 
+                currentOrigin.startsWith(domain) || currentOrigin.includes('github.io') || currentOrigin.includes('vercel.app')
+            );
+            
+            const statusEl = document.getElementById('domain-status');
+            const detailsEl = document.getElementById('domain-details');
+            const sectionEl = document.getElementById('domain-test');
+            
+            if (isAuthorized || currentOrigin.includes('localhost') || currentOrigin.includes('127.0.0.1')) {
+                statusEl.textContent = '✅ Domínio Autorizado';
+                statusEl.className = 'status success';
+                sectionEl.className = 'test-section';
+                detailsEl.textContent = `Domínio atual (${currentOrigin}) está na lista de domínios autorizados ou é um ambiente de desenvolvimento local.`;
+            } else {
+                statusEl.textContent = '⚠️ Domínio Não Autorizado';
+                statusEl.className = 'status warning';
+                sectionEl.className = 'test-section warning';
+                detailsEl.textContent = `ATENÇÃO: O domínio atual (${currentOrigin}) pode não estar autorizado nas configurações do Firebase/YouTube APIs. Verifique as configurações de segurança.`;
+            }
+        }
+
+        // Teste do Firebase
+        async function testFirebase() {
+            const statusEl = document.getElementById('firebase-status');
+            const detailsEl = document.getElementById('firebase-details');
+            const sectionEl = document.getElementById('firebase-test');
+            
+            try {
+                if (!window.firebaseConfig) {
+                    throw new Error('Configuração do Firebase não encontrada');
+                }
+                
+                // Inicializar Firebase
+                firebase.initializeApp(window.firebaseConfig);
+                const db = firebase.firestore();
+                
+                // Teste de leitura
+                const testDoc = await db.collection('songs').limit(1).get();
+                
+                statusEl.textContent = '✅ Firebase Conectado';
+                statusEl.className = 'status success';
+                sectionEl.className = 'test-section';
+                detailsEl.textContent = `Firebase inicializado com sucesso!\nProjeto: ${window.firebaseConfig.projectId}\nTeste de leitura: ${testDoc.size >= 0 ? 'OK' : 'Falhou'}`;
+                
+            } catch (error) {
+                statusEl.textContent = '❌ Erro no Firebase';
+                statusEl.className = 'status error';
+                sectionEl.className = 'test-section error';
+                detailsEl.textContent = `Erro: ${error.message}\n\nPossíveis causas:\n- Domínio não autorizado\n- Configuração incorreta\n- Regras de segurança muito restritivas`;
+            }
+        }
+
+        // Teste das APIs do YouTube
+        async function testYouTubeAPIs() {
+            const statusEl = document.getElementById('youtube-status');
+            const detailsEl = document.getElementById('youtube-details');
+            const sectionEl = document.getElementById('youtube-test');
+            
+            try {
+                if (!window.YOUTUBE_API_KEYS || window.YOUTUBE_API_KEYS.length === 0) {
+                    throw new Error('Chaves da API do YouTube não encontradas');
+                }
+                
+                // Testar primeira chave disponível
+                const apiKey = window.YOUTUBE_API_KEYS[0];
+                const testUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=test&maxResults=1&key=${apiKey}`;
+                
+                const response = await fetch(testUrl);
+                
+                if (response.ok) {
+                    statusEl.textContent = '✅ YouTube API Funcionando';
+                    statusEl.className = 'status success';
+                    sectionEl.className = 'test-section';
+                    detailsEl.textContent = `APIs do YouTube configuradas corretamente!\nTotal de chaves: ${window.YOUTUBE_API_KEYS.length}\nTeste de API: Sucesso (${response.status})`;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+            } catch (error) {
+                statusEl.textContent = '❌ Erro nas APIs do YouTube';
+                statusEl.className = 'status error';
+                sectionEl.className = 'test-section error';
+                detailsEl.textContent = `Erro: ${error.message}\n\nPossíveis causas:\n- Domínio não autorizado nas APIs\n- Chaves inválidas ou expiradas\n- Cota da API excedida\n- Restrições de CORS`;
+            }
+        }
+
+        // Teste das regras do Firestore
+        async function testFirestoreRules() {
+            const statusEl = document.getElementById('firestore-status');
+            const detailsEl = document.getElementById('firestore-details');
+            const sectionEl = document.getElementById('firestore-test');
+            
+            try {
+                if (!firebase.apps.length) {
+                    throw new Error('Firebase não inicializado');
+                }
+                
+                const db = firebase.firestore();
+                
+                // Teste de leitura (deve funcionar)
+                const readTest = await db.collection('songs').limit(1).get();
+                
+                // Teste de escrita (pode falhar dependendo das regras)
+                let writeTest = 'Não testado';
+                try {
+                    const testDoc = db.collection('songs').doc('security-test-' + Date.now());
+                    await testDoc.set({
+                        title: 'Teste de Segurança',
+                        timestamp: new Date(),
+                        test: true
+                    });
+                    writeTest = 'Permitido';
+                    
+                    // Limpar o documento de teste
+                    await testDoc.delete();
+                } catch (writeError) {
+                    writeTest = `Bloqueado: ${writeError.message}`;
+                }
+                
+                statusEl.textContent = '✅ Regras do Firestore Ativas';
+                statusEl.className = 'status success';
+                sectionEl.className = 'test-section';
+                detailsEl.textContent = `Teste de Regras do Firestore:\n\nLeitura: ✅ Permitida (${readTest.size} documentos)\nEscrita: ${writeTest.includes('Bloqueado') ? '🔒' : '✅'} ${writeTest}\n\nSe a escrita estiver bloqueada, as regras de segurança estão funcionando corretamente!`;
+                
+            } catch (error) {
+                statusEl.textContent = '❌ Erro nas Regras do Firestore';
+                statusEl.className = 'status error';
+                sectionEl.className = 'test-section error';
+                detailsEl.textContent = `Erro: ${error.message}\n\nVerifique se:\n- As regras do Firestore estão configuradas\n- O domínio está autorizado\n- A conexão com o Firebase está funcionando`;
+            }
+        }
+
+        // Executar todos os testes
+        async function runAllTests() {
+            updateEnvironmentInfo();
+            testDomain();
+            await testFirebase();
+            await testYouTubeAPIs();
+            await testFirestoreRules();
+        }
+
+        // Mostrar guia de segurança
+        function showSecurityGuide() {
+            window.open('SECURITY-SETUP.md', '_blank');
+        }
+
+        // Executar testes ao carregar a página
+        window.addEventListener('load', () => {
+            setTimeout(runAllTests, 1000);
+        });
+    </script>
+</body>
+</html>

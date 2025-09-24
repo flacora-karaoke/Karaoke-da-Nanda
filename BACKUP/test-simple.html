@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teste Simples Firebase</title>
+    <script src="config.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -135,16 +136,14 @@
 
             try {
                 if (!firebaseApp) {
-                    const firebaseConfig = {
-                        apiKey: "AIzaSyCCwVRf1FxGDPpN0DcG1RohR6JniQheN3Q",
-                        authDomain: "karaokehub-5b1bc.firebaseapp.com",
-                        projectId: "karaokehub-5b1bc",
-                        storageBucket: "karaokehub-5b1bc.firebasestorage.app",
-                        messagingSenderId: "155863546905",
-                        appId: "1:155863546905:web:cb0d719b05c9e2d03e3e88"
-                    };
+                    // Verificar se as configurações estão disponíveis
+                    if (!window.firebaseConfig || !validateConfig(window.firebaseConfig)) {
+                        addLog('❌ Configurações do Firebase não encontradas ou inválidas');
+                        addLog('📝 Configure as variáveis de ambiente conforme o arquivo .env.example');
+                        return;
+                    }
                     
-                    firebaseApp = firebase.initializeApp(firebaseConfig);
+                    firebaseApp = firebase.initializeApp(window.firebaseConfig);
                     auth = firebase.auth();
                     addLog('✅ Firebase inicializado');
                 }

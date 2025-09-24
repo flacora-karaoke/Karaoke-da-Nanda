@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teste Firebase - Karaoke Hub</title>
+    <script src="config.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -116,15 +117,14 @@
             updateLogsDisplay();
         }
 
-        // Configuração Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyCCwVRf1FxGDPpN0DcG1RohR6JniQheN3Q",
-            authDomain: "karaokehub-5b1bc.firebaseapp.com",
-            projectId: "karaokehub-5b1bc",
-            storageBucket: "karaokehub-5b1bc.firebasestorage.app",
-            messagingSenderId: "155863546905",
-            appId: "1:155863546905:web:cb0d719b05c9e2d03e3e88"
-        };
+        // Configuração Firebase - usando configurações centralizadas
+        if (!window.firebaseConfig || !validateConfig(window.firebaseConfig)) {
+            const status = document.getElementById('connectionStatus');
+            status.innerHTML = '<span style="color: #f44336;">❌ Configurações do Firebase não encontradas ou inválidas!</span><br>' +
+                             '<small>Verifique se o arquivo config.js está carregado e as configurações estão definidas corretamente.</small>';
+            status.parentElement.className = 'test-section error';
+            return;
+        }
 
         // Inicializar Firebase
         let app, db, auth;
@@ -132,7 +132,7 @@
         function testConnection() {
             const status = document.getElementById('connectionStatus');
             try {
-                app = firebase.initializeApp(firebaseConfig);
+                app = firebase.initializeApp(window.firebaseConfig);
                 db = firebase.firestore();
                 auth = firebase.auth();
                 

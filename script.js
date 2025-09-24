@@ -81,6 +81,12 @@ const musicDatabase = [
     { title: 'Blinding Lights', artist: 'The Weeknd', genre: 'internacional', searchTerm: 'blinding lights weeknd karaoke playback' }
 ];
 
+// ========================================
+// CONFIGURAÇÕES GLOBAIS
+// ========================================
+// As configurações de API e Firebase agora são carregadas do config.js
+// YOUTUBE_API_KEYS e firebaseConfig são definidos globalmente pelo config.js
+
 // Global Variables
 let allSongs = [];
 let filteredSongs = [];

@@ -2,6 +2,14 @@
 *.txt
 !README.md
 
+# Arquivos de ambiente (CRÍTICO - NUNCA COMMITAR)
+.env
+.env.local
+.env.production
+.env.development
+config.js
+firebase-config.js
+
 # Arquivos de backup
 *.zip
 *_BACKUP.*
@@ -33,3 +41,9 @@ node_modules/
 # Arquivos de build (se houver)
 dist/
 build/
+
+# Chaves e certificados
+*.key
+*.pem
+*.p12
+*.pfx

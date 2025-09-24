@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teste Cache Firebase</title>
+    <script src="config.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -69,18 +70,15 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
     <script>
-        // Configuração do Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyCCwVRf1FxGDPpN0DcG1RohR6JniQheN3Q",
-            authDomain: "karaokehub-5b1bc.firebaseapp.com",
-            projectId: "karaokehub-5b1bc",
-            storageBucket: "karaokehub-5b1bc.firebasestorage.app",
-            messagingSenderId: "155863546905",
-            appId: "1:155863546905:web:cb0d719b05c9e2d03e3e88"
-        };
+        // Configuração do Firebase - usando configurações centralizadas
+        if (!window.firebaseConfig || !validateConfig(window.firebaseConfig)) {
+            document.getElementById('connectionStatus').innerHTML = 
+                '<span style="color: #f44336;">❌ Configurações do Firebase não encontradas ou inválidas!</span>';
+            return;
+        }
 
         // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp(window.firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
 

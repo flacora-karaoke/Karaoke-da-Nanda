@@ -1,164 +1,199 @@
-# 🎤 KaraokeHub - Seu App de Karaokê
+# 🎤 Karaoke YouTube App
 
-Um aplicativo web moderno e elegante para karaokê que utiliza vídeos do YouTube, desenvolvido com HTML, CSS e JavaScript puro.
+Um aplicativo web moderno para buscar e reproduzir vídeos de karaokê do YouTube com integração Firebase.
 
-## ✨ Funcionalidades
+## 🚀 Características
 
-- 🎵 **Biblioteca Extensa**: Mais de 100 músicas populares organizadas por gênero
-- 🔍 **Busca Inteligente**: Pesquise por música, artista ou gênero
-- 🎭 **Categorias por Gênero**: Pop, Rock, Sertanejo, MPB, Funk, Pagode, Gospel e Internacional
-- 📱 **Design Responsivo**: Interface moderna que funciona em desktop, tablet e mobile
-- ⭐ **Sistema de Favoritos**: Salve suas músicas preferidas
-- 🎲 **Música Aleatória**: Descubra novas músicas com o botão aleatório
-- 📊 **Múltiplas Visualizações**: Visualização em grade ou lista
-- 🔗 **Integração YouTube**: Links diretos para vídeos de karaokê no YouTube
+- 🔍 Busca inteligente de vídeos de karaokê no YouTube
+- 🎵 Biblioteca de músicas organizadas por gênero (MPB, Pagode, Gospel, Funk, Internacional)
+- ⭐ Sistema de favoritos com sincronização Firebase
+- 📱 Interface responsiva e moderna
+- 🎲 Seleção aleatória de músicas
+- 💾 Cache inteligente para melhor performance
+- 🔄 Múltiplas chaves de API para alta disponibilidade
 
-## 🚀 Como Usar
+## 🛠️ Configuração
 
-### Opção 1: Uso Básico (Sem API do YouTube)
-1. Abra o arquivo `index.html` em seu navegador
-2. O app funcionará com dados mock e thumbnails padrão
-3. Clique em qualquer música para abrir o modal
-4. Use o botão "Cantar Agora" para buscar a música no YouTube
+### 1. Configuração das Variáveis de Ambiente
 
-### Opção 2: Uso Completo (Com API do YouTube)
-1. Obtenha uma chave da API do YouTube:
-   - Acesse o [Google Cloud Console](https://console.cloud.google.com/)
-   - Crie um novo projeto ou selecione um existente
-   - Ative a YouTube Data API v3
-   - Crie credenciais (API Key)
-   - Copie sua chave da API
+Para proteger informações sensíveis, este projeto usa um sistema de configuração centralizada:
 
-2. Configure a API:
-   - Abra o arquivo `script.js`
-   - Substitua `'YOUR_YOUTUBE_API_KEY'` pela sua chave real
-   - Salve o arquivo
+1. **Copie o arquivo de exemplo:**
+   ```bash
+   cp .env.example .env
+   ```
 
-3. Abra o arquivo `index.html` em seu navegador
+2. **Configure suas chaves no arquivo `.env`:**
+   ```env
+   # Configurações do Firebase
+   FIREBASE_API_KEY=sua_chave_firebase_aqui
+   FIREBASE_AUTH_DOMAIN=seu-projeto.firebaseapp.com
+   FIREBASE_PROJECT_ID=seu-projeto-id
+   FIREBASE_STORAGE_BUCKET=seu-projeto.firebasestorage.app
+   FIREBASE_MESSAGING_SENDER_ID=123456789
+   FIREBASE_APP_ID=1:123456789:web:abcdef123456
 
-## 🎯 Funcionalidades Principais
+   # Chaves da API do YouTube (múltiplas para alta disponibilidade)
+   YOUTUBE_API_KEY_1=sua_primeira_chave_youtube_aqui
+   YOUTUBE_API_KEY_2=sua_segunda_chave_youtube_aqui
+   # ... adicione até 8 chaves
+   ```
 
-### Navegação por Gêneros
-- **Todos**: Visualiza todas as músicas disponíveis
-- **Pop**: Sucessos pop nacionais e internacionais
-- **Rock**: Clássicos do rock nacional
-- **Sertanejo**: Hits sertanejos e country
-- **MPB**: Música Popular Brasileira
+### 2. Obtenção das Chaves de API
+
+#### Firebase:
+1. Acesse o [Console do Firebase](https://console.firebase.google.com/)
+2. Crie um novo projeto ou use um existente
+3. Vá em "Configurações do projeto" > "Geral"
+4. Na seção "Seus aplicativos", adicione um app web
+5. Copie as configurações fornecidas
+
+#### YouTube Data API:
+1. Acesse o [Google Cloud Console](https://console.cloud.google.com/)
+2. Crie um novo projeto ou selecione um existente
+3. Ative a "YouTube Data API v3"
+4. Vá em "Credenciais" > "Criar credenciais" > "Chave de API"
+5. Configure as restrições conforme necessário
+6. Repita o processo para criar múltiplas chaves (recomendado)
+
+### 3. Configuração do Firebase
+
+1. **Firestore Database:**
+   - Crie um banco de dados Firestore
+   - Configure as regras de segurança apropriadas
+
+2. **Authentication (opcional):**
+   - Configure os métodos de autenticação desejados
+   - Ajuste as regras de segurança conforme necessário
+
+### 4. Execução Local
+
+1. **Servidor HTTP simples:**
+   ```bash
+   python -m http.server 8000
+   ```
+
+2. **Acesse no navegador:**
+   ```
+   http://localhost:8000
+   ```
+
+## 📁 Estrutura do Projeto
+
+```
+karaoke-youtube/
+├── index.html              # Aplicação principal
+├── script.js              # Lógica principal
+├── config.js              # Configurações centralizadas
+├── styles.css             # Estilos CSS
+├── .env.example           # Exemplo de configuração
+├── .gitignore            # Arquivos ignorados pelo Git
+├── README.md             # Este arquivo
+├── test-*.html           # Arquivos de teste
+└── batch-populate.html   # Ferramenta de população em lote
+```
+
+## 🔒 Segurança
+
+### Informações Protegidas
+
+Este projeto protege as seguintes informações sensíveis:
+
+- ✅ Chaves de API do Firebase
+- ✅ Chaves de API do YouTube
+- ✅ IDs e configurações do projeto Firebase
+- ✅ Tokens de autenticação
+
+### Arquivos Ignorados pelo Git
+
+O arquivo `.gitignore` está configurado para ignorar:
+
+```gitignore
+# Arquivos de configuração sensíveis
+.env
+config.js
+firebase-config.js
+
+# Arquivos de chaves/certificados
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Arquivos de backup e temporários
+*.bak
+*.tmp
+*.temp
+*~
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Diretórios de dependências
+node_modules/
+bower_components/
+
+# Arquivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Arquivos de cache e build
+dist/
+build/
+.cache/
+```
+
+## 🚨 Importante
+
+⚠️ **NUNCA** commite arquivos contendo:
+- Chaves de API reais
+- Configurações de produção
+- Tokens de acesso
+- Informações de autenticação
+
+✅ **SEMPRE** use o arquivo `.env.example` como referência e mantenha suas configurações reais no arquivo `.env` (que é ignorado pelo Git).
+
+## 🎵 Gêneros Disponíveis
+
+- **MPB**: Música Popular Brasileira clássica
+- **Pagode**: Samba e pagode brasileiro
+- **Gospel**: Música gospel e cristã
 - **Funk**: Funk carioca e brasileiro
-- **Pagode**: Samba e pagode
-- **Gospel**: Música gospel e religiosa
 - **Internacional**: Sucessos internacionais
 
-### Sistema de Busca
-- Busque por nome da música
-- Busque por artista
-- Busque por gênero musical
-- Busca em tempo real com debounce
+## 🔧 Funcionalidades Técnicas
 
-### Ordenação
-- **Ordem Alfabética**: Músicas ordenadas A-Z
-- **Por Artista**: Agrupadas por artista
-- **Popularidade**: Baseada na data de publicação no YouTube
+- **Cache Inteligente**: Armazena resultados para reduzir chamadas de API
+- **Rotação de Chaves**: Sistema automático de rotação entre múltiplas chaves de API
+- **Fallback**: Sistema de fallback para quando as APIs não estão disponíveis
+- **Responsivo**: Interface adaptável para desktop e mobile
+- **PWA Ready**: Preparado para ser uma Progressive Web App
 
-### Favoritos
-- Adicione músicas aos favoritos
-- Favoritos são salvos no localStorage
-- Ícone de coração indica músicas favoritadas
+## 📝 Contribuição
 
-## 🛠️ Tecnologias Utilizadas
-
-- **HTML5**: Estrutura semântica moderna
-- **CSS3**: 
-  - Flexbox e Grid Layout
-  - Animações e transições suaves
-  - Design responsivo
-  - Backdrop filter para efeitos de vidro
-  - Gradientes modernos
-- **JavaScript ES6+**:
-  - Async/Await para chamadas de API
-  - LocalStorage para persistência
-  - Event delegation
-  - Debouncing para otimização
-- **APIs Externas**:
-  - YouTube Data API v3
-  - Font Awesome para ícones
-  - Google Fonts (Poppins)
-
-## 📱 Compatibilidade
-
-- ✅ Chrome 80+
-- ✅ Firefox 75+
-- ✅ Safari 13+
-- ✅ Edge 80+
-- ✅ Dispositivos móveis (iOS/Android)
-
-## 🎨 Design Inspirado em
-
-Baseado nas melhores práticas de UI/UX de 2025 <mcreference link="https://www.zegocloud.com/blog/karaoke-app-development" index="2">2</mcreference>, incluindo:
-- Interface limpa e intuitiva <mcreference link="https://www.zegocloud.com/blog/karaoke-app-development" index="2">2</mcreference>
-- Elementos de gamificação
-- Design responsivo moderno
-- Experiência de usuário fluida
-
-## 🔧 Personalização
-
-### Adicionando Novas Músicas
-1. Abra o arquivo `script.js`
-2. Localize o array `musicDatabase`
-3. Adicione novos objetos seguindo o padrão:
-```javascript
-{
-    title: 'Nome da Música',
-    artist: 'Nome do Artista',
-    genre: 'genero',
-    searchTerm: 'termo de busca karaoke'
-}
-```
-
-### Modificando Cores e Estilos
-1. Abra o arquivo `styles.css`
-2. Modifique as variáveis CSS no início do arquivo
-3. Personalize gradientes, cores e espaçamentos
-
-## 📊 Estrutura do Projeto
-
-```
-KARAOKE YOUTUBE/
-├── index.html          # Página principal
-├── styles.css          # Estilos e design
-├── script.js           # Lógica e funcionalidades
-└── README.md           # Documentação
-```
-
-## 🚨 Limitações e Considerações
-
-- **Quota da API**: A YouTube API tem limites de uso diário
-- **CORS**: Para uso em produção, considere implementar um backend
-- **Offline**: Funciona offline com dados mock (sem thumbnails reais)
-- **Navegadores**: Requer navegadores modernos com suporte a ES6+
-
-## 🔮 Futuras Melhorias
-
-- [ ] Sistema de playlists personalizadas
-- [ ] Integração com Spotify/Apple Music
-- [ ] Modo karaokê com letras sincronizadas
-- [ ] Sistema de pontuação
-- [ ] Compartilhamento social
-- [ ] Modo offline completo
-- [ ] Suporte a múltiplos idiomas
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
 
 ## 📄 Licença
 
-Este projeto é de código aberto e está disponível sob a licença MIT.
+Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
 
-## 🤝 Contribuições
+## 🤝 Suporte
 
-Contribuições são bem-vindas! Sinta-se à vontade para:
-- Reportar bugs
-- Sugerir novas funcionalidades
-- Melhorar a documentação
-- Adicionar novas músicas ao banco de dados
+Se você encontrar problemas ou tiver dúvidas:
+
+1. Verifique se todas as configurações estão corretas no arquivo `.env`
+2. Confirme se as chaves de API estão válidas e ativas
+3. Verifique o console do navegador para mensagens de erro
+4. Abra uma issue no repositório do projeto
 
 ---
 
-**Desenvolvido com ❤️ para amantes do karaokê em 2025**
+**Desenvolvido com ❤️ para a comunidade de karaokê**
