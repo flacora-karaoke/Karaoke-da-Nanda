@@ -7,8 +7,8 @@
 .env.local
 .env.production
 .env.development
-config.js
-firebase-config.js
+# config.js - REMOVIDO: Chaves Firebase são públicas e protegidas por domain restrictions
+# firebase-config.js - REMOVIDO: Protegido por configurações de segurança
 
 # Arquivos de backup
 *.zip
