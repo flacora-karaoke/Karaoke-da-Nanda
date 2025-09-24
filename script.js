@@ -1,64 +1,7 @@
+const YOUTUBE_API_URL = 'https://www.googleapis.com/youtube/v3/search';
+
+// Database
 const musicDatabase = [
-    { title: 'Mas Que Nada Jorge Ben Jor Karaoke Playback', artist: 'Mas Que Nada Jorge Ben Jor Karaoke Playback' },
-    { title: 'O Que É Que a Baiana Tem', artist: 'Dorival Caymmi', genre: 'mpb', searchTerm: 'que baiana tem dorival caymmi karaoke playback' },
-    { title: 'Samba de Uma Nota Só', artist: 'Tom Jobim', genre: 'mpb', searchTerm: 'samba uma nota so tom jobim karaoke playback' },
-    { title: 'Tarde em Itapuã', artist: 'Toquinho', genre: 'mpb', searchTerm: 'tarde itapua toquinho karaoke playback' },
-    { title: 'Wave', artist: 'Tom Jobim', genre: 'mpb', searchTerm: 'wave tom jobim karaoke playback' },
-    { title: 'Corcovado', artist: 'Tom Jobim', genre: 'mpb', searchTerm: 'corcovado tom jobim karaoke playback' },
-    { title: 'Desafinado', artist: 'Tom Jobim', genre: 'mpb', searchTerm: 'desafinado tom jobim karaoke playback' },
-    { title: 'Chega de Saudade', artist: 'Tom Jobim', genre: 'mpb', searchTerm: 'chega saudade tom jobim karaoke playback' },
-    { title: 'Construção', artist: 'Chico Buarque', genre: 'mpb', searchTerm: 'construcao chico buarque karaoke playback' },
-    { title: 'Apesar de Você', artist: 'Chico Buarque', genre: 'mpb', searchTerm: 'apesar voce chico buarque karaoke playback' },
-    { title: 'Cálice', artist: 'Chico Buarque', genre: 'mpb', searchTerm: 'calice chico buarque karaoke playback' },
-    { title: 'Travessia', artist: 'Milton Nascimento', genre: 'mpb', searchTerm: 'travessia milton nascimento karaoke playback' },
-    
-    // Pagode
-    { title: 'Deixa a Vida Me Levar', artist: 'Zeca Pagodinho', genre: 'pagode', searchTerm: 'deixa vida me levar zeca pagodinho karaoke playback' },
-    { title: 'Insensível', artist: 'Péricles', genre: 'pagode', searchTerm: 'insensivel pericles karaoke playback' },
-    { title: 'Jeito de Muleque', artist: 'Exaltasamba', genre: 'pagode', searchTerm: 'jeito muleque exaltasamba karaoke playback' },
-    { title: 'Meu Lugar', artist: 'Arlindo Cruz', genre: 'pagode', searchTerm: 'meu lugar arlindo cruz karaoke playback' },
-    { title: 'Papel de Pão', artist: 'Luiz Carlos da Vila', genre: 'pagode', searchTerm: 'papel pao luiz carlos vila karaoke playback' },
-    { title: 'Sorriso Maroto', artist: 'Sorriso Maroto', genre: 'pagode', searchTerm: 'sorriso maroto karaoke playback' },
-    { title: 'Caraca, Eu Tô Apaixonado', artist: 'Thiaguinho', genre: 'pagode', searchTerm: 'caraca apaixonado thiaguinho karaoke playback' },
-    { title: 'Vou Deixar', artist: 'Skank', genre: 'pagode', searchTerm: 'vou deixar skank karaoke playback' },
-    { title: 'Amor de Chocolate', artist: 'Naldo', genre: 'pagode', searchTerm: 'amor chocolate naldo karaoke playback' },
-    { title: 'Coração Radiante', artist: 'Grupo Revelação', genre: 'pagode', searchTerm: 'coracao radiante grupo revelacao karaoke playback' },
-    { title: 'Pagode em Brasília', artist: 'Grupo Fundo de Quintal', genre: 'pagode', searchTerm: 'pagode brasilia fundo quintal karaoke playback' },
-    { title: 'Coisinha do Pai', artist: 'Jorge Aragão', genre: 'pagode', searchTerm: 'coisinha pai jorge aragao karaoke playback' },
-    { title: 'Identidade', artist: 'Jorge Aragão', genre: 'pagode', searchTerm: 'identidade jorge aragao karaoke playback' },
-    { title: 'Malandro', artist: 'Bezerra da Silva', genre: 'pagode', searchTerm: 'malandro bezerra silva karaoke playback' },
-    { title: 'Se Você Pensa', artist: 'Bezerra da Silva', genre: 'pagode', searchTerm: 'se voce pensa bezerra silva karaoke playback' },
-    
-    // Gospel
-    { title: 'Ressuscita-me', artist: 'Aline Barros', genre: 'gospel', searchTerm: 'ressuscita me aline barros karaoke playback' },
-    { title: 'Brasa Viva', artist: 'Fernandinho', genre: 'gospel', searchTerm: 'brasa viva fernandinho karaoke playback' },
-    { title: 'Deus Cuida de Mim', artist: 'Kleber Lucas', genre: 'gospel', searchTerm: 'deus cuida mim kleber lucas karaoke playback' },
-    { title: 'Eu Navegarei', artist: 'Gabriela Rocha', genre: 'gospel', searchTerm: 'eu navegarei gabriela rocha karaoke playback' },
-    { title: 'Fiel é o Senhor', artist: 'Thalles Roberto', genre: 'gospel', searchTerm: 'fiel senhor thalles roberto karaoke playback' },
-    { title: 'Grande é o Senhor', artist: 'Cassiane', genre: 'gospel', searchTerm: 'grande senhor cassiane karaoke playback' },
-    { title: 'Hosana', artist: 'Gabriela Rocha', genre: 'gospel', searchTerm: 'hosana gabriela rocha karaoke playback' },
-    { title: 'Isaías 40', artist: 'Fernandinho', genre: 'gospel', searchTerm: 'isaias 40 fernandinho karaoke playback' },
-    { title: 'Jesus em Tua Presença', artist: 'Diante do Trono', genre: 'gospel', searchTerm: 'jesus tua presenca diante trono karaoke playback' },
-    { title: 'Koinonya', artist: 'Aline Barros', genre: 'gospel', searchTerm: 'koinonya aline barros karaoke playback' },
-    { title: 'Tua Graça Me Basta', artist: 'Fernandinho', genre: 'gospel', searchTerm: 'tua graca me basta fernandinho karaoke playback' },
-    { title: 'Uma Nova História', artist: 'Fernandinho', genre: 'gospel', searchTerm: 'uma nova historia fernandinho karaoke playback' },
-    { title: 'Vem, Esta é a Hora', artist: 'Fernandinho', genre: 'gospel', searchTerm: 'vem esta hora fernandinho karaoke playback' },
-    { title: 'Yeshua', artist: 'Fernandinho', genre: 'gospel', searchTerm: 'yeshua fernandinho karaoke playback' },
-    { title: 'Lugar Secreto', artist: 'Gabriela Rocha', genre: 'gospel', searchTerm: 'lugar secreto gabriela rochaoke playback' },
-    
-    // Funk
-    { title: 'Baile de Favela', artist: 'MC João', genre: 'funk', searchTerm: 'baile favela mc joao karaoke playback' },
-    { title: 'Bum Bum Tam Tam', artist: 'MC Fioti', genre: 'funk', searchTerm: 'bum bum tam tam mc fioti karaoke playback' },
-    { title: 'Créu', artist: 'MC Créu', genre: 'funk', searchTerm: 'creu mc creu karaoke playback' },
-    { title: 'Dança do Créu', artist: 'MC Créu', genre: 'funk', searchTerm: 'danca creu mc creu karaoke playback' },
-    { title: 'Envolvimento', artist: 'MC Loma', genre: 'funk', searchTerm: 'envolvimento mc loma karaoke playback' },
-    { title: 'Lepo Lepo', artist: 'Psirico', genre: 'funk', searchTerm: 'lepo lepo psirico karaoke playback' },
-    { title: 'Olha a Explosão', artist: 'MC Kevinho', genre: 'funk', searchTerm: 'olha explosao mc kevinho karaoke playback' },
-    { title: 'Paradinha', artist: 'Anitta', genre: 'funk', searchTerm: 'paradinha anitta karaoke playback' },
-    { title: 'Vai Malandra', artist: 'Anitta', genre: 'funk', searchTerm: 'vai malandra anitta karaoke playback' },
-    { title: 'Sua Cara', artist: 'Anitta', genre: 'funk', searchTerm: 'sua cara anitta karaoke playback' },
-    
-    // Internacional
     { title: 'Bohemian Rhapsody', artist: 'Queen', genre: 'internacional', searchTerm: 'bohemian rhapsody queen karaoke playback' },
     { title: 'Don\'t Stop Believin\'', artist: 'Journey', genre: 'internacional', searchTerm: 'dont stop believin journey karaoke playback' },
     { title: 'Hotel California', artist: 'Eagles', genre: 'internacional', searchTerm: 'hotel california eagles karaoke playback' },
@@ -497,13 +440,19 @@ async function loadSongsFromFirebaseCollection() {
         
         if (!snapshot.empty) {
             const songs = [];
+            const genreCount = {};
             snapshot.forEach(doc => {
                 const data = doc.data();
+                const genre = data.genre || 'outros';
+                
+                // Contar gêneros para debug
+                genreCount[genre] = (genreCount[genre] || 0) + 1;
+                
                 songs.push({
                     id: doc.id,
                     title: data.title || '',
                     artist: data.artist || '',
-                    genre: data.genre || 'outros',
+                    genre: genre,
                     searchTerm: data.searchTerm || `${data.title} ${data.artist} karaoke`,
                     videoId: data.videoId || null,
                     thumbnailUrl: data.thumbnail || './THUMBNAIL.JPG',
@@ -513,6 +462,8 @@ async function loadSongsFromFirebaseCollection() {
             });
             
             console.log(`✅ ${songs.length} músicas carregadas da coleção Firebase`);
+            console.log('📊 GÊNEROS ENCONTRADOS NO FIREBASE:', genreCount);
+            
             return songs;
         } else {
             console.log('⚠️ Nenhuma música encontrada na coleção Firebase');
@@ -1294,12 +1245,11 @@ function getGenreDisplayName(genre) {
     const genreNames = {
         'sertanejo': 'Sertanejo',
         'mpb': 'MPB',
-        'rock': 'Rock',
+        'rock': 'Rock Brasileiro',
         'pagode': 'Pagode',
         'gospel': 'Gospel',
         'funk': 'Funk',
         'internacional': 'Internacional',
-        'pop': 'Pop',
         'youtube': 'YouTube'
     };
     return genreNames[genre] || genre;

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Verificador de Status das APIs do YouTube</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .api-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .api-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 5px solid #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        .api-card.working {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+
+        .api-card.quota-exceeded {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+
+        .api-card.error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .api-card.testing {
+            border-left-color: #007bff;
+            background: #d1ecf1;
+        }
+
+        .api-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .api-title {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .api-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .status-working { background: #28a745; color: white; }
+        .status-quota { background: #ffc107; color: #212529; }
+        .status-error { background: #dc3545; color: white; }
+        .status-testing { background: #007bff; color: white; }
+        .status-unknown { background: #6c757d; color: white; }
+
+        .api-details {
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .api-details strong {
+            color: #495057;
+        }
+
+        .controls {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .summary {
+            background: #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            text-align: center;
+        }
+
+        .summary-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .summary-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .summary-label {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        .working { color: #28a745; }
+        .quota { color: #ffc107; }
+        .error { color: #dc3545; }
+
+        .log {
+            background: #212529;
+            color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+
+        .log-success { color: #28a745; }
+        .log-warning { color: #ffc107; }
+        .log-error { color: #dc3545; }
+        .log-info { color: #17a2b8; }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .testing {
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Verificador de APIs do YouTube</h1>
+            <p>Monitore o status e quotas das suas chaves de API</p>
+        </div>
+
+        <div class="content">
+            <div class="controls">
+                <button class="btn" id="testAllBtn" onclick="testAllAPIs()">
+                    🧪 Testar Todas as APIs
+                </button>
+                <button class="btn" id="refreshBtn" onclick="location.reload()">
+                    🔄 Atualizar Página
+                </button>
+            </div>
+
+            <div class="summary" id="summary" style="display: none;">
+                <h3 style="margin-bottom: 15px;">📊 Resumo do Status</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-number working" id="workingCount">0</div>
+                        <div class="summary-label">Funcionando</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-number quota" id="quotaCount">0</div>
+                        <div class="summary-label">Quota Excedida</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-number error" id="errorCount">0</div>
+                        <div class="summary-label">Com Erro</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-number" id="totalCount">0</div>
+                        <div class="summary-label">Total de Chaves</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="api-grid" id="apiGrid">
+                <!-- APIs serão carregadas aqui -->
+            </div>
+
+            <div class="log" id="log">
+                <div class="log-entry log-info">🚀 Carregando verificador de APIs...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        let apiResults = [];
+        
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function updateSummary() {
+            const working = apiResults.filter(r => r.status === 'working').length;
+            const quota = apiResults.filter(r => r.status === 'quota-exceeded').length;
+            const error = apiResults.filter(r => r.status === 'error').length;
+            const total = apiResults.length;
+
+            document.getElementById('workingCount').textContent = working;
+            document.getElementById('quotaCount').textContent = quota;
+            document.getElementById('errorCount').textContent = error;
+            document.getElementById('totalCount').textContent = total;
+            
+            document.getElementById('summary').style.display = 'block';
+        }
+
+        function createAPICard(index, key) {
+            const maskedKey = key.substring(0, 8) + '...' + key.substring(key.length - 4);
+            
+            return `
+                <div class="api-card" id="card-${index}">
+                    <div class="api-header">
+                        <div class="api-title">🔑 Chave API #${index + 1}</div>
+                        <div class="api-status status-unknown" id="status-${index}">Aguardando</div>
+                    </div>
+                    <div class="api-details" id="details-${index}">
+                        <strong>Chave:</strong> ${maskedKey}<br>
+                        <strong>Status:</strong> Não testada<br>
+                        <strong>Última verificação:</strong> Nunca
+                    </div>
+                </div>
+            `;
+        }
+
+        async function testSingleAPI(index, key) {
+            const card = document.getElementById(`card-${index}`);
+            const status = document.getElementById(`status-${index}`);
+            const details = document.getElementById(`details-${index}`);
+            const maskedKey = key.substring(0, 8) + '...' + key.substring(key.length - 4);
+
+            // Marcar como testando
+            card.className = 'api-card testing';
+            status.className = 'api-status status-testing';
+            status.textContent = 'Testando...';
+            
+            addLog(`🧪 Testando chave API #${index + 1}...`, 'info');
+
+            try {
+                const testUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=test&maxResults=1&key=${key}`;
+                const response = await fetch(testUrl);
+                const data = await response.json();
+
+                const now = new Date().toLocaleTimeString();
+                let result = {
+                    index: index,
+                    key: maskedKey,
+                    status: 'unknown',
+                    message: '',
+                    timestamp: now
+                };
+
+                if (response.ok && !data.error) {
+                    // API funcionando
+                    result.status = 'working';
+                    result.message = 'API funcionando normalmente';
+                    
+                    card.className = 'api-card working';
+                    status.className = 'api-status status-working';
+                    status.textContent = '✅ Funcionando';
+                    
+                    details.innerHTML = `
+                        <strong>Chave:</strong> ${maskedKey}<br>
+                        <strong>Status:</strong> ✅ Funcionando normalmente<br>
+                        <strong>Última verificação:</strong> ${now}<br>
+                        <strong>Resultados encontrados:</strong> ${data.items ? data.items.length : 0}
+                    `;
+                    
+                    addLog(`✅ Chave API #${index + 1} está funcionando`, 'success');
+                    
+                } else if (response.status === 403 || (data.error && data.error.code === 403)) {
+                    // Verificar se é quota excedida ou erro de permissão
+                    if (data.error && data.error.errors && data.error.errors.some(e => e.reason === 'quotaExceeded')) {
+                        result.status = 'quota-exceeded';
+                        result.message = 'Quota diária excedida';
+                        
+                        card.className = 'api-card quota-exceeded';
+                        status.className = 'api-status status-quota';
+                        status.textContent = '⚠️ Quota Excedida';
+                        
+                        details.innerHTML = `
+                            <strong>Chave:</strong> ${maskedKey}<br>
+                            <strong>Status:</strong> ⚠️ Quota diária excedida<br>
+                            <strong>Última verificação:</strong> ${now}<br>
+                            <strong>Erro:</strong> ${data.error.message}
+                        `;
+                        
+                        addLog(`⚠️ Chave API #${index + 1} - Quota excedida`, 'warning');
+                    } else {
+                        result.status = 'error';
+                        result.message = 'Erro de permissão (403)';
+                        
+                        card.className = 'api-card error';
+                        status.className = 'api-status status-error';
+                        status.textContent = '❌ Erro 403';
+                        
+                        details.innerHTML = `
+                            <strong>Chave:</strong> ${maskedKey}<br>
+                            <strong>Status:</strong> ❌ Erro de permissão<br>
+                            <strong>Última verificação:</strong> ${now}<br>
+                            <strong>Erro:</strong> ${data.error ? data.error.message : 'Acesso negado'}
+                        `;
+                        
+                        addLog(`❌ Chave API #${index + 1} - Erro de permissão`, 'error');
+                    }
+                } else {
+                    // Outro tipo de erro
+                    result.status = 'error';
+                    result.message = `Erro HTTP ${response.status}`;
+                    
+                    card.className = 'api-card error';
+                    status.className = 'api-status status-error';
+                    status.textContent = `❌ Erro ${response.status}`;
+                    
+                    details.innerHTML = `
+                        <strong>Chave:</strong> ${maskedKey}<br>
+                        <strong>Status:</strong> ❌ Erro HTTP ${response.status}<br>
+                        <strong>Última verificação:</strong> ${now}<br>
+                        <strong>Erro:</strong> ${data.error ? data.error.message : response.statusText}
+                    `;
+                    
+                    addLog(`❌ Chave API #${index + 1} - Erro HTTP ${response.status}`, 'error');
+                }
+
+                return result;
+
+            } catch (error) {
+                const now = new Date().toLocaleTimeString();
+                const result = {
+                    index: index,
+                    key: maskedKey,
+                    status: 'error',
+                    message: `Erro de rede: ${error.message}`,
+                    timestamp: now
+                };
+
+                card.className = 'api-card error';
+                status.className = 'api-status status-error';
+                status.textContent = '❌ Erro de Rede';
+                
+                details.innerHTML = `
+                    <strong>Chave:</strong> ${maskedKey}<br>
+                    <strong>Status:</strong> ❌ Erro de conexão<br>
+                    <strong>Última verificação:</strong> ${now}<br>
+                    <strong>Erro:</strong> ${error.message}
+                `;
+                
+                addLog(`❌ Chave API #${index + 1} - Erro de rede: ${error.message}`, 'error');
+                return result;
+            }
+        }
+
+        async function testAllAPIs() {
+            if (!window.YOUTUBE_API_KEYS || window.YOUTUBE_API_KEYS.length === 0) {
+                addLog('❌ Nenhuma chave de API encontrada!', 'error');
+                return;
+            }
+
+            const testBtn = document.getElementById('testAllBtn');
+            testBtn.disabled = true;
+            testBtn.textContent = '🧪 Testando...';
+
+            apiResults = [];
+            addLog(`🚀 Iniciando teste de ${window.YOUTUBE_API_KEYS.length} chaves de API...`, 'info');
+
+            // Testar todas as APIs com delay entre elas
+            for (let i = 0; i < window.YOUTUBE_API_KEYS.length; i++) {
+                const result = await testSingleAPI(i, window.YOUTUBE_API_KEYS[i]);
+                apiResults.push(result);
+                
+                // Delay de 1 segundo entre testes para evitar rate limiting
+                if (i < window.YOUTUBE_API_KEYS.length - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            }
+
+            updateSummary();
+            
+            const working = apiResults.filter(r => r.status === 'working').length;
+            const quota = apiResults.filter(r => r.status === 'quota-exceeded').length;
+            const error = apiResults.filter(r => r.status === 'error').length;
+            
+            addLog(`🎉 Teste concluído! Funcionando: ${working}, Quota excedida: ${quota}, Erro: ${error}`, 'success');
+            
+            testBtn.disabled = false;
+            testBtn.textContent = '🧪 Testar Novamente';
+        }
+
+        function initializeChecker() {
+            if (!window.YOUTUBE_API_KEYS || window.YOUTUBE_API_KEYS.length === 0) {
+                addLog('❌ Configurações de API não encontradas!', 'error');
+                document.getElementById('apiGrid').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #dc3545;">
+                        <h3>❌ Nenhuma chave de API encontrada</h3>
+                        <p>Verifique se o arquivo config.js está carregado corretamente.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            addLog(`📋 Encontradas ${window.YOUTUBE_API_KEYS.length} chaves de API`, 'info');
+            
+            const apiGrid = document.getElementById('apiGrid');
+            apiGrid.innerHTML = '';
+            
+            window.YOUTUBE_API_KEYS.forEach((key, index) => {
+                apiGrid.innerHTML += createAPICard(index, key);
+            });
+            
+            addLog('✅ Interface carregada. Clique em "Testar Todas as APIs" para verificar o status.', 'success');
+        }
+
+        // Inicializar quando a página carregar
+        document.addEventListener('DOMContentLoaded', initializeChecker);
+    </script>
+</body>
+</html>

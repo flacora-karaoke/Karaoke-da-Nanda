@@ -255,7 +255,6 @@
                     <label for="genreSelect" style="display: block; font-weight: bold; margin-bottom: 6px; color: white;">🎵 Gênero:</label>
                     <select id="genreSelect" style="width: 100%; padding: 10px; border-radius: 6px; border: none; font-size: 0.9em;">
                         <option value="rock" selected>Rock</option>
-                        <option value="pop">Pop</option>
                         <option value="sertanejo">Sertanejo</option>
                         <option value="romantico">Romântico</option>
                         <option value="mpb">MPB</option>
@@ -429,22 +428,32 @@
             }
         }
         // Firebase Configuration - usando configurações centralizadas
-        if (!validateConfig(window.firebaseConfig)) {
-            alert('❌ Configurações do Firebase inválidas!');
-            throw new Error('Configurações do Firebase inválidas');
-        }
+        let db, auth; // Declarar variáveis globalmente
+        
+        try {
+            if (!validateConfig()) {
+                alert('❌ Configurações do Firebase inválidas!');
+                throw new Error('Configurações do Firebase inválidas');
+            }
 
-        // Inicializar Firebase com configurações otimizadas
-        firebase.initializeApp(window.firebaseConfig);
-        const db = firebase.firestore();
-        
-        // Configurar Firestore para evitar listeners em tempo real
-        db.settings({
-            cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
-            experimentalForceLongPolling: false // Desabilita long polling que causa ERR_BLOCKED_BY_CLIENT
-        });
-        
-        const auth = firebase.auth();
+            // Inicializar Firebase com configurações otimizadas
+            firebase.initializeApp(window.firebaseConfig);
+            db = firebase.firestore();
+            
+            // Configurar Firestore para evitar listeners em tempo real
+            db.settings({
+                cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
+                experimentalForceLongPolling: false // Desabilita long polling que causa ERR_BLOCKED_BY_CLIENT
+            });
+            
+            auth = firebase.auth();
+            
+            console.log('✅ Firebase inicializado com sucesso!');
+        } catch (error) {
+            console.error('❌ Erro na inicialização do Firebase:', error);
+            alert('❌ Erro na inicialização do Firebase: ' + error.message);
+            throw error;
+        }
 
         let creditsUsed = 0;
         let processedSongs = 0;
@@ -739,35 +748,30 @@
         const SEARCH_TERMS_BY_DECADE = {
             '1960s': {
                 rock: ['classic rock 60s karaoke', 'rock and roll 1960s karaoke', 'beatles karaoke playback', 'rolling stones 60s karaoke', 'rock clássico anos 60 karaoke'],
-                pop: ['pop hits 1960s karaoke', '60s pop classics karaoke', 'oldies 60s karaoke playback', 'pop internacional 60s karaoke', 'sucessos pop anos 60 karaoke'],
                 sertanejo: ['sertanejo raiz anos 60 karaoke', 'moda de viola 60s karaoke playback', 'sertanejo clássico 1960 karaoke', 'duplas sertanejas 60s karaoke', 'viola caipira 60s karaoke'],
                 romantico: ['românticas anos 60 karaoke', 'love songs 1960s karaoke', 'baladas românticas 60s karaoke playback', 'música romântica 60s karaoke', 'slow 60s karaoke'],
                 mpb: ['mpb anos 60 karaoke', 'bossa nova 60s karaoke', 'música popular brasileira 1960 karaoke playback', 'tropicália 60s karaoke', 'mpb clássica 60s karaoke']
             },
             '1970s': {
                 rock: ['classic rock 70s karaoke', 'rock progressivo 70s karaoke', 'hard rock 1970s karaoke playback', 'rock nacional 70s karaoke', 'rock clássico anos 70 karaoke'],
-                pop: ['pop hits 1970s karaoke', 'disco 70s karaoke', 'pop internacional 70s karaoke playback', 'sucessos pop anos 70 karaoke', 'dance 70s karaoke'],
                 sertanejo: ['sertanejo anos 70 karaoke', 'moda de viola 70s karaoke playback', 'sertanejo raiz 1970 karaoke', 'duplas sertanejas 70s karaoke', 'música caipira 70s karaoke'],
                 romantico: ['românticas anos 70 karaoke', 'love songs 1970s karaoke', 'baladas românticas 70s karaoke playback', 'música romântica 70s karaoke', 'slow 70s karaoke'],
                 mpb: ['mpb anos 70 karaoke', 'música popular brasileira 1970 karaoke playback', 'mpb clássica 70s karaoke', 'cantores mpb 70s karaoke', 'compositores mpb 70s karaoke']
             },
             '1980s': {
                 rock: ['rock 80s karaoke', 'new wave 80s karaoke', 'rock nacional 80s karaoke', 'hard rock 1980s karaoke playback', 'rock clássico anos 80 karaoke'],
-                pop: ['pop 80s karaoke', 'synthpop 80s karaoke', 'pop internacional 80s karaoke playback', 'sucessos pop anos 80 karaoke', 'dance 80s karaoke'],
                 sertanejo: ['sertanejo anos 80 karaoke', 'sertanejo romântico 80s karaoke playback', 'duplas sertanejas 80s karaoke', 'música sertaneja 1980 karaoke', 'country brasileiro 80s karaoke'],
                 romantico: ['românticas anos 80 karaoke', 'love songs 1980s karaoke', 'baladas românticas 80s karaoke playback', 'música romântica 80s karaoke', 'slow 80s karaoke'],
                 mpb: ['mpb anos 80 karaoke', 'música popular brasileira 1980 karaoke playback', 'rock nacional 80s karaoke', 'cantores mpb 80s karaoke', 'mpb romântica 80s karaoke']
             },
             '1990s': {
                 rock: ['rock 90s karaoke', 'grunge 90s karaoke', 'rock nacional 90s karaoke', 'alternative rock 1990s karaoke playback', 'rock clássico anos 90 karaoke'],
-                pop: ['pop 90s karaoke', 'dance 90s karaoke', 'pop internacional 90s karaoke playback', 'sucessos pop anos 90 karaoke', 'eurodance 90s karaoke'],
                 sertanejo: ['sertanejo anos 90 karaoke', 'sertanejo romântico 90s karaoke playback', 'duplas sertanejas 90s karaoke', 'música sertaneja 1990 karaoke', 'country brasileiro 90s karaoke'],
                 romantico: ['românticas anos 90 karaoke', 'love songs 1990s karaoke', 'baladas românticas 90s karaoke playback', 'música romântica 90s karaoke', 'slow 90s karaoke'],
                 mpb: ['mpb anos 90 karaoke', 'música popular brasileira 1990 karaoke playback', 'rock nacional 90s karaoke', 'cantores mpb 90s karaoke', 'mpb contemporânea 90s karaoke']
             },
             '2000s': {
                 rock: ['rock 2000s karaoke', 'nu metal 2000s karaoke', 'rock nacional 2000 karaoke', 'alternative rock 2000s karaoke playback', 'rock anos 2000 karaoke'],
-                pop: ['pop 2000s karaoke', 'pop rock 2000s karaoke', 'pop internacional 2000 karaoke playback', 'sucessos pop anos 2000 karaoke', 'dance 2000s karaoke'],
                 sertanejo: ['sertanejo anos 2000 karaoke', 'sertanejo universitário 2000s karaoke playback', 'duplas sertanejas 2000 karaoke', 'música sertaneja 2000 karaoke', 'sertanejo moderno 2000s karaoke'],
                 romantico: ['românticas anos 2000 karaoke', 'love songs 2000s karaoke', 'baladas românticas 2000 karaoke playback', 'música romântica 2000s karaoke', 'slow 2000s karaoke'],
                 mpb: ['mpb anos 2000 karaoke', 'música popular brasileira 2000 karaoke playback', 'cantores mpb 2000s karaoke', 'mpb contemporânea 2000 karaoke', 'nova mpb 2000s karaoke']
@@ -826,7 +830,6 @@
         function mapGenreToCategory(genre, decade) {
             const genreMap = {
                 'rock': decade < '1990s' ? 'Rock Internacional' : 'Rock Nacional',
-                'pop': decade < '1990s' ? 'Pop Internacional' : 'Pop Nacional', 
                 'sertanejo': 'Sertanejo',
                 'romantico': 'Romântico',
                 'mpb': 'MPB'
