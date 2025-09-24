@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔄 FORÇAR REPOPULAÇÃO DO BANCO</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0,0,0,0.3);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .status {
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #4CAF50;
+        }
+        .error {
+            border-left-color: #f44336;
+        }
+        .warning {
+            border-left-color: #ff9800;
+        }
+        .btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        .btn-danger {
+            background: #f44336;
+        }
+        .btn-danger:hover {
+            background: #da190b;
+        }
+        .progress {
+            width: 100%;
+            height: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 FORÇAR REPOPULAÇÃO DO BANCO DE DADOS</h1>
+        
+        <div id="status-container">
+            <div class="status">
+                <strong>📊 Status:</strong> Aguardando início da operação...
+            </div>
+        </div>
+
+        <div class="progress">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <button class="btn btn-danger" onclick="clearAllCache()">
+                🗑️ LIMPAR TODO O CACHE
+            </button>
+            <button class="btn" onclick="forceRepopulate()">
+                🔄 FORÇAR REPOPULAÇÃO
+            </button>
+            <button class="btn" onclick="testConnection()">
+                🧪 TESTAR CONEXÃO
+            </button>
+        </div>
+
+        <div id="logs" style="background: rgba(0,0,0,0.7); padding: 15px; border-radius: 10px; font-family: monospace; font-size: 12px; max-height: 400px; overflow-y: auto;">
+            <div>🚀 Sistema pronto para repopulação...</div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBQf9NzJgGjkOOH4nQX8k7Vv5YrN2M8Qw4",
+            authDomain: "karaokehub-5b1bc.firebaseapp.com",
+            projectId: "karaokehub-5b1bc",
+            storageBucket: "karaokehub-5b1bc.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef123456"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        let progressBar = document.getElementById('progress-bar');
+        let statusContainer = document.getElementById('status-container');
+        let logsContainer = document.getElementById('logs');
+
+        function updateProgress(percent) {
+            progressBar.style.width = percent + '%';
+        }
+
+        function addStatus(message, type = 'info') {
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status ${type}`;
+            statusDiv.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong> ${message}`;
+            statusContainer.appendChild(statusDiv);
+            statusContainer.scrollTop = statusContainer.scrollHeight;
+        }
+
+        function addLog(message) {
+            const logDiv = document.createElement('div');
+            logDiv.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logsContainer.appendChild(logDiv);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+        }
+
+        async function ensureAuth() {
+            return new Promise((resolve) => {
+                if (auth.currentUser) {
+                    resolve(auth.currentUser);
+                } else {
+                    auth.signInAnonymously().then(resolve).catch(() => {
+                        addLog('❌ Erro na autenticação, continuando sem login');
+                        resolve(null);
+                    });
+                }
+            });
+        }
+
+        async function clearAllCache() {
+            addStatus('🗑️ Iniciando limpeza completa do cache...', 'warning');
+            addLog('🗑️ LIMPEZA COMPLETA INICIADA');
+            updateProgress(10);
+
+            try {
+                await ensureAuth();
+                updateProgress(20);
+
+                // Limpar localStorage
+                addLog('🧹 Limpando localStorage...');
+                localStorage.removeItem('songsCache');
+                localStorage.removeItem('searchCache');
+                localStorage.clear();
+                updateProgress(40);
+
+                // Limpar coleção songsCache
+                addLog('🔥 Limpando coleção songsCache no Firebase...');
+                const songsCacheRef = db.collection('songsCache');
+                const songsSnapshot = await songsCacheRef.get();
+                
+                const batch1 = db.batch();
+                songsSnapshot.docs.forEach(doc => {
+                    batch1.delete(doc.ref);
+                });
+                await batch1.commit();
+                updateProgress(60);
+
+                // Limpar coleção searchCache
+                addLog('🔥 Limpando coleção searchCache no Firebase...');
+                const searchCacheRef = db.collection('searchCache');
+                const searchSnapshot = await searchCacheRef.get();
+                
+                const batch2 = db.batch();
+                searchSnapshot.docs.forEach(doc => {
+                    batch2.delete(doc.ref);
+                });
+                await batch2.commit();
+                updateProgress(80);
+
+                // Limpar coleção debug_test
+                addLog('🔥 Limpando coleção debug_test no Firebase...');
+                const debugRef = db.collection('debug_test');
+                const debugSnapshot = await debugRef.get();
+                
+                const batch3 = db.batch();
+                debugSnapshot.docs.forEach(doc => {
+                    batch3.delete(doc.ref);
+                });
+                await batch3.commit();
+                updateProgress(100);
+
+                addStatus('✅ Cache completamente limpo!', 'info');
+                addLog('✅ LIMPEZA COMPLETA FINALIZADA COM SUCESSO');
+
+            } catch (error) {
+                addStatus(`❌ Erro na limpeza: ${error.message}`, 'error');
+                addLog(`❌ ERRO: ${error.message}`);
+            }
+        }
+
+        async function forceRepopulate() {
+            addStatus('🔄 Iniciando repopulação forçada...', 'info');
+            addLog('🔄 REPOPULAÇÃO FORÇADA INICIADA');
+            updateProgress(0);
+
+            try {
+                await ensureAuth();
+                updateProgress(10);
+
+                // Usar banco de dados local (mesmo do script.js)
+                addLog('📊 Carregando banco de dados local...');
+                const musicDatabase = await loadLocalMusicDatabase();
+                updateProgress(30);
+
+                if (!musicDatabase || !Array.isArray(musicDatabase)) {
+                    throw new Error('Erro ao carregar banco de dados local');
+                }
+
+                addLog(`📊 Carregados ${musicDatabase.length} músicas do banco local`);
+                updateProgress(50);
+
+                // Salvar no Firebase
+                addLog('💾 Salvando dados no Firebase...');
+                const cacheData = {
+                    songs: musicDatabase,
+                    timestamp: Date.now(),
+                    source: 'local_database',
+                    total_songs: musicDatabase.length,
+                    cache_type: 'full_repopulation'
+                };
+
+                const cacheRef = db.collection('songsCache');
+                await cacheRef.add(cacheData);
+                updateProgress(70);
+
+                // Salvar no localStorage como backup
+                addLog('💾 Salvando backup no localStorage...');
+                localStorage.setItem('songsCache', JSON.stringify(cacheData));
+                updateProgress(90);
+
+                // Teste de verificação
+                addLog('🧪 Verificando dados salvos...');
+                const verification = await cacheRef.limit(1).get();
+                if (verification.empty) {
+                    throw new Error('Falha na verificação: dados não encontrados');
+                }
+                updateProgress(100);
+
+                addStatus('✅ Repopulação concluída com sucesso!', 'info');
+                addLog('✅ REPOPULAÇÃO FINALIZADA COM SUCESSO');
+                addLog(`📊 Total de músicas salvas: ${musicDatabase.length}`);
+
+            } catch (error) {
+                addStatus(`❌ Erro na repopulação: ${error.message}`, 'error');
+                addLog(`❌ ERRO: ${error.message}`);
+            }
+        }
+
+        async function testConnection() {
+            addStatus('🧪 Testando conexão...', 'info');
+            addLog('🧪 TESTE DE CONEXÃO INICIADO');
+            updateProgress(0);
+
+            try {
+                await ensureAuth();
+                updateProgress(25);
+
+                // Testar escrita
+                addLog('✍️ Testando escrita no Firebase...');
+                const testRef = db.collection('debug_test');
+                await testRef.add({
+                    test: 'connection_test',
+                    timestamp: Date.now(),
+                    status: 'success'
+                });
+                updateProgress(50);
+
+                // Testar leitura
+                addLog('📖 Testando leitura do Firebase...');
+                const snapshot = await testRef.limit(1).get();
+                if (snapshot.empty) {
+                    throw new Error('Falha na leitura');
+                }
+                updateProgress(75);
+
+                // Verificar cache
+                addLog('🔍 Verificando cache existente...');
+                const cacheSnapshot = await db.collection('songsCache').limit(1).get();
+                const hasCache = !cacheSnapshot.empty;
+                updateProgress(100);
+
+                addStatus('✅ Conexão funcionando perfeitamente!', 'info');
+                addLog('✅ TESTE DE CONEXÃO FINALIZADO');
+                addLog(`📊 Cache existente: ${hasCache ? 'SIM' : 'NÃO'}`);
+
+            } catch (error) {
+                addStatus(`❌ Erro na conexão: ${error.message}`, 'error');
+                addLog(`❌ ERRO: ${error.message}`);
+            }
+        }
+
+        // Função para carregar o banco de dados local (mesmo do script.js)
+        async function loadLocalMusicDatabase() {
+            return [
+                // Pop Nacional
+                { title: 'Evidências', artist: 'Chitãozinho & Xororó', genre: 'sertanejo', searchTerm: 'evidencias chitaozinho xororo karaoke playback' },
+                { title: 'Ainda Bem', artist: 'Marisa Monte', genre: 'mpb', searchTerm: 'ainda bem marisa monte karaoke playback' },
+                { title: 'Aquarela', artist: 'Toquinho', genre: 'mpb', searchTerm: 'aquarela toquinho karaoke playback' },
+                { title: 'Asa Branca', artist: 'Luiz Gonzaga', genre: 'mpb', searchTerm: 'asa branca luiz gonzaga karaoke playback' },
+                { title: 'Beijinho no Ombro', artist: 'Valesca Popozuda', genre: 'funk', searchTerm: 'beijinho ombro valesca popozuda karaoke' },
+                { title: 'Bom Rapaz', artist: 'Fernando & Sorocaba', genre: 'sertanejo', searchTerm: 'bom rapaz fernando sorocaba karaoke playback' },
+                { title: 'Camarote', artist: 'Os Barões da Pisadinha', genre: 'funk', searchTerm: 'camarote baroes pisadinha karaoke playback' },
+                { title: 'Coração de Pedra', artist: 'Joelma', genre: 'pop', searchTerm: 'coracao pedra joelma karaoke playback' },
+                { title: 'Deus Me Livre', artist: 'Raça Negra', genre: 'pagode', searchTerm: 'deus me livre raca negra karaoke playback' },
+                { title: 'Eduardo e Mônica', artist: 'Legião Urbana', genre: 'rock', searchTerm: 'eduardo monica legiao urbana karaoke playback' },
+                
+                // Sertanejo
+                { title: 'Ai Se Eu Te Pego', artist: 'Michel Teló', genre: 'sertanejo', searchTerm: 'ai se eu te pego michel telo karaoke playback' },
+                { title: 'Balada', artist: 'Gusttavo Lima', genre: 'sertanejo', searchTerm: 'balada gusttavo lima karaoke playback' },
+                { title: 'Casal Perfeito', artist: 'Henrique & Juliano', genre: 'sertanejo', searchTerm: 'casal perfeito henrique juliano karaoke playback' },
+                { title: 'Flor e o Beija-Flor', artist: 'Henrique & Juliano', genre: 'sertanejo', searchTerm: 'flor beija flor henrique juliano karaoke playback' },
+                { title: 'Infiel', artist: 'Marília Mendonça', genre: 'sertanejo', searchTerm: 'infiel marilia mendonca karaoke playback' },
+                { title: 'Meu Pedacinho de Chão', artist: 'Almir Sater', genre: 'sertanejo', searchTerm: 'meu pedacinho chao almir sater karaoke playback' },
+                { title: 'Modão Duido', artist: 'Michel Teló', genre: 'sertanejo', searchTerm: 'modao duido michel telo karaoke playback' },
+                { title: 'Sogrão Caprichou', artist: 'Matheus & Kauan', genre: 'sertanejo', searchTerm: 'sograo caprichou matheus kauan karaoke playback' },
+                { title: 'Temporal de Amor', artist: 'Léo Magalhães', genre: 'sertanejo', searchTerm: 'temporal amor leo magalhaes karaoke playback' },
+                { title: 'Zé da Recaída', artist: 'Gusttavo Lima', genre: 'sertanejo', searchTerm: 'ze recaida gusttavo lima karaoke playback' },
+                { title: 'Saudade', artist: 'Luan Santana', genre: 'sertanejo', searchTerm: 'saudade luan santana karaoke playback' },
+                { title: 'Meteoro', artist: 'Luan Santana', genre: 'sertanejo', searchTerm: 'meteoro luan santana karaoke playback' },
+                { title: 'Largado às Traças', artist: 'Zé Neto & Cristiano', genre: 'sertanejo', searchTerm: 'largado tracas ze neto cristiano karaoke playback' },
+                { title: 'Notificação Preferida', artist: 'Zé Neto & Cristiano', genre: 'sertanejo', searchTerm: 'notificacao preferida ze neto cristiano karaoke playback' },
+                { title: 'Jenifer', artist: 'Gabriel Diniz', genre: 'sertanejo', searchTerm: 'jenifer gabriel diniz karaoke playback' },
+                
+                // Rock Nacional
+                { title: 'Ainda É Cedo', artist: 'Legião Urbana', genre: 'rock', searchTerm: 'ainda cedo legiao urbana karaoke playback' },
+                { title: 'Bete Balanço', artist: 'Barão Vermelho', genre: 'rock', searchTerm: 'bete balanco barao vermelho karaoke playback' },
+                { title: 'Certas Coisas', artist: 'Lulu Santos', genre: 'rock', searchTerm: 'certas coisas lulu santos karaoke playback' },
+                { title: 'Faroeste Caboclo', artist: 'Legião Urbana', genre: 'rock', searchTerm: 'faroeste caboclo legiao urbana karaoke playback' },
+                { title: 'Pais e Filhos', artist: 'Legião Urbana', genre: 'rock', searchTerm: 'pais filhos legiao urbana karaoke playback' },
+                { title: 'Que País É Este', artist: 'Legião Urbana', genre: 'rock', searchTerm: 'que pais este legiao urbana karaoke playback' },
+                { title: 'Tempo Perdido', artist: 'Legião Urbana', genre: 'rock', searchTerm: 'tempo perdido legiao urbana karaoke playback' },
+                { title: 'Toda Forma de Amor', artist: 'Lulu Santos', genre: 'rock', searchTerm: 'toda forma amor lulu santos karaoke playback' },
+                { title: 'Vento no Litoral', artist: 'Legião Urbana', genre: 'rock', searchTerm: 'vento litoral legiao urbana karaoke playback' },
+                { title: 'Será', artist: 'Legião Urbana', genre: 'rock', searchTerm: 'sera legiao urbana karaoke playback' },
+                { title: 'Ideologia', artist: 'Cazuza', genre: 'rock', searchTerm: 'ideologia cazuza karaoke playback' },
+                { title: 'O Tempo Não Para', artist: 'Cazuza', genre: 'rock', searchTerm: 'tempo nao para cazuza karaoke playback' },
+                { title: 'Exagerado', artist: 'Cazuza', genre: 'rock', searchTerm: 'exagerado cazuza karaoke playback' },
+                { title: 'Coração de Estudante', artist: 'Milton Nascimento', genre: 'rock', searchTerm: 'coracao estudante milton nascimento karaoke playback' },
+                { title: 'Pra Não Dizer Que Não Falei das Flores', artist: 'Geraldo Vandré', genre: 'rock', searchTerm: 'pra nao dizer nao falei flores geraldo vandre karaoke playback' },
+                
+                // MPB
+                { title: 'Águas de Março', artist: 'Elis Regina', genre: 'mpb', searchTerm: 'aguas marco elis regina karaoke playback' },
+                { title: 'Carinhoso', artist: 'Pixinguinha', genre: 'mpb', searchTerm: 'carinhoso pixinguinha karaoke playback' },
+                { title: 'Chega de Saudade', artist: 'João Gilberto', genre: 'mpb', searchTerm: 'chega saudade joao gilberto karaoke playback' },
+                { title: 'Garota de Ipanema', artist: 'Tom Jobim', genre: 'mpb', searchTerm: 'garota ipanema tom jobim karaoke playback' },
+                { title: 'Mas Que Nada', artist: 'Jorge Ben Jor', genre: 'mpb', searchTerm: 'mas que nada jorge ben jor karaoke playback' },
+                { title: 'Samba de Uma Nota Só', artist: 'Tom Jobim', genre: 'mpb', searchTerm: 'samba uma nota so tom jobim karaoke playback' },
+                { title: 'Wave', artist: 'Tom Jobim', genre: 'mpb', searchTerm: 'wave tom jobim karaoke playback' },
+                { title: 'Corcovado', artist: 'Tom Jobim', genre: 'mpb', searchTerm: 'corcovado tom jobim karaoke playback' },
+                { title: 'Desafinado', artist: 'Tom Jobim', genre: 'mpb', searchTerm: 'desafinado tom jobim karaoke playback' },
+                { title: 'Insensatez', artist: 'Tom Jobim', genre: 'mpb', searchTerm: 'insensatez tom jobim karaoke playback' }
+            ];
+        }
+
+        // Auto-inicialização
+        window.addEventListener('load', () => {
+            addLog('🚀 Sistema carregado e pronto');
+            addStatus('✅ Sistema pronto para operação', 'info');
+        });
+    </script>
+</body>
+</html>

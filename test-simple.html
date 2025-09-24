@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Simples Firebase</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: white;
+        }
+        .container {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #5a6fd8;
+        }
+        #logs {
+            background: #0f0f23;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .loading { background: #ffa500; color: black; }
+        .success { background: #28a745; }
+        .error { background: #dc3545; }
+    </style>
+</head>
+<body>
+    <h1>🎤 Teste Simples Firebase - Karaoke</h1>
+    
+    <div class="container">
+        <h2>Status</h2>
+        <div id="status" class="status loading">Carregando...</div>
+    </div>
+
+    <div class="container">
+        <h2>Testes</h2>
+        <button onclick="testBasicConnection()">Testar Conexão Básica</button>
+        <button onclick="testAuth()">Testar Autenticação</button>
+        <button onclick="testFirestore()">Testar Firestore</button>
+        <button onclick="testCache()">Testar Cache</button>
+        <button onclick="clearLogs()">Limpar Logs</button>
+    </div>
+
+    <div class="container">
+        <h2>Logs</h2>
+        <div id="logs">Iniciando teste...\n</div>
+    </div>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const logsDiv = document.getElementById('logs');
+        
+        function addLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logsDiv.textContent += `[${timestamp}] ${message}\n`;
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function updateStatus(message, type = 'loading') {
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+
+        function clearLogs() {
+            logsDiv.textContent = 'Logs limpos...\n';
+        }
+
+        // Teste básico sem Firebase primeiro
+        addLog('✅ JavaScript funcionando');
+        updateStatus('JavaScript carregado', 'success');
+
+        // Variáveis globais para Firebase
+        let firebaseApp = null;
+        let db = null;
+        let auth = null;
+
+        function testBasicConnection() {
+            addLog('🔄 Testando conexão básica...');
+            updateStatus('Testando conexão...', 'loading');
+            
+            try {
+                // Teste de conectividade básica
+                fetch('https://www.google.com/favicon.ico', { mode: 'no-cors' })
+                    .then(() => {
+                        addLog('✅ Conectividade de rede OK');
+                        updateStatus('Rede funcionando', 'success');
+                    })
+                    .catch(error => {
+                        addLog('❌ Erro de rede: ' + error.message);
+                        updateStatus('Erro de rede', 'error');
+                    });
+            } catch (error) {
+                addLog('❌ Erro no teste básico: ' + error.message);
+                updateStatus('Erro no teste', 'error');
+            }
+        }
+
+        function testAuth() {
+            addLog('🔄 Testando autenticação...');
+            updateStatus('Testando auth...', 'loading');
+            
+            if (!window.firebase) {
+                addLog('❌ Firebase não carregado');
+                updateStatus('Firebase não encontrado', 'error');
+                return;
+            }
+
+            try {
+                if (!firebaseApp) {
+                    const firebaseConfig = {
+                        apiKey: "AIzaSyCCwVRf1FxGDPpN0DcG1RohR6JniQheN3Q",
+                        authDomain: "karaokehub-5b1bc.firebaseapp.com",
+                        projectId: "karaokehub-5b1bc",
+                        storageBucket: "karaokehub-5b1bc.firebasestorage.app",
+                        messagingSenderId: "155863546905",
+                        appId: "1:155863546905:web:cb0d719b05c9e2d03e3e88"
+                    };
+                    
+                    firebaseApp = firebase.initializeApp(firebaseConfig);
+                    auth = firebase.auth();
+                    addLog('✅ Firebase inicializado');
+                }
+
+                auth.signInAnonymously()
+                    .then(() => {
+                        addLog('✅ Autenticação anônima bem-sucedida');
+                        updateStatus('Autenticado', 'success');
+                    })
+                    .catch((error) => {
+                        addLog('❌ Erro na autenticação: ' + error.message);
+                        updateStatus('Erro na auth', 'error');
+                    });
+                    
+            } catch (error) {
+                addLog('❌ Erro no teste de auth: ' + error.message);
+                updateStatus('Erro na auth', 'error');
+            }
+        }
+
+        function testFirestore() {
+            addLog('🔄 Testando Firestore...');
+            updateStatus('Testando Firestore...', 'loading');
+            
+            if (!window.firebase) {
+                addLog('❌ Firebase não carregado');
+                updateStatus('Firebase não encontrado', 'error');
+                return;
+            }
+
+            try {
+                if (!db) {
+                    db = firebase.firestore();
+                    addLog('✅ Firestore inicializado');
+                }
+
+                // Teste simples de leitura
+                db.collection('test').limit(1).get()
+                    .then((querySnapshot) => {
+                        addLog('✅ Firestore conectado - ' + querySnapshot.size + ' documentos');
+                        updateStatus('Firestore OK', 'success');
+                    })
+                    .catch((error) => {
+                        addLog('❌ Erro no Firestore: ' + error.message);
+                        updateStatus('Erro no Firestore', 'error');
+                    });
+                    
+            } catch (error) {
+                addLog('❌ Erro no teste do Firestore: ' + error.message);
+                updateStatus('Erro no Firestore', 'error');
+            }
+        }
+
+        function testCache() {
+            addLog('🔄 Testando operações de cache...');
+            updateStatus('Testando cache...', 'loading');
+            
+            if (!db || !auth.currentUser) {
+                addLog('❌ Firebase não inicializado ou usuário não autenticado');
+                updateStatus('Erro: não autenticado', 'error');
+                return;
+            }
+
+            try {
+                // Dados de teste
+                const testData = {
+                    songs: [
+                        { title: 'Evidências', artist: 'Chitãozinho & Xororó', genre: 'sertanejo' },
+                        { title: 'Ainda Bem', artist: 'Marisa Monte', genre: 'mpb' }
+                    ],
+                    timestamp: Date.now(),
+                    version: '1.0',
+                    totalSongs: 2
+                };
+
+                addLog('💾 Salvando dados de teste no cache...');
+                
+                // Salvar no cache
+                db.collection('songsCache').doc('cached_songs').set(testData)
+                    .then(() => {
+                        addLog('✅ Cache salvo com sucesso!');
+                        
+                        // Agora tentar recuperar
+                        addLog('🔍 Recuperando dados do cache...');
+                        return db.collection('songsCache').doc('cached_songs').get();
+                    })
+                    .then((doc) => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            addLog(`✅ Cache recuperado! ${data.songs.length} músicas`);
+                            addLog(`📅 Timestamp: ${new Date(data.timestamp).toLocaleString()}`);
+                            updateStatus('Cache funcionando!', 'success');
+                        } else {
+                            addLog('❌ Cache não encontrado após salvamento');
+                            updateStatus('Erro no cache', 'error');
+                        }
+                    })
+                    .catch((error) => {
+                        addLog('❌ Erro nas operações de cache: ' + error.message);
+                        updateStatus('Erro no cache', 'error');
+                    });
+                    
+            } catch (error) {
+                addLog('❌ Erro no teste de cache: ' + error.message);
+                updateStatus('Erro no cache', 'error');
+            }
+        }
+
+        // Carregar Firebase de forma assíncrona
+        function loadFirebase() {
+            addLog('🔄 Carregando scripts do Firebase...');
+            updateStatus('Carregando Firebase...', 'loading');
+            
+            const scripts = [
+                'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js',
+                'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js',
+                'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js'
+            ];
+            
+            let loadedScripts = 0;
+            
+            scripts.forEach((src, index) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = () => {
+                    loadedScripts++;
+                    addLog(`✅ Script ${index + 1}/${scripts.length} carregado`);
+                    
+                    if (loadedScripts === scripts.length) {
+                        addLog('✅ Todos os scripts do Firebase carregados');
+                        updateStatus('Firebase carregado', 'success');
+                    }
+                };
+                script.onerror = () => {
+                    addLog(`❌ Erro ao carregar script ${index + 1}: ${src}`);
+                    updateStatus('Erro ao carregar Firebase', 'error');
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        // Iniciar carregamento
+        setTimeout(() => {
+            loadFirebase();
+        }, 1000);
+    </script>
+</body>
+</html>

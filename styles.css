@@ -1,0 +1,1314 @@
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+    overflow-x: hidden;
+}
+
+.app-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header Styles */
+.header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #667eea;
+}
+
+.logo i {
+    font-size: 2rem;
+}
+
+.logo h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.search-container {
+    flex: 1;
+    max-width: 500px;
+    position: relative;
+}
+
+.search-container input {
+    width: 100%;
+    padding: 0.75rem 3rem 0.75rem 1rem;
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    border-radius: 25px;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    transition: all 0.3s ease;
+}
+
+.search-container input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.search-container button {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.search-container button:hover {
+    background: #5a67d8;
+    transform: translateY(-50%) scale(1.05);
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Button Styles */
+.btn-primary, .btn-secondary {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 25px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.9);
+    color: #667eea;
+    border: 2px solid rgba(102, 126, 234, 0.2);
+}
+
+.btn-secondary:hover {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: #667eea;
+}
+
+.btn-expand {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 25px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+}
+
+.btn-expand:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+    background: linear-gradient(135deg, #218838, #1e7e34);
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    display: flex;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    gap: 2rem;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 280px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 1.5rem;
+    height: fit-content;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 120px;
+}
+
+.sidebar h3 {
+    color: #667eea;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.genre-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.genre-btn {
+    background: transparent;
+    border: none;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.genre-btn:hover, .genre-btn.active {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    transform: translateX(5px);
+}
+
+.genre-btn i {
+    width: 20px;
+    text-align: center;
+}
+
+/* Content Area */
+.content-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.filter-controls {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 15px;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.sort-options {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.sort-options label {
+    font-weight: 500;
+    color: #667eea;
+}
+
+.sort-options select {
+    padding: 0.5rem 1rem;
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.view-toggle {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.view-btn {
+    background: transparent;
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    padding: 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.view-btn.active, .view-btn:hover {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+/* Loading */
+.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: white;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Songs Container */
+.songs-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    min-height: 400px;
+}
+
+.songs-container.list-view {
+    grid-template-columns: 1fr;
+}
+
+/* CORREÇÃO: Otimizações para reduzir flickering */
+.song-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 15px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease; /* Reduzido de 0.3s para 0.2s */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    /* CORREÇÃO: Usar will-change para otimizar animações */
+    will-change: transform, box-shadow;
+    /* CORREÇÃO: Usar transform3d para ativar aceleração de hardware */
+    transform: translate3d(0, 0, 0);
+}
+
+.song-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    transform: scaleX(0);
+    transition: transform 0.2s ease; /* Reduzido de 0.3s para 0.2s */
+}
+
+.song-card:hover::before {
+    transform: scaleX(1);
+}
+
+.song-card:hover {
+    transform: translate3d(0, -5px, 0); /* Usando translate3d */
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.card-image-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 15px 15px 0 0;
+}
+
+.song-thumbnail {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.card-image-container:hover .song-thumbnail {
+    transform: scale(1.05);
+}
+
+/* Indicadores para músicas em modo offline */
+.song-card.offline {
+    border: 2px solid #ff9800;
+    background: rgba(255, 152, 0, 0.1);
+}
+
+.song-card.offline::before {
+    background: linear-gradient(135deg, #ff9800, #f57c00);
+}
+
+.offline-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255, 152, 0, 0.9);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+}
+
+.error-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(244, 67, 54, 0.9);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+}
+
+.song-card.has-error {
+    border: 2px solid #f44336;
+    background: rgba(244, 67, 54, 0.1);
+}
+
+.song-card.has-error::before {
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+}
+
+.card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.card-image-container:hover .card-overlay {
+    opacity: 1;
+}
+
+.card-play-btn {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.2rem;
+    color: #667eea;
+}
+
+.card-play-btn:hover {
+    background: white;
+    transform: scale(1.1);
+}
+
+.youtube-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 0, 0, 0.9);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.song-info {
+    padding: 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.song-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.song-title {
+    color: #333;
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.3;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.favorite-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    color: #ccc;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.favorite-btn:hover {
+    background: rgba(231, 76, 60, 0.1);
+    color: #e74c3c;
+}
+
+.favorite-btn.favorited {
+    color: #e74c3c;
+}
+
+.song-artist {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0;
+    font-weight: 500;
+}
+
+.song-channel {
+    color: #888;
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+.song-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.song-genre {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.song-region {
+    display: inline-block;
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.card-actions {
+    padding: 0 1rem 1rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-card-primary, .btn-card-secondary {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-card-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.btn-card-primary:hover {
+    background: linear-gradient(135deg, #5a6fd8, #6a4190);
+    transform: translateY(-2px);
+}
+
+.btn-card-secondary {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.btn-card-secondary:hover {
+    background: rgba(102, 126, 234, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Song Actions Buttons */
+.song-actions {
+    padding: 0 1rem 1rem;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.btn-favorite, .btn-play {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #667eea;
+    font-size: 1rem;
+}
+
+.btn-favorite:hover, .btn-play:hover {
+    background: #667eea;
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-favorite.active {
+    background: #e74c3c;
+    color: white;
+    border-color: #e74c3c;
+}
+
+.btn-favorite.active:hover {
+    background: #c0392b;
+    border-color: #c0392b;
+}
+
+/* List View Styles */
+.songs-container.list-view .song-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem 1.5rem;
+}
+
+.songs-container.list-view .song-thumbnail {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+}
+
+.songs-container.list-view .song-info {
+    flex: 1;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.page-btn {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.page-numbers {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.page-number {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 40px;
+    text-align: center;
+}
+
+.page-number.active, .page-number:hover {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+}
+
+.modal-content {
+    background: white;
+    margin: 5% auto;
+    padding: 2rem;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 600px;
+    position: relative;
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.close {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    font-size: 2rem;
+    cursor: pointer;
+    color: #999;
+    transition: color 0.3s ease;
+}
+
+.close:hover {
+    color: #667eea;
+}
+
+.song-info {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.song-info img {
+    width: 150px;
+    height: 150px;
+    border-radius: 15px;
+    object-fit: cover;
+}
+
+.song-details h2 {
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.song-details p {
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+/* Footer */
+.footer {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    text-align: center;
+    padding: 1.5rem;
+    color: #666;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .main-content {
+        flex-direction: column;
+        padding: 1rem;
+    }
+    
+    .sidebar {
+        width: 100%;
+        position: static;
+    }
+    
+    .genre-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 0 1rem;
+    }
+    
+    .search-container {
+        order: 3;
+        max-width: none;
+    }
+    
+    .songs-container {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+    
+    .filter-controls {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .modal-content {
+        margin: 10% auto;
+        padding: 1.5rem;
+    }
+    
+    .song-info {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .song-info img {
+        align-self: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .songs-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .pagination {
+        flex-wrap: wrap;
+    }
+    
+    .page-numbers {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* CORREÇÃO: Otimizar animações de fade-in */
+.fade-in {
+    animation: fadeIn 0.3s ease-out; /* Reduzido de 0.5s para 0.3s */
+    /* CORREÇÃO: Usar will-change para otimizar animações */
+    will-change: opacity, transform;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 20px, 0); /* Usando translate3d */
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0); /* Usando translate3d */
+    }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #5a67d8, #6b46c1);
+}
+
+/* Estilos para resultados do YouTube */
+.youtube-result {
+    border: 2px solid #ff6b6b;
+    position: relative;
+}
+
+.youtube-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    z-index: 2;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.song-region {
+    background: rgba(255, 107, 107, 0.2);
+    color: #ff6b6b;
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    margin-left: 0.5rem;
+}
+
+.search-info {
+    grid-column: 1 / -1;
+    margin-bottom: 1rem;
+}
+
+.search-info p {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Melhorar visual dos cards do YouTube */
+.youtube-result:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+}
+
+.youtube-result .song-image img {
+    border-radius: 8px;
+}
+
+/* Animações para notificações de cache */
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* Estilos para informações de cache */
+.cache-info {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.cache-info:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+/* Melhorias para indicadores de status de cache */
+.search-info {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.search-info p {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.search-info small {
+    font-size: 0.85em;
+    opacity: 0.9;
+}
+
+/* Indicadores visuais para economia de quota */
+.quota-saved {
+    background: linear-gradient(135deg, #4CAF50, #45a049) !important;
+    border-color: rgba(76, 175, 80, 0.5) !important;
+}
+
+.quota-used {
+    background: linear-gradient(135deg, rgba(255, 152, 0, 0.2), rgba(255, 193, 7, 0.2)) !important;
+    border-color: rgba(255, 152, 0, 0.3) !important;
+}
+
+/* Melhorias para badges do YouTube */
+.youtube-badge {
+    background: linear-gradient(135deg, #FF0000, #CC0000);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Animação para cards do YouTube */
+.youtube-result {
+    border: 2px solid rgba(255, 0, 0, 0.3);
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.05), rgba(0, 0, 0, 0.1));
+}
+
+.youtube-result:hover {
+    border-color: rgba(255, 0, 0, 0.5);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(255, 0, 0, 0.2);
+}
+
+/* Indicadores de região para resultados do YouTube */
+.song-region {
+    background: linear-gradient(135deg, #2196F3, #1976D2);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    margin-left: 4px;
+}
+
+/* Melhorias para loading indicator */
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-left: 4px solid #4CAF50;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Melhorias para mensagens de status */
+.status-message {
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin: 10px 0;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: fadeInUp 0.3s ease-out;
+}
+
+.status-success {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(69, 160, 73, 0.2));
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    color: #4CAF50;
+}
+
+.status-info {
+    background: linear-gradient(135deg, rgba(33, 150, 243, 0.2), rgba(25, 118, 210, 0.2));
+    border: 1px solid rgba(33, 150, 243, 0.3);
+    color: #2196F3;
+}
+
+.status-warning {
+    background: linear-gradient(135deg, rgba(255, 152, 0, 0.2), rgba(255, 193, 7, 0.2));
+    border: 1px solid rgba(255, 152, 0, 0.3);
+    color: #FF9800;
+}
+
+/* Animação fadeInUp */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Melhorias para responsividade das notificações */
+@media (max-width: 768px) {
+    .cache-info {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        font-size: 13px;
+        padding: 10px 16px;
+    }
+    
+    .search-info p {
+        font-size: 0.9rem;
+        padding: 0.6rem;
+    }
+    
+    .search-info small {
+        font-size: 0.8em;
+    }
+}
+
+/* Efeitos hover para botões de ação */
+.btn-card-primary:hover,
+.btn-card-secondary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* Melhorias para o modal */
+.modal-content {
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Indicadores de performance */
+.performance-indicator {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* API Warning Styles */
+.api-warning {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.2);
+    animation: slideInDown 0.5s ease-out;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.warning-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: white;
+}
+
+.warning-content i {
+    font-size: 2rem;
+    color: #fff;
+    animation: bounce 2s infinite;
+}
+
+.warning-text h4 {
+    margin: 0 0 8px 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.warning-text p {
+    margin: 4px 0;
+    font-size: 0.95rem;
+    opacity: 0.95;
+}
+
+/* Fallback Result Styles */
+.fallback-result {
+    border: 2px dashed #4facfe;
+    background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.05));
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+.fallback-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #ff6b6b;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    z-index: 2;
+    animation: bounce 2s infinite;
+}
+
+.fallback-result .song-title {
+    color: #ff6b6b;
+    font-weight: 600;
+}
+
+.fallback-result .song-artist {
+    color: #666;
+    font-style: italic;
+}
+
+.fallback-result .btn-play {
+    background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+    border-color: #ff6b6b;
+}
+
+.fallback-result .btn-play:hover {
+    background: linear-gradient(135deg, #ff5252, #ff7979);
+    transform: scale(1.05);
+}
+
+/* Animations */
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}

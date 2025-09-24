@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karaokê da Nanda - Seu App de Karaoke</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.ico">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="anti-flicker.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-microphone-alt"></i>
+                    <h1>Karaokê da Nanda</h1>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Buscar karaoke no YouTube (ex: evidências, bohemian rhapsody)..." autocomplete="off">
+                    <button id="searchBtn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-secondary" id="randomBtn">
+                        <i class="fas fa-random"></i> Aleatório
+                    </button>
+                    <button class="btn-expand" id="expandMusicBtn" title="Expandir banco de músicas">
+                        <i class="fas fa-plus-circle"></i> Expandir Banco
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Sidebar with Genres -->
+            <aside class="sidebar">
+                <h3><i class="fas fa-music"></i> Gêneros Musicais</h3>
+                <div class="genre-list">
+                    <button class="genre-btn active" data-genre="all">
+                        <i class="fas fa-globe"></i> Todos
+                    </button>
+                    <button class="genre-btn" data-genre="pop">
+                        <i class="fas fa-star"></i> Pop
+                    </button>
+                    <button class="genre-btn" data-genre="rock">
+                        <i class="fas fa-guitar"></i> Rock
+                    </button>
+                    <button class="genre-btn" data-genre="sertanejo">
+                        <i class="fas fa-hat-cowboy"></i> Sertanejo
+                    </button>
+                    <button class="genre-btn" data-genre="mpb">
+                        <i class="fas fa-heart"></i> MPB
+                    </button>
+                    <button class="genre-btn" data-genre="funk">
+                        <i class="fas fa-fire"></i> Funk
+                    </button>
+                    <button class="genre-btn" data-genre="pagode">
+                        <i class="fas fa-drum"></i> Pagode
+                    </button>
+                    <button class="genre-btn" data-genre="gospel">
+                        <i class="fas fa-praying-hands"></i> Gospel
+                    </button>
+                    <button class="genre-btn" data-genre="internacional">
+                        <i class="fas fa-globe-americas"></i> Internacional
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Content Area -->
+            <section class="content-area">
+                <!-- Filter Controls -->
+                <div class="filter-controls">
+                    <div class="sort-options">
+                        <label>Ordenar por:</label>
+                        <select id="sortSelect">
+                            <option value="alphabetical">Ordem Alfabética</option>
+                            <option value="artist">Por Artista</option>
+                            <option value="popularity">Popularidade</option>
+                        </select>
+                    </div>
+                    <div class="view-toggle">
+                        <button id="gridView" class="view-btn active">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button id="listView" class="view-btn">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Songs Grid/List -->
+                <div class="songs-container" id="songsContainer">
+                    <!-- Songs will be dynamically loaded here -->
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination" id="pagination">
+                    <button class="page-btn" id="prevPage">
+                        <i class="fas fa-chevron-left"></i> Anterior
+                    </button>
+                    <div class="page-numbers" id="pageNumbers"></div>
+                    <button class="page-btn" id="nextPage">
+                        Próximo <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2025 KaraokeHub - Desenvolvido com ❤️ para amantes do karaokê</p>
+        </footer>
+    </div>
+
+    <!-- Modal for Song Details -->
+    <div class="modal" id="songModal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <div class="modal-body">
+                <div class="song-info">
+                    <img id="modalThumbnail" src="./THUMBNAIL.JPG" alt="Thumbnail" onerror="if(this.src!=='./THUMBNAIL.JPG'){this.src='./THUMBNAIL.JPG'}else{this.style.display='none'}">
+                    <div class="song-details">
+                        <h2 id="modalTitle"></h2>
+                        <p id="modalArtist"></p>
+                        <p id="modalGenre"></p>
+                        <p id="modalDuration"></p>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-primary" id="playKaraoke">
+                        <i class="fas fa-play"></i> Cantar Agora
+                    </button>
+                    <button class="btn-secondary" id="addToFavorites">
+                        <i class="fas fa-heart"></i> Favoritar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCCwVRf1FxGDPpN0DcG1RohR6JniQheN3Q",
+            authDomain: "karaokehub-5b1bc.firebaseapp.com",
+            projectId: "karaokehub-5b1bc",
+            storageBucket: "karaokehub-5b1bc.firebasestorage.app",
+            messagingSenderId: "155863546905",
+            appId: "1:155863546905:web:cb0d719b05c9e2d03e3e88"
+        };
+        
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        
+        // Configurar Firestore com configurações otimizadas
+        const db = firebase.firestore();
+        
+        // Desabilitar listeners em tempo real para economizar leituras
+        db.settings({
+            cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
+            experimentalForceLongPolling: false // Desabilita long polling
+        });
+        
+        const auth = firebase.auth();
+        
+        // Enable anonymous authentication
+        auth.signInAnonymously().catch((error) => {
+            console.error('Erro na autenticação anônima:', error);
+        });
+    </script>
+    
+    <!-- Firebase Optimizer -->
+    <script src="firebase-optimizer.js"></script>
+    <script src="firebase-performance-optimizer.js"></script>
+    
+    <!-- Offline Fallback System -->
+    <script src="offline-fallback.js"></script>
+    
+    <!-- Clear cache script -->
+    <script>
+        // Limpar cache antigo na inicialização
+        if (localStorage.getItem('karaoke-cache-version') !== '2.1') {
+            localStorage.clear();
+            sessionStorage.clear();
+            localStorage.setItem('karaoke-cache-version', '2.1');
+            console.log('🧹 Cache antigo limpo - versão 2.1');
+        }
+    </script>
+    
+    <!-- Main Script -->
+    <script src="script.js"></script>
+</body>
+</html>

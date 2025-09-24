@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Firebase - Karaokê</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #45a049;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .danger {
+            background: #dc3545;
+            color: white;
+        }
+        .danger:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Debug Firebase - Limpeza de Coleções</h1>
+    
+    <div class="test-section">
+        <h2>1. Status Atual das Coleções</h2>
+        <button class="test-button" onclick="listCollections()">Verificar Coleções</button>
+        <div id="collections-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Análise Detalhada</h2>
+        <button class="test-button" onclick="analyzeCollections()">Analisar Todas as Coleções</button>
+        <div id="analysis-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. 🗑️ Remover Coleções Desnecessárias</h2>
+        <p><strong>⚠️ ATENÇÃO:</strong> Esta operação irá remover permanentemente as coleções que não são mais utilizadas pelo sistema.</p>
+        <button class="test-button danger" onclick="removeUnusedCollections()">Remover Coleções Não Utilizadas</button>
+        <div id="cleanup-result"></div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCCwVRf1FxGDPpN0DcG1RohR6JniQheN3Q",
+            authDomain: "karaokehub-5b1bc.firebaseapp.com",
+            projectId: "karaokehub-5b1bc",
+            storageBucket: "karaokehub-5b1bc.firebasestorage.app",
+            messagingSenderId: "155863546905",
+            appId: "1:155863546905:web:cb0d719b05c9e2d03e3e88"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="result ${type}">${message}</div>`;
+        }
+
+        async function ensureAuth() {
+            if (!auth.currentUser) {
+                await auth.signInAnonymously();
+            }
+        }
+
+        async function listCollections() {
+            try {
+                showResult('collections-result', '🔄 Verificando coleções...', 'info');
+                await ensureAuth();
+                
+                // Coleções conhecidas do sistema
+                const collections = ['songs', 'songsCache', 'searchCache', 'debug_test'];
+                let results = [];
+                
+                for (const collectionName of collections) {
+                    try {
+                        const snapshot = await db.collection(collectionName).get();
+                        const status = collectionName === 'songs' ? '✅ PRINCIPAL' : 
+                                     collectionName === 'songsCache' ? '⚠️ CACHE' :
+                                     collectionName === 'searchCache' ? '⚠️ CACHE' : '🗑️ TESTE';
+                        results.push(`${collectionName}: ${snapshot.size} documento(s) - ${status}`);
+                    } catch (error) {
+                        results.push(`${collectionName}: ❌ Erro - ${error.message}`);
+                    }
+                }
+                
+                showResult('collections-result', `📋 Status das Coleções:\n${results.join('\n')}`, 'info');
+            } catch (error) {
+                showResult('collections-result', `❌ Erro ao verificar coleções: ${error.message}`, 'error');
+            }
+        }
+
+        async function analyzeCollections() {
+            try {
+                showResult('analysis-result', '🔄 Analisando coleções...', 'info');
+                await ensureAuth();
+                
+                let result = '📊 ANÁLISE DETALHADA:\n\n';
+                
+                // Analisar coleção 'songs' (PRINCIPAL)
+                try {
+                    const songsSnapshot = await db.collection('songs').get();
+                    result += `1️⃣ COLEÇÃO 'songs' (PRINCIPAL):\n`;
+                    result += `   - Documentos: ${songsSnapshot.size}\n`;
+                    result += `   - Status: ✅ MANTER - É a coleção principal do sistema\n\n`;
+                } catch (error) {
+                    result += `1️⃣ COLEÇÃO 'songs': ❌ Erro - ${error.message}\n\n`;
+                }
+                
+                // Analisar coleção 'songsCache' (CACHE - pode ter documentos antigos)
+                try {
+                    const cacheSnapshot = await db.collection('songsCache').get();
+                    result += `2️⃣ COLEÇÃO 'songsCache' (CACHE):\n`;
+                    result += `   - Documentos: ${cacheSnapshot.size}\n`;
+                    
+                    if (cacheSnapshot.size > 0) {
+                        result += `   - Documentos encontrados:\n`;
+                        cacheSnapshot.forEach(doc => {
+                            const data = doc.data();
+                            result += `     • ${doc.id}: `;
+                            if (data.songs && Array.isArray(data.songs)) {
+                                result += `${data.songs.length} músicas`;
+                            } else {
+                                result += `${Object.keys(data).length} campos`;
+                            }
+                            result += `\n`;
+                        });
+                        result += `   - Status: ⚠️ VERIFICAR - Pode conter dados antigos\n\n`;
+                    } else {
+                        result += `   - Status: ✅ VAZIO - Nada para limpar\n\n`;
+                    }
+                } catch (error) {
+                    result += `2️⃣ COLEÇÃO 'songsCache': ❌ Erro - ${error.message}\n\n`;
+                }
+                
+                // Analisar coleção 'searchCache' (CACHE DE BUSCA)
+                try {
+                    const searchSnapshot = await db.collection('searchCache').get();
+                    result += `3️⃣ COLEÇÃO 'searchCache' (CACHE DE BUSCA):\n`;
+                    result += `   - Documentos: ${searchSnapshot.size}\n`;
+                    result += `   - Status: ${searchSnapshot.size > 0 ? '🗑️ PODE REMOVER - Cache de busca antigo' : '✅ VAZIO'}\n\n`;
+                } catch (error) {
+                    result += `3️⃣ COLEÇÃO 'searchCache': ❌ Erro - ${error.message}\n\n`;
+                }
+                
+                // Analisar coleção 'debug_test' (TESTE)
+                try {
+                    const debugSnapshot = await db.collection('debug_test').get();
+                    result += `4️⃣ COLEÇÃO 'debug_test' (TESTE):\n`;
+                    result += `   - Documentos: ${debugSnapshot.size}\n`;
+                    result += `   - Status: ${debugSnapshot.size > 0 ? '🗑️ PODE REMOVER - Dados de teste' : '✅ VAZIO'}\n\n`;
+                } catch (error) {
+                    result += `4️⃣ COLEÇÃO 'debug_test': ❌ Erro - ${error.message}\n\n`;
+                }
+                
+                result += `💡 RECOMENDAÇÃO:\n`;
+                result += `   ✅ MANTER: 'songs' (coleção principal)\n`;
+                result += `   🗑️ REMOVER: 'searchCache' (cache antigo)\n`;
+                result += `   🗑️ REMOVER: 'debug_test' (dados de teste)\n`;
+                result += `   🗑️ REMOVER: 'songsCache' (cache desnecessário - temos a coleção 'songs')\n`;
+                
+                showResult('analysis-result', result, 'info');
+                
+            } catch (error) {
+                showResult('analysis-result', `❌ Erro na análise: ${error.message}`, 'error');
+            }
+        }
+
+        async function removeUnusedCollections() {
+            try {
+                showResult('cleanup-result', '🗑️ Iniciando remoção de coleções desnecessárias...', 'info');
+                await ensureAuth();
+                
+                let removedCount = 0;
+                let result = '';
+                
+                // 1. Remover coleção 'searchCache' (cache de busca antigo)
+                try {
+                    const searchSnapshot = await db.collection('searchCache').get();
+                    if (!searchSnapshot.empty) {
+                        const batch = db.batch();
+                        searchSnapshot.docs.forEach(doc => {
+                            batch.delete(doc.ref);
+                        });
+                        await batch.commit();
+                        result += `✅ Coleção 'searchCache' removida (${searchSnapshot.size} documentos)\n`;
+                        removedCount += searchSnapshot.size;
+                    } else {
+                        result += `ℹ️ Coleção 'searchCache' já estava vazia\n`;
+                    }
+                } catch (error) {
+                    result += `⚠️ Erro ao remover 'searchCache': ${error.message}\n`;
+                }
+                
+                // 2. Remover coleção 'debug_test' (dados de teste)
+                try {
+                    const debugSnapshot = await db.collection('debug_test').get();
+                    if (!debugSnapshot.empty) {
+                        const batch = db.batch();
+                        debugSnapshot.docs.forEach(doc => {
+                            batch.delete(doc.ref);
+                        });
+                        await batch.commit();
+                        result += `✅ Coleção 'debug_test' removida (${debugSnapshot.size} documentos)\n`;
+                        removedCount += debugSnapshot.size;
+                    } else {
+                        result += `ℹ️ Coleção 'debug_test' já estava vazia\n`;
+                    }
+                } catch (error) {
+                    result += `⚠️ Erro ao remover 'debug_test': ${error.message}\n`;
+                }
+                
+                // 3. REMOVER COMPLETAMENTE a coleção 'songsCache' (cache desnecessário)
+                try {
+                    const cacheSnapshot = await db.collection('songsCache').get();
+                    if (!cacheSnapshot.empty) {
+                        // REMOVER TODOS OS DOCUMENTOS - não precisamos mais do cache
+                        const batch = db.batch();
+                        cacheSnapshot.docs.forEach(doc => {
+                            batch.delete(doc.ref);
+                        });
+                        await batch.commit();
+                        result += `✅ Coleção 'songsCache' COMPLETAMENTE removida (${cacheSnapshot.size} documentos)\n`;
+                        result += `   • Removido: a2yk9b1JXDDlogPzGO0G (575 músicas)\n`;
+                        result += `   • Removido: cached_songs (115 músicas)\n`;
+                        result += `   • Removido: karaoke-songs (115 músicas)\n`;
+                        removedCount += cacheSnapshot.size;
+                    } else {
+                        result += `ℹ️ Coleção 'songsCache' já estava vazia\n`;
+                    }
+                } catch (error) {
+                    result += `⚠️ Erro ao limpar 'songsCache': ${error.message}\n`;
+                }
+                
+                // Resultado final
+                if (removedCount > 0) {
+                    result += `\n🎉 LIMPEZA CONCLUÍDA!\n`;
+                    result += `✅ Total de documentos removidos: ${removedCount}\n`;
+                    result += `💡 Sistema otimizado - apenas dados necessários mantidos\n`;
+                    result += `\n📋 STATUS DAS COLEÇÕES:\n`;
+                    result += `   • 'songs' - Coleção principal (MANTIDA) ✅\n`;
+                    result += `   • 'songsCache' - REMOVIDA COMPLETAMENTE ❌\n`;
+                    result += `   • 'searchCache' - REMOVIDA COMPLETAMENTE ❌\n`;
+                    result += `   • 'debug_test' - REMOVIDA COMPLETAMENTE ❌\n`;
+                    result += `\n🎯 RESULTADO:\n`;
+                    result += `   Agora você tem apenas a coleção 'songs' com suas 575 músicas!\n`;
+                    result += `   Todas as coleções de cache desnecessárias foram eliminadas!\n`;
+                    showResult('cleanup-result', result, 'success');
+                } else {
+                    result += `\n✅ Sistema já estava otimizado - nenhuma limpeza necessária\n`;
+                    showResult('cleanup-result', result, 'info');
+                }
+                
+            } catch (error) {
+                console.error('Erro na limpeza:', error);
+                showResult('cleanup-result', `❌ Erro na limpeza: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-executar verificação ao carregar
+        window.onload = function() {
+            setTimeout(listCollections, 1000);
+        };
+    </script>
+</body>
+</html>

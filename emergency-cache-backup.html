@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚨 Backup de Emergência - Cache Local</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #ff6b6b;
+        }
+        .status {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn.success {
+            background: linear-gradient(45deg, #00b894, #00a085);
+        }
+        .data-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        .warning {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .critical {
+            background: rgba(220, 53, 69, 0.2);
+            border: 2px solid #dc3545;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 Backup de Emergência - Cache Local</h1>
+        
+        <div class="critical">
+            <h3>⚠️ SITUAÇÃO CRÍTICA DETECTADA</h3>
+            <p>Firebase atingiu 67k leituras! Esta ferramenta vai ajudar a fazer backup dos dados locais.</p>
+        </div>
+
+        <div class="status" id="status">
+            <h3>📊 Status do Cache Local</h3>
+            <p>Verificando dados disponíveis...</p>
+        </div>
+
+        <div style="text-align: center;">
+            <button class="btn" onclick="analyzeCache()">🔍 Analisar Cache</button>
+            <button class="btn" onclick="backupAllData()">💾 Backup Completo</button>
+            <button class="btn success" onclick="downloadBackup()">⬇️ Download Backup</button>
+            <button class="btn" onclick="clearCache()">🗑️ Limpar Cache</button>
+        </div>
+
+        <div class="data-display" id="dataDisplay">
+            Clique em "Analisar Cache" para ver os dados disponíveis...
+        </div>
+
+        <div class="warning">
+            <h4>📋 Instruções de Recuperação:</h4>
+            <ol>
+                <li>Faça o backup completo dos dados locais</li>
+                <li>Baixe o arquivo de backup</li>
+                <li>Crie um novo projeto Firebase se necessário</li>
+                <li>Use o backup para restaurar os dados</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        let backupData = {};
+
+        function analyzeCache() {
+            const status = document.getElementById('status');
+            const display = document.getElementById('dataDisplay');
+            
+            try {
+                // Verificar todos os dados do localStorage
+                const cacheData = {
+                    songsCache: localStorage.getItem('songsCache'),
+                    songsCacheTimestamp: localStorage.getItem('songsCacheTimestamp'),
+                    favorites: localStorage.getItem('favorites'),
+                    userPreferences: localStorage.getItem('userPreferences'),
+                    offlineData: localStorage.getItem('offlineData'),
+                    firebaseCache: localStorage.getItem('firebaseCache'),
+                    youtubeCache: localStorage.getItem('youtubeCache')
+                };
+
+                let totalItems = 0;
+                let analysis = "🔍 ANÁLISE DO CACHE LOCAL:\n\n";
+
+                Object.entries(cacheData).forEach(([key, value]) => {
+                    if (value) {
+                        try {
+                            const parsed = JSON.parse(value);
+                            const size = new Blob([value]).size;
+                            const itemCount = Array.isArray(parsed) ? parsed.length : 
+                                            (typeof parsed === 'object' ? Object.keys(parsed).length : 1);
+                            
+                            analysis += `✅ ${key}:\n`;
+                            analysis += `   - Tamanho: ${(size / 1024).toFixed(2)} KB\n`;
+                            analysis += `   - Itens: ${itemCount}\n`;
+                            analysis += `   - Última atualização: ${new Date(localStorage.getItem(key + 'Timestamp') || Date.now()).toLocaleString()}\n\n`;
+                            
+                            totalItems += itemCount;
+                        } catch (e) {
+                            analysis += `⚠️ ${key}: Dados corrompidos ou formato inválido\n\n`;
+                        }
+                    } else {
+                        analysis += `❌ ${key}: Não encontrado\n\n`;
+                    }
+                });
+
+                analysis += `📊 RESUMO:\n`;
+                analysis += `- Total de itens encontrados: ${totalItems}\n`;
+                analysis += `- Dados disponíveis para backup: ${Object.values(cacheData).filter(v => v).length}/7\n`;
+
+                display.textContent = analysis;
+                
+                status.innerHTML = `
+                    <h3>📊 Status do Cache Local</h3>
+                    <p>✅ Análise concluída! Encontrados ${totalItems} itens em cache.</p>
+                    <p>🔄 Cache disponível para backup: ${Object.values(cacheData).filter(v => v).length}/7 categorias</p>
+                `;
+
+            } catch (error) {
+                display.textContent = `❌ Erro ao analisar cache: ${error.message}`;
+                status.innerHTML = `
+                    <h3>📊 Status do Cache Local</h3>
+                    <p>❌ Erro na análise do cache!</p>
+                `;
+            }
+        }
+
+        function backupAllData() {
+            try {
+                backupData = {
+                    timestamp: new Date().toISOString(),
+                    version: '1.0',
+                    source: 'emergency-backup',
+                    data: {}
+                };
+
+                // Backup de todos os dados do localStorage
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    const value = localStorage.getItem(key);
+                    
+                    try {
+                        // Tentar parsear como JSON
+                        backupData.data[key] = JSON.parse(value);
+                    } catch (e) {
+                        // Se não for JSON, salvar como string
+                        backupData.data[key] = value;
+                    }
+                }
+
+                const status = document.getElementById('status');
+                const display = document.getElementById('dataDisplay');
+                
+                const backupSize = new Blob([JSON.stringify(backupData)]).size;
+                const itemCount = Object.keys(backupData.data).length;
+                
+                status.innerHTML = `
+                    <h3>💾 Backup Completo Realizado</h3>
+                    <p>✅ ${itemCount} itens salvos no backup</p>
+                    <p>📦 Tamanho do backup: ${(backupSize / 1024).toFixed(2)} KB</p>
+                    <p>🕒 Criado em: ${new Date().toLocaleString()}</p>
+                `;
+
+                display.textContent = `🎉 BACKUP COMPLETO CRIADO!\n\n` +
+                    `📊 Estatísticas:\n` +
+                    `- Itens salvos: ${itemCount}\n` +
+                    `- Tamanho: ${(backupSize / 1024).toFixed(2)} KB\n` +
+                    `- Data/Hora: ${new Date().toLocaleString()}\n\n` +
+                    `🔍 Dados incluídos:\n` +
+                    Object.keys(backupData.data).map(key => `- ${key}`).join('\n') +
+                    `\n\n✅ Backup pronto para download!`;
+
+            } catch (error) {
+                document.getElementById('status').innerHTML = `
+                    <h3>❌ Erro no Backup</h3>
+                    <p>Falha ao criar backup: ${error.message}</p>
+                `;
+            }
+        }
+
+        function downloadBackup() {
+            if (!backupData.data || Object.keys(backupData.data).length === 0) {
+                alert('❌ Nenhum backup disponível! Clique em "Backup Completo" primeiro.');
+                return;
+            }
+
+            try {
+                const dataStr = JSON.stringify(backupData, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(dataBlob);
+                link.download = `karaoke-emergency-backup-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                document.getElementById('status').innerHTML = `
+                    <h3>⬇️ Download Iniciado</h3>
+                    <p>✅ Arquivo de backup baixado com sucesso!</p>
+                    <p>📁 Nome: ${link.download}</p>
+                `;
+
+            } catch (error) {
+                alert(`❌ Erro ao baixar backup: ${error.message}`);
+            }
+        }
+
+        function clearCache() {
+            if (confirm('⚠️ ATENÇÃO: Isso vai limpar TODOS os dados do cache local!\n\nTem certeza? Esta ação não pode ser desfeita!')) {
+                try {
+                    const itemCount = localStorage.length;
+                    localStorage.clear();
+                    
+                    document.getElementById('status').innerHTML = `
+                        <h3>🗑️ Cache Limpo</h3>
+                        <p>✅ ${itemCount} itens removidos do cache local</p>
+                        <p>⚠️ Todos os dados locais foram apagados!</p>
+                    `;
+                    
+                    document.getElementById('dataDisplay').textContent = 
+                        '🗑️ Cache local limpo!\n\nTodos os dados foram removidos do localStorage.';
+                        
+                } catch (error) {
+                    alert(`❌ Erro ao limpar cache: ${error.message}`);
+                }
+            }
+        }
+
+        // Executar análise automática ao carregar
+        window.addEventListener('load', () => {
+            setTimeout(analyzeCache, 1000);
+        });
+    </script>
+</body>
+</html>

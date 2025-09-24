@@ -1,0 +1,35 @@
+# Arquivos de configuração sensíveis
+*.txt
+!README.md
+
+# Arquivos de backup
+*.zip
+*_BACKUP.*
+
+# Arquivos temporários
+*.tmp
+*.temp
+*.log
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Diretórios de dependências (se houver)
+node_modules/
+.npm/
+
+# Arquivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Arquivos de cache
+.cache/
+*.cache
+
+# Arquivos de build (se houver)
+dist/
+build/

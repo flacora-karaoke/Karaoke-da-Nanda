@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Cache Firebase</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: white;
+        }
+        .container {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #5a6fd8;
+        }
+        #logs {
+            background: #0f0f23;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎤 Teste Cache Firebase - Karaoke</h1>
+    
+    <div class="container">
+        <h2>Status da Conexão</h2>
+        <p id="connectionStatus">Verificando conexão...</p>
+        <p id="authStatus">Verificando autenticação...</p>
+    </div>
+
+    <div class="container">
+        <h2>Testes de Cache</h2>
+        <button onclick="testGetCache()">Testar Buscar Cache</button>
+        <button onclick="testSaveCache()">Testar Salvar Cache</button>
+        <button onclick="clearLogs()">Limpar Logs</button>
+    </div>
+
+    <div class="container">
+        <h2>Logs do Console</h2>
+        <div id="logs"></div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCCwVRf1FxGDPpN0DcG1RohR6JniQheN3Q",
+            authDomain: "karaokehub-5b1bc.firebaseapp.com",
+            projectId: "karaokehub-5b1bc",
+            storageBucket: "karaokehub-5b1bc.firebasestorage.app",
+            messagingSenderId: "155863546905",
+            appId: "1:155863546905:web:cb0d719b05c9e2d03e3e88"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Elementos da página
+        const connectionStatus = document.getElementById('connectionStatus');
+        const authStatus = document.getElementById('authStatus');
+        const logsDiv = document.getElementById('logs');
+
+        // Função para adicionar logs na tela
+        function addLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logsDiv.textContent += `[${timestamp}] ${message}\n`;
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+            console.log(message);
+        }
+
+        // Interceptar console.log para mostrar na tela
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addLog(args.join(' '));
+        };
+
+        // Interceptar console.error para mostrar na tela
+        const originalError = console.error;
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addLog('ERROR: ' + args.join(' '));
+        };
+
+        // Verificar conexão e autenticação
+        addLog('🔥 Iniciando Firebase...');
+        connectionStatus.textContent = 'Conectando ao Firebase...';
+        authStatus.textContent = 'Fazendo login anônimo...';
+
+        // Autenticação anônima
+        auth.signInAnonymously().then(() => {
+            addLog('✅ Autenticação anônima bem-sucedida');
+            authStatus.textContent = '✅ Usuário autenticado anonimamente';
+            connectionStatus.textContent = '✅ Conectado ao Firebase';
+        }).catch((error) => {
+            addLog('❌ Erro na autenticação: ' + error.message);
+            authStatus.textContent = '❌ Erro na autenticação: ' + error.message;
+        });
+
+        // Dados de teste
+        const testSongs = [
+            { title: 'Evidências', artist: 'Chitãozinho & Xororó', genre: 'sertanejo' },
+            { title: 'Ainda Bem', artist: 'Marisa Monte', genre: 'mpb' },
+            { title: 'Eduardo e Mônica', artist: 'Legião Urbana', genre: 'rock' }
+        ];
+
+        // Função para testar buscar cache
+        async function testGetCache() {
+            addLog('🔍 Testando busca no cache...');
+            
+            try {
+                if (!auth.currentUser) {
+                    await auth.signInAnonymously();
+                }
+
+                const cacheRef = db.collection('songsCache').doc('cached_songs');
+                const doc = await cacheRef.get();
+
+                if (doc.exists) {
+                    const data = doc.data();
+                    addLog(`✅ Cache encontrado! ${data.songs.length} músicas, versão ${data.version}`);
+                    addLog(`📅 Cache criado em: ${new Date(data.timestamp).toLocaleString()}`);
+                } else {
+                    addLog('ℹ️ Nenhum cache encontrado');
+                }
+            } catch (error) {
+                addLog('❌ Erro ao buscar cache: ' + error.message);
+            }
+        }
+
+        // Função para testar salvar cache
+        async function testSaveCache() {
+            addLog('💾 Testando salvamento no cache...');
+            
+            try {
+                if (!auth.currentUser) {
+                    await auth.signInAnonymously();
+                }
+
+                const cacheData = {
+                    songs: testSongs,
+                    timestamp: Date.now(),
+                    version: '1.0',
+                    totalSongs: testSongs.length
+                };
+
+                // Remover cache antigo
+                const cacheRef = db.collection('songsCache').doc('cached_songs');
+                await cacheRef.delete();
+                addLog('🗑️ Cache antigo removido');
+
+                // Salvar novo cache
+                await cacheRef.set(cacheData);
+                addLog(`✅ Cache salvo com sucesso! ${testSongs.length} músicas`);
+                
+            } catch (error) {
+                addLog('❌ Erro ao salvar cache: ' + error.message);
+            }
+        }
+
+        // Função para limpar logs
+        function clearLogs() {
+            logsDiv.textContent = '';
+        }
+
+        // Adicionar log inicial
+        addLog('🎤 Teste de Cache Firebase iniciado');
+    </script>
+</body>
+</html>

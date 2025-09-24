@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Firebase - Karaoke Hub</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .success { border-left-color: #4CAF50; }
+        .error { border-left-color: #f44336; }
+        .warning { border-left-color: #ff9800; }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #5a6fd8; }
+        pre {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔥 Teste de Conexão Firebase</h1>
+    
+    <div class="test-section">
+        <h3>1. Status da Conexão</h3>
+        <div id="connectionStatus">Verificando...</div>
+        <button onclick="testConnection()">Testar Conexão</button>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Teste de Autenticação</h3>
+        <div id="authStatus">Verificando...</div>
+        <button onclick="testAuth()">Testar Autenticação</button>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Teste de Leitura</h3>
+        <div id="readStatus">Aguardando teste...</div>
+        <button onclick="testRead()">Testar Leitura</button>
+    </div>
+
+    <div class="test-section">
+        <h3>4. Teste de Escrita</h3>
+        <div id="writeStatus">Aguardando teste...</div>
+        <button onclick="testWrite()">Testar Escrita</button>
+    </div>
+
+    <div class="test-section">
+        <h3>5. Logs do Console</h3>
+        <pre id="consoleLogs"></pre>
+        <button onclick="clearLogs()">Limpar Logs</button>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <script>
+        // Capturar logs do console
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        let logs = [];
+
+        function addLog(type, message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logs.push(`[${timestamp}] ${type.toUpperCase()}: ${message}`);
+            updateLogsDisplay();
+        }
+
+        console.log = function(...args) {
+            addLog('log', args.join(' '));
+            originalLog.apply(console, args);
+        };
+
+        console.error = function(...args) {
+            addLog('error', args.join(' '));
+            originalError.apply(console, args);
+        };
+
+        console.warn = function(...args) {
+            addLog('warn', args.join(' '));
+            originalWarn.apply(console, args);
+        };
+
+        function updateLogsDisplay() {
+            document.getElementById('consoleLogs').textContent = logs.slice(-20).join('\n');
+        }
+
+        function clearLogs() {
+            logs = [];
+            updateLogsDisplay();
+        }
+
+        // Configuração Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCCwVRf1FxGDPpN0DcG1RohR6JniQheN3Q",
+            authDomain: "karaokehub-5b1bc.firebaseapp.com",
+            projectId: "karaokehub-5b1bc",
+            storageBucket: "karaokehub-5b1bc.firebasestorage.app",
+            messagingSenderId: "155863546905",
+            appId: "1:155863546905:web:cb0d719b05c9e2d03e3e88"
+        };
+
+        // Inicializar Firebase
+        let app, db, auth;
+        
+        function testConnection() {
+            const status = document.getElementById('connectionStatus');
+            try {
+                app = firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                auth = firebase.auth();
+                
+                status.innerHTML = '<span style="color: #4CAF50;">✅ Firebase inicializado com sucesso!</span>';
+                status.parentElement.className = 'test-section success';
+                console.log('Firebase conectado com sucesso');
+            } catch (error) {
+                status.innerHTML = `<span style="color: #f44336;">❌ Erro: ${error.message}</span>`;
+                status.parentElement.className = 'test-section error';
+                console.error('Erro ao conectar Firebase:', error);
+            }
+        }
+
+        function testAuth() {
+            const status = document.getElementById('authStatus');
+            
+            if (!auth) {
+                status.innerHTML = '<span style="color: #ff9800;">⚠️ Execute o teste de conexão primeiro</span>';
+                return;
+            }
+
+            auth.signInAnonymously()
+                .then(() => {
+                    status.innerHTML = '<span style="color: #4CAF50;">✅ Autenticação anônima realizada!</span>';
+                    status.parentElement.className = 'test-section success';
+                    console.log('Autenticação anônima bem-sucedida');
+                })
+                .catch((error) => {
+                    status.innerHTML = `<span style="color: #f44336;">❌ Erro na autenticação: ${error.message}</span>`;
+                    status.parentElement.className = 'test-section error';
+                    console.error('Erro na autenticação:', error);
+                });
+        }
+
+        function testRead() {
+            const status = document.getElementById('readStatus');
+            
+            if (!db) {
+                status.innerHTML = '<span style="color: #ff9800;">⚠️ Execute o teste de conexão primeiro</span>';
+                return;
+            }
+
+            status.innerHTML = '<span style="color: #2196F3;">🔄 Testando leitura...</span>';
+            
+            db.collection('songs_cache').doc('main').get()
+                .then((doc) => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        status.innerHTML = `<span style="color: #4CAF50;">✅ Leitura bem-sucedida! Encontrados ${data.songs ? data.songs.length : 0} itens no cache</span>`;
+                        status.parentElement.className = 'test-section success';
+                        console.log('Dados lidos do cache:', data);
+                    } else {
+                        status.innerHTML = '<span style="color: #ff9800;">⚠️ Documento não existe (normal na primeira execução)</span>';
+                        status.parentElement.className = 'test-section warning';
+                        console.log('Documento de cache não encontrado');
+                    }
+                })
+                .catch((error) => {
+                    status.innerHTML = `<span style="color: #f44336;">❌ Erro na leitura: ${error.message}</span>`;
+                    status.parentElement.className = 'test-section error';
+                    console.error('Erro ao ler dados:', error);
+                });
+        }
+
+        function testWrite() {
+            const status = document.getElementById('writeStatus');
+            
+            if (!db) {
+                status.innerHTML = '<span style="color: #ff9800;">⚠️ Execute o teste de conexão primeiro</span>';
+                return;
+            }
+
+            status.innerHTML = '<span style="color: #2196F3;">🔄 Testando escrita...</span>';
+            
+            const testData = {
+                songs: [
+                    { title: 'Teste', artist: 'Artista Teste', genre: 'teste', videoId: 'test123' }
+                ],
+                timestamp: Date.now(),
+                version: '1.0',
+                testMode: true
+            };
+
+            db.collection('songs_cache').doc('test').set(testData)
+                .then(() => {
+                    status.innerHTML = '<span style="color: #4CAF50;">✅ Escrita bem-sucedida!</span>';
+                    status.parentElement.className = 'test-section success';
+                    console.log('Dados salvos com sucesso no Firebase');
+                    
+                    // Tentar ler o que acabamos de escrever
+                    return db.collection('songs_cache').doc('test').get();
+                })
+                .then((doc) => {
+                    if (doc.exists) {
+                        console.log('Verificação: dados lidos após escrita:', doc.data());
+                        status.innerHTML += '<br><span style="color: #4CAF50;">✅ Verificação de leitura após escrita: OK</span>';
+                    }
+                })
+                .catch((error) => {
+                    status.innerHTML = `<span style="color: #f44336;">❌ Erro na escrita: ${error.message}</span>`;
+                    status.parentElement.className = 'test-section error';
+                    console.error('Erro ao salvar dados:', error);
+                    
+                    // Informações adicionais sobre o erro
+                    if (error.code === 'permission-denied') {
+                        status.innerHTML += '<br><span style="color: #ff9800;">💡 Dica: Verifique as regras de segurança do Firestore</span>';
+                    }
+                });
+        }
+
+        // Executar teste de conexão automaticamente
+        window.onload = function() {
+            setTimeout(testConnection, 1000);
+        };
+    </script>
+</body>
+</html>

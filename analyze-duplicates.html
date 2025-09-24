@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de Duplicatas - Karaokê da Nanda</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #00d2d3 0%, #54a0ff 100%);
+            color: white;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        .status.info { background: #e3f2fd; color: #1976d2; }
+        .status.success { background: #e8f5e8; color: #2e7d32; }
+        .status.warning { background: #fff3e0; color: #f57c00; }
+        .status.error { background: #ffebee; color: #c62828; }
+        
+        .results {
+            margin-top: 20px;
+        }
+        
+        .duplicate-group {
+            background: #f8f9fa;
+            border: 2px solid #ff6b6b;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .duplicate-header {
+            font-weight: bold;
+            color: #c62828;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .song-item {
+            background: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 4px solid #ff6b6b;
+        }
+        
+        .song-id {
+            font-family: monospace;
+            background: #f1f3f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .logs {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Análise de Duplicatas</h1>
+        
+        <div class="controls">
+            <button class="btn-primary" onclick="analyzeDuplicates()">🔍 Analisar Duplicatas</button>
+            <button class="btn-danger" onclick="removeDuplicates()" id="removeBtn" style="display:none;">🗑️ Remover Duplicatas</button>
+            <button class="btn-success" onclick="clearLogs()">🧹 Limpar Logs</button>
+        </div>
+        
+        <div id="status-container"></div>
+        
+        <div class="stats" id="stats" style="display:none;">
+            <div class="stat-card">
+                <div class="stat-number" id="totalSongs">0</div>
+                <div>Total de Músicas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="duplicateGroups">0</div>
+                <div>Grupos Duplicados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="duplicateSongs">0</div>
+                <div>Músicas Duplicadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="toRemove">0</div>
+                <div>Para Remover</div>
+            </div>
+        </div>
+        
+        <div class="results" id="results"></div>
+        
+        <div class="logs" id="logs"></div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCCwVRf1FxGDPpN0DcG1RohR6JniQheN3Q",
+            authDomain: "karaokehub-5b1bc.firebaseapp.com",
+            projectId: "karaokehub-5b1bc",
+            storageBucket: "karaokehub-5b1bc.firebasestorage.app",
+            messagingSenderId: "155863546905",
+            appId: "1:155863546905:web:cb0d719b05c9e2d03e3e88"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        let duplicateData = null;
+
+        function addStatus(message, type = 'info') {
+            const statusContainer = document.getElementById('status-container');
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status ${type}`;
+            statusDiv.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong> ${message}`;
+            statusContainer.appendChild(statusDiv);
+            statusContainer.scrollTop = statusContainer.scrollHeight;
+        }
+
+        function addLog(message) {
+            const logsContainer = document.getElementById('logs');
+            const logDiv = document.createElement('div');
+            logDiv.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logsContainer.appendChild(logDiv);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+            document.getElementById('status-container').innerHTML = '';
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('stats').style.display = 'none';
+            document.getElementById('removeBtn').style.display = 'none';
+        }
+
+        async function ensureAuth() {
+            if (!auth.currentUser) {
+                await auth.signInAnonymously();
+            }
+        }
+
+        function normalizeString(str) {
+            return str.toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+                .replace(/[^\w\s]/g, '') // Remove pontuação
+                .replace(/\s+/g, ' ') // Normaliza espaços
+                .trim();
+        }
+
+        async function analyzeDuplicates() {
+            addStatus('🔍 Iniciando análise de duplicatas...', 'info');
+            addLog('🔍 ANÁLISE DE DUPLICATAS INICIADA');
+
+            try {
+                await ensureAuth();
+                addLog('✅ Autenticação realizada');
+
+                // Carregar todas as músicas
+                addLog('📊 Carregando músicas da coleção songs...');
+                const songsRef = db.collection('songs');
+                const snapshot = await songsRef.get();
+
+                if (snapshot.empty) {
+                    addStatus('⚠️ Nenhuma música encontrada na coleção', 'warning');
+                    return;
+                }
+
+                const songs = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    songs.push({
+                        id: doc.id,
+                        title: data.title || '',
+                        artist: data.artist || '',
+                        genre: data.genre || 'outros',
+                        videoId: data.videoId || null,
+                        normalizedKey: normalizeString(`${data.title || ''} ${data.artist || ''}`)
+                    });
+                });
+
+                addLog(`📊 Total de músicas carregadas: ${songs.length}`);
+
+                // Agrupar por título + artista normalizado
+                const groups = {};
+                songs.forEach(song => {
+                    if (!groups[song.normalizedKey]) {
+                        groups[song.normalizedKey] = [];
+                    }
+                    groups[song.normalizedKey].push(song);
+                });
+
+                // Encontrar duplicatas
+                const duplicates = {};
+                let totalDuplicates = 0;
+                let songsToRemove = 0;
+
+                Object.keys(groups).forEach(key => {
+                    if (groups[key].length > 1) {
+                        duplicates[key] = groups[key];
+                        totalDuplicates += groups[key].length;
+                        songsToRemove += groups[key].length - 1; // Manter apenas 1 de cada grupo
+                    }
+                });
+
+                // Atualizar estatísticas
+                document.getElementById('totalSongs').textContent = songs.length;
+                document.getElementById('duplicateGroups').textContent = Object.keys(duplicates).length;
+                document.getElementById('duplicateSongs').textContent = totalDuplicates;
+                document.getElementById('toRemove').textContent = songsToRemove;
+                document.getElementById('stats').style.display = 'grid';
+
+                // Exibir resultados
+                displayDuplicates(duplicates);
+
+                if (Object.keys(duplicates).length > 0) {
+                    addStatus(`🚨 Encontradas ${Object.keys(duplicates).length} grupos de duplicatas!`, 'error');
+                    addLog(`🚨 DUPLICATAS ENCONTRADAS: ${Object.keys(duplicates).length} grupos`);
+                    addLog(`📊 Total de músicas duplicadas: ${totalDuplicates}`);
+                    addLog(`🗑️ Músicas para remover: ${songsToRemove}`);
+                    
+                    duplicateData = duplicates;
+                    document.getElementById('removeBtn').style.display = 'inline-block';
+                } else {
+                    addStatus('✅ Nenhuma duplicata encontrada!', 'success');
+                    addLog('✅ ANÁLISE CONCLUÍDA: Nenhuma duplicata encontrada');
+                }
+
+            } catch (error) {
+                addStatus(`❌ Erro na análise: ${error.message}`, 'error');
+                addLog(`❌ ERRO: ${error.message}`);
+                console.error('Erro:', error);
+            }
+        }
+
+        function displayDuplicates(duplicates) {
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = '';
+
+            if (Object.keys(duplicates).length === 0) {
+                resultsContainer.innerHTML = '<div class="status success">✅ Nenhuma duplicata encontrada!</div>';
+                return;
+            }
+
+            Object.keys(duplicates).forEach(key => {
+                const group = duplicates[key];
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'duplicate-group';
+
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'duplicate-header';
+                headerDiv.textContent = `🎵 "${group[0].title}" - ${group[0].artist} (${group.length} duplicatas)`;
+                groupDiv.appendChild(headerDiv);
+
+                group.forEach((song, index) => {
+                    const songDiv = document.createElement('div');
+                    songDiv.className = 'song-item';
+                    songDiv.innerHTML = `
+                        <strong>${index === 0 ? '✅ MANTER' : '🗑️ REMOVER'}:</strong> 
+                        <span class="song-id">${song.id}</span> - 
+                        ${song.title} - ${song.artist} 
+                        ${song.videoId ? `(VideoID: ${song.videoId})` : '(Sem vídeo)'}
+                    `;
+                    groupDiv.appendChild(songDiv);
+                });
+
+                resultsContainer.appendChild(groupDiv);
+            });
+        }
+
+        async function removeDuplicates() {
+            if (!duplicateData) {
+                addStatus('❌ Execute a análise primeiro!', 'error');
+                return;
+            }
+
+            const confirmed = confirm('⚠️ ATENÇÃO: Esta ação irá remover permanentemente as músicas duplicadas do Firebase!\n\nDeseja continuar?');
+            if (!confirmed) {
+                addLog('❌ Operação cancelada pelo usuário');
+                return;
+            }
+
+            addStatus('🗑️ Iniciando remoção de duplicatas...', 'warning');
+            addLog('🗑️ REMOÇÃO DE DUPLICATAS INICIADA');
+
+            try {
+                let removedCount = 0;
+                const batch = db.batch();
+
+                Object.keys(duplicateData).forEach(key => {
+                    const group = duplicateData[key];
+                    // Remover todas exceto a primeira (índice 0)
+                    for (let i = 1; i < group.length; i++) {
+                        const songRef = db.collection('songs').doc(group[i].id);
+                        batch.delete(songRef);
+                        removedCount++;
+                        addLog(`🗑️ Marcando para remoção: ${group[i].title} - ${group[i].artist} (${group[i].id})`);
+                    }
+                });
+
+                addLog(`📊 Total de documentos para remover: ${removedCount}`);
+                addLog('💾 Executando remoção em lote...');
+
+                await batch.commit();
+
+                addStatus(`✅ Remoção concluída! ${removedCount} duplicatas removidas.`, 'success');
+                addLog(`✅ REMOÇÃO CONCLUÍDA: ${removedCount} músicas duplicadas removidas`);
+                addLog('🎉 Base de dados otimizada com sucesso!');
+
+                // Limpar dados e interface
+                duplicateData = null;
+                document.getElementById('removeBtn').style.display = 'none';
+                document.getElementById('results').innerHTML = '<div class="status success">✅ Duplicatas removidas com sucesso!</div>';
+
+            } catch (error) {
+                addStatus(`❌ Erro na remoção: ${error.message}`, 'error');
+                addLog(`❌ ERRO NA REMOÇÃO: ${error.message}`);
+                console.error('Erro:', error);
+            }
+        }
+
+        // Auto-executar análise ao carregar
+        window.onload = function() {
+            addLog('🎤 Analisador de Duplicatas carregado');
+            addStatus('✅ Sistema pronto para análise', 'info');
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+/* Anti-flickering CSS para aplicação de karaoke */
+
+/* Pré-carregamento de imagem placeholder */
+.preload-placeholder::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('./THUMBNAIL.JPG');
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Placeholder suave para imagens carregando */
+.song-thumbnail img {
+    background-color: #f0f0f0;
+    background-image: url('./THUMBNAIL.JPG');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Transições suaves para evitar flickering */
+.song-card {
+    transition: none !important;
+    animation: none !important;
+}
+
+.song-card img {
+    transition: opacity 0.1s ease;
+}
+
+/* Remover animações que causam flickering */
+.song-thumbnail {
+    transition: none !important;
+}
+
+.song-thumbnail::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('./THUMBNAIL.JPG');
+    background-size: cover;
+    background-position: center;
+    z-index: -1;
+}
+
+/* Garantir que imagens apareçam instantaneamente */
+img {
+    image-rendering: auto;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+}
+
+/* Animações suaves para mudanças de estado */
+.song-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+/* Prevenção de flickering durante hover */
+.song-card:hover {
+    transform: translateY(-2px);
+    will-change: transform;
+}
+
+/* Otimização de renderização */
+.songs-grid {
+    contain: layout style paint;
+}
+
+/* Prevenção de reflow desnecessário */
+.song-thumbnail {
+    contain: layout style paint;
+    will-change: auto;
+}
+
+/* Transição suave para paginação */
+.pagination {
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* Prevenção de flickering em botões */
+.btn {
+    transition: all 0.15s ease-in-out;
+    will-change: auto;
+}
+
+/* Otimização para dispositivos móveis */
+@media (max-width: 768px) {
+    .song-thumbnail {
+        transition-duration: 0.1s;
+    }
+    
+    #songsContainer {
+        transition-duration: 0.15s;
+    }
+}

@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 POPULAÇÃO INTELIGENTE - SEM DUPLICATAS</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(0,0,0,0.3);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .status {
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #4CAF50;
+        }
+        .error {
+            border-left-color: #f44336;
+        }
+        .warning {
+            border-left-color: #ff9800;
+        }
+        .btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        .btn-danger {
+            background: #f44336;
+        }
+        .btn-danger:hover {
+            background: #da190b;
+        }
+        .btn-warning {
+            background: #ff9800;
+        }
+        .btn-warning:hover {
+            background: #e68900;
+        }
+        .progress {
+            width: 100%;
+            height: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: rgba(0,0,0,0.4);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        .logs {
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 POPULAÇÃO INTELIGENTE - SEM DUPLICATAS</h1>
+        <p>Sistema avançado que previne duplicatas durante a população de músicas</p>
+        
+        <div id="status-container">
+            <div class="status">
+                <strong>📊 Status:</strong> Sistema pronto para operação...
+            </div>
+        </div>
+
+        <div class="progress">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="stat-total">0</div>
+                <div>Total Processadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-inserted">0</div>
+                <div>Novas Inseridas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-duplicates">0</div>
+                <div>Duplicatas Evitadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-errors">0</div>
+                <div>Erros</div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <button class="btn" onclick="smartPopulate()">
+                🧠 POPULAÇÃO INTELIGENTE
+            </button>
+            <button class="btn btn-warning" onclick="cleanDuplicates()">
+                🧹 LIMPAR DUPLICATAS EXISTENTES
+            </button>
+            <button class="btn btn-danger" onclick="testConnection()">
+                🧪 TESTAR CONEXÃO
+            </button>
+        </div>
+
+        <div id="logs" class="logs">🚀 Sistema de População Inteligente carregado...
+Recursos disponíveis:
+- ✅ Verificação de duplicatas por título + artista
+- ✅ Normalização de strings (acentos, pontuação)
+- ✅ Inserção em lotes otimizada
+- ✅ Relatórios detalhados de progresso
+- ✅ Limpeza de duplicatas existentes
+
+Pronto para uso!
+</div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+
+    <!-- Sistema de Prevenção de Duplicatas -->
+    <script src="prevent-duplicates.js"></script>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCCwVRf1FxGDPpN0DcG1RohR6JniQheN3Q",
+            authDomain: "karaokehub-5b1bc.firebaseapp.com",
+            projectId: "karaokehub-5b1bc",
+            storageBucket: "karaokehub-5b1bc.firebasestorage.app",
+            messagingSenderId: "155863546905",
+            appId: "1:155863546905:web:cb0d719b05c9e2d03e3e88"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Elementos da interface
+        const statusContainer = document.getElementById('status-container');
+        const progressBar = document.getElementById('progress-bar');
+        const logs = document.getElementById('logs');
+        const statTotal = document.getElementById('stat-total');
+        const statInserted = document.getElementById('stat-inserted');
+        const statDuplicates = document.getElementById('stat-duplicates');
+        const statErrors = document.getElementById('stat-errors');
+
+        // Funções de interface
+        function addStatus(message, type = 'info') {
+            const statusClass = type === 'error' ? 'status error' : 
+                               type === 'warning' ? 'status warning' : 'status';
+            statusContainer.innerHTML = `<div class="${statusClass}"><strong>📊 Status:</strong> ${message}</div>`;
+        }
+
+        function addLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logs.textContent += `[${timestamp}] ${message}\n`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        function updateProgress(percent) {
+            progressBar.style.width = `${percent}%`;
+        }
+
+        function updateStats(stats) {
+            statTotal.textContent = stats.current || stats.total || 0;
+            statInserted.textContent = stats.results?.inserted || 0;
+            statDuplicates.textContent = stats.results?.duplicates || 0;
+            statErrors.textContent = stats.results?.errors || 0;
+        }
+
+        // Autenticação
+        async function ensureAuth() {
+            return new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    reject(new Error('Timeout na autenticação'));
+                }, 10000);
+
+                auth.onAuthStateChanged(async (user) => {
+                    clearTimeout(timeout);
+                    if (user) {
+                        resolve(user);
+                    } else {
+                        try {
+                            await auth.signInAnonymously();
+                            resolve(auth.currentUser);
+                        } catch (error) {
+                            reject(error);
+                        }
+                    }
+                });
+            });
+        }
+
+        // Carregar banco de dados local (mesmo do script.js)
+        async function loadLocalMusicDatabase() {
+            // Banco de dados completo de músicas (copiado do script.js)
+            return [
+                // Pop Nacional
+                { title: 'Evidências', artist: 'Chitãozinho & Xororó', genre: 'sertanejo', searchTerm: 'evidencias chitaozinho xororo karaoke playback' },
+                { title: 'Ainda Bem', artist: 'Marisa Monte', genre: 'mpb', searchTerm: 'ainda bem marisa monte karaoke playback' },
+                { title: 'Aquarela', artist: 'Toquinho', genre: 'mpb', searchTerm: 'aquarela toquinho karaoke playback' },
+                { title: 'Asa Branca', artist: 'Luiz Gonzaga', genre: 'mpb', searchTerm: 'asa branca luiz gonzaga karaoke playback' },
+                { title: 'Beijinho no Ombro', artist: 'Valesca Popozuda', genre: 'funk', searchTerm: 'beijinho ombro valesca popozuda karaoke' },
+                { title: 'Bom Rapaz', artist: 'Fernando & Sorocaba', genre: 'sertanejo', searchTerm: 'bom rapaz fernando sorocaba karaoke playback' },
+                { title: 'Camarote', artist: 'Os Barões da Pisadinha', genre: 'funk', searchTerm: 'camarote baroes pisadinha karaoke playback' },
+                { title: 'Coração de Pedra', artist: 'Joelma', genre: 'pop', searchTerm: 'coracao pedra joelma karaoke playback' },
+                { title: 'Deus Me Livre', artist: 'Raça Negra', genre: 'pagode', searchTerm: 'deus me livre raca negra karaoke playback' },
+                { title: 'Eduardo e Mônica', artist: 'Legião Urbana', genre: 'rock', searchTerm: 'eduardo monica legiao urbana karaoke playback' },
+                
+                // Sertanejo
+                { title: 'Ai Se Eu Te Pego', artist: 'Michel Teló', genre: 'sertanejo', searchTerm: 'ai se eu te pego michel telo karaoke playback' },
+                { title: 'Balada', artist: 'Gusttavo Lima', genre: 'sertanejo', searchTerm: 'balada gusttavo lima karaoke playback' },
+                { title: 'Casal Perfeito', artist: 'Henrique & Juliano', genre: 'sertanejo', searchTerm: 'casal perfeito henrique juliano karaoke playback' },
+                { title: 'Flor e o Beija-Flor', artist: 'Henrique & Juliano', genre: 'sertanejo', searchTerm: 'flor beija flor henrique juliano karaoke playback' },
+                { title: 'Infiel', artist: 'Marília Mendonça', genre: 'sertanejo', searchTerm: 'infiel marilia mendonca karaoke playback' },
+                { title: 'Meu Pedacinho de Chão', artist: 'Almir Sater', genre: 'sertanejo', searchTerm: 'meu pedacinho chao almir sater karaoke playback' },
+                { title: 'Modão Duido', artist: 'Michel Teló', genre: 'sertanejo', searchTerm: 'modao duido michel telo karaoke playback' },
+                { title: 'Sogrão Caprichou', artist: 'Matheus & Kauan', genre: 'sertanejo', searchTerm: 'sograo caprichou matheus kauan karaoke playback' },
+                { title: 'Temporal de Amor', artist: 'Léo Magalhães', genre: 'sertanejo', searchTerm: 'temporal amor leo magalhaes karaoke playback' },
+                { title: 'Zé da Recaída', artist: 'Gusttavo Lima', genre: 'sertanejo', searchTerm: 'ze recaida gusttavo lima karaoke playback' },
+                { title: 'Saudade', artist: 'Luan Santana', genre: 'sertanejo', searchTerm: 'saudade luan santana karaoke playback' },
+                { title: 'Meteoro', artist: 'Luan Santana', genre: 'sertanejo', searchTerm: 'meteoro luan santana karaoke playback' },
+                { title: 'Largado às Traças', artist: 'Zé Neto & Cristiano', genre: 'sertanejo', searchTerm: 'largado tracas ze neto cristiano karaoke playback' },
+                { title: 'Notificação Preferida', artist: 'Zé Neto & Cristiano', genre: 'sertanejo', searchTerm: 'notificacao preferida ze neto cristiano karaoke playback' },
+                { title: 'Jenifer', artist: 'Gabriel Diniz', genre: 'sertanejo', searchTerm: 'jenifer gabriel diniz karaoke playback' },
+                
+                // Rock Nacional
+                { title: 'Ainda É Cedo', artist: 'Legião Urbana', genre: 'rock', searchTerm: 'ainda cedo legiao urbana karaoke playback' },
+                { title: 'Bete Balanço', artist: 'Barão Vermelho', genre: 'rock', searchTerm: 'bete balanco barao vermelho karaoke playback' },
+                { title: 'Certas Coisas', artist: 'Lulu Santos', genre: 'rock', searchTerm: 'certas coisas lulu santos karaoke playback' },
+                { title: 'Faroeste Caboclo', artist: 'Legião Urbana', genre: 'rock', searchTerm: 'faroeste caboclo legiao urbana karaoke playback' },
+                { title: 'Pais e Filhos', artist: 'Legião Urbana', genre: 'rock', searchTerm: 'pais filhos legiao urbana karaoke playback' },
+                { title: 'Que País É Este', artist: 'Legião Urbana', genre: 'rock', searchTerm: 'que pais este legiao urbana karaoke playback' },
+                { title: 'Tempo Perdido', artist: 'Legião Urbana', genre: 'rock', searchTerm: 'tempo perdido legiao urbana karaoke playback' },
+                { title: 'Toda Forma de Amor', artist: 'Lulu Santos', genre: 'rock', searchTerm: 'toda forma amor lulu santos karaoke playback' },
+                { title: 'Vento no Litoral', artist: 'Legião Urbana', genre: 'rock', searchTerm: 'vento litoral legiao urbana karaoke playback' },
+                { title: 'Será', artist: 'Legião Urbana', genre: 'rock', searchTerm: 'sera legiao urbana karaoke playback' },
+                { title: 'Ideologia', artist: 'Cazuza', genre: 'rock', searchTerm: 'ideologia cazuza karaoke playback' },
+                { title: 'O Tempo Não Para', artist: 'Cazuza', genre: 'rock', searchTerm: 'tempo nao para cazuza karaoke playback' },
+                { title: 'Exagerado', artist: 'Cazuza', genre: 'rock', searchTerm: 'exagerado cazuza karaoke playback' },
+                { title: 'Coração de Estudante', artist: 'Milton Nascimento', genre: 'rock', searchTerm: 'coracao estudante milton nascimento karaoke playback' },
+                { title: 'Pra Não Dizer Que Não Falei das Flores', artist: 'Geraldo Vandré', genre: 'rock', searchTerm: 'pra nao dizer nao falei flores geraldo vandre karaoke playback' },
+                
+                // MPB
+                { title: 'Águas de Março', artist: 'Elis Regina', genre: 'mpb', searchTerm: 'aguas marco elis regina karaoke playback' },
+                { title: 'Carinhoso', artist: 'Pixinguinha', genre: 'mpb', searchTerm: 'carinhoso pixinguinha karaoke playback' },
+                { title: 'Garota de Ipanema', artist: 'Tom Jobim', genre: 'mpb', searchTerm: 'garota ipanema tom jobim karaoke playback' },
+                { title: 'Mas Que Nada', artist: 'Jorge Ben Jor', genre: 'mpb', searchTerm: 'mas que nada jorge ben jor karaoke playback' },
+                { title: 'O Que É Que a Baiana Tem', artist: 'Dorival Caymmi', genre: 'mpb', searchTerm: 'que baiana tem dorival caymmi karaoke playback' },
+                { title: 'Samba de Uma Nota Só', artist: 'Tom Jobim', genre: 'mpb', searchTerm: 'samba uma nota so tom jobim karaoke playback' },
+                { title: 'Tarde em Itapuã', artist: 'Toquinho', genre: 'mpb', searchTerm: 'tarde itapua toquinho karaoke playback' },
+                { title: 'Wave', artist: 'Tom Jobim', genre: 'mpb', searchTerm: 'wave tom jobim karaoke playback' },
+                { title: 'Corcovado', artist: 'Tom Jobim', genre: 'mpb', searchTerm: 'corcovado tom jobim karaoke playback' },
+                { title: 'Desafinado', artist: 'Tom Jobim', genre: 'mpb', searchTerm: 'desafinado tom jobim karaoke playback' },
+                { title: 'Chega de Saudade', artist: 'Tom Jobim', genre: 'mpb', searchTerm: 'chega saudade tom jobim karaoke playback' },
+                { title: 'Construção', artist: 'Chico Buarque', genre: 'mpb', searchTerm: 'construcao chico buarque karaoke playback' },
+                { title: 'Apesar de Você', artist: 'Chico Buarque', genre: 'mpb', searchTerm: 'apesar voce chico buarque karaoke playback' },
+                { title: 'Cálice', artist: 'Chico Buarque', genre: 'mpb', searchTerm: 'calice chico buarque karaoke playback' },
+                { title: 'Travessia', artist: 'Milton Nascimento', genre: 'mpb', searchTerm: 'travessia milton nascimento karaoke playback' },
+                
+                // Pagode
+                { title: 'Deixa a Vida Me Levar', artist: 'Zeca Pagodinho', genre: 'pagode', searchTerm: 'deixa vida me levar zeca pagodinho karaoke playback' },
+                { title: 'Insensível', artist: 'Péricles', genre: 'pagode', searchTerm: 'insensivel pericles karaoke playback' },
+                { title: 'Jeito de Muleque', artist: 'Exaltasamba', genre: 'pagode', searchTerm: 'jeito muleque exaltasamba karaoke playback' },
+                { title: 'Meu Lugar', artist: 'Arlindo Cruz', genre: 'pagode', searchTerm: 'meu lugar arlindo cruz karaoke playback' },
+                { title: 'Papel de Pão', artist: 'Luiz Carlos da Vila', genre: 'pagode', searchTerm: 'papel pao luiz carlos vila karaoke playback' },
+                { title: 'Sorriso Maroto', artist: 'Sorriso Maroto', genre: 'pagode', searchTerm: 'sorriso maroto karaoke playback' },
+                { title: 'Caraca, Eu Tô Apaixonado', artist: 'Thiaguinho', genre: 'pagode', searchTerm: 'caraca apaixonado thiaguinho karaoke playback' },
+                { title: 'Vou Deixar', artist: 'Skank', genre: 'pagode', searchTerm: 'vou deixar skank karaoke playback' },
+                { title: 'Amor de Chocolate', artist: 'Naldo', genre: 'pagode', searchTerm: 'amor chocolate naldo karaoke playback' },
+                { title: 'Coração Radiante', artist: 'Grupo Revelação', genre: 'pagode', searchTerm: 'coracao radiante grupo revelacao karaoke playback' },
+                { title: 'Pagode em Brasília', artist: 'Grupo Fundo de Quintal', genre: 'pagode', searchTerm: 'pagode brasilia fundo quintal karaoke playback' },
+                { title: 'Coisinha do Pai', artist: 'Jorge Aragão', genre: 'pagode', searchTerm: 'coisinha pai jorge aragao karaoke playback' },
+                { title: 'Identidade', artist: 'Jorge Aragão', genre: 'pagode', searchTerm: 'identidade jorge aragao karaoke playback' },
+                { title: 'Malandro', artist: 'Bezerra da Silva', genre: 'pagode', searchTerm: 'malandro bezerra silva karaoke playback' },
+                { title: 'Se Você Pensa', artist: 'Bezerra da Silva', genre: 'pagode', searchTerm: 'se voce pensa bezerra silva karaoke playback' },
+                
+                // Gospel
+                { title: 'Ressuscita-me', artist: 'Aline Barros', genre: 'gospel', searchTerm: 'ressuscita me aline barros karaoke playback' },
+                { title: 'Brasa Viva', artist: 'Fernandinho', genre: 'gospel', searchTerm: 'brasa viva fernandinho karaoke playback' },
+                { title: 'Deus Cuida de Mim', artist: 'Kleber Lucas', genre: 'gospel', searchTerm: 'deus cuida mim kleber lucas karaoke playback' },
+                { title: 'Eu Navegarei', artist: 'Gabriela Rocha', genre: 'gospel', searchTerm: 'eu navegarei gabriela rocha karaoke playback' },
+                { title: 'Fiel é o Senhor', artist: 'Thalles Roberto', genre: 'gospel', searchTerm: 'fiel senhor thalles roberto karaoke playback' },
+                { title: 'Grande é o Senhor', artist: 'Cassiane', genre: 'gospel', searchTerm: 'grande senhor cassiane karaoke playback' },
+                { title: 'Hosana', artist: 'Gabriela Rocha', genre: 'gospel', searchTerm: 'hosana gabriela rocha karaoke playback' },
+                { title: 'Isaías 40', artist: 'Fernandinho', genre: 'gospel', searchTerm: 'isaias 40 fernandinho karaoke playback' },
+                { title: 'Jesus em Tua Presença', artist: 'Diante do Trono', genre: 'gospel', searchTerm: 'jesus tua presenca diante trono karaoke playback' },
+                { title: 'Koinonya', artist: 'Aline Barros', genre: 'gospel', searchTerm: 'koinonya aline barros karaoke playback' },
+                { title: 'Tua Graça Me Basta', artist: 'Fernandinho', genre: 'gospel', searchTerm: 'tua graca me basta fernandinho karaoke playback' },
+                { title: 'Uma Nova História', artist: 'Fernandinho', genre: 'gospel', searchTerm: 'uma nova historia fernandinho karaoke playback' },
+                { title: 'Vem, Esta é a Hora', artist: 'Fernandinho', genre: 'gospel', searchTerm: 'vem esta hora fernandinho karaoke playback' },
+                { title: 'Yeshua', artist: 'Fernandinho', genre: 'gospel', searchTerm: 'yeshua fernandinho karaoke playback' },
+                { title: 'Lugar Secreto', artist: 'Gabriela Rocha', genre: 'gospel', searchTerm: 'lugar secreto gabriela rocha karaoke playback' },
+                
+                // Funk
+                { title: 'Baile de Favela', artist: 'MC João', genre: 'funk', searchTerm: 'baile favela mc joao karaoke playback' },
+                { title: 'Bum Bum Tam Tam', artist: 'MC Fioti', genre: 'funk', searchTerm: 'bum bum tam tam mc fioti karaoke playback' },
+                { title: 'Créu', artist: 'MC Créu', genre: 'funk', searchTerm: 'creu mc creu karaoke playback' },
+                { title: 'Dança do Créu', artist: 'MC Créu', genre: 'funk', searchTerm: 'danca creu mc creu karaoke playback' },
+                { title: 'Envolvimento', artist: 'MC Loma', genre: 'funk', searchTerm: 'envolvimento mc loma karaoke playback' },
+                { title: 'Lepo Lepo', artist: 'Psirico', genre: 'funk', searchTerm: 'lepo lepo psirico karaoke playback' },
+                { title: 'Olha a Explosão', artist: 'MC Kevinho', genre: 'funk', searchTerm: 'olha explosao mc kevinho karaoke playback' },
+                { title: 'Paradinha', artist: 'Anitta', genre: 'funk', searchTerm: 'paradinha anitta karaoke playback' },
+                { title: 'Vai Malandra', artist: 'Anitta', genre: 'funk', searchTerm: 'vai malandra anitta karaoke playback' },
+                { title: 'Sua Cara', artist: 'Anitta', genre: 'funk', searchTerm: 'sua cara anitta karaoke playback' },
+                
+                // Internacional
+                { title: 'Bohemian Rhapsody', artist: 'Queen', genre: 'internacional', searchTerm: 'bohemian rhapsody queen karaoke playback' },
+                { title: 'Don\'t Stop Believin\'', artist: 'Journey', genre: 'internacional', searchTerm: 'dont stop believin journey karaoke playback' },
+                { title: 'Hotel California', artist: 'Eagles', genre: 'internacional', searchTerm: 'hotel california eagles karaoke playback' },
+                { title: 'Imagine', artist: 'John Lennon', genre: 'internacional', searchTerm: 'imagine john lennon karaoke playback' },
+                { title: 'Let It Be', artist: 'The Beatles', genre: 'internacional', searchTerm: 'let it be beatles karaoke playback' },
+                { title: 'My Way', artist: 'Frank Sinatra', genre: 'internacional', searchTerm: 'my way frank sinatra karaoke playback' },
+                { title: 'Sweet Child O\' Mine', artist: 'Guns N\' Roses', genre: 'internacional', searchTerm: 'sweet child mine guns roses karaoke playback' },
+                { title: 'Yesterday', artist: 'The Beatles', genre: 'internacional', searchTerm: 'yesterday beatles karaoke playback' },
+                { title: 'Wonderwall', artist: 'Oasis', genre: 'internacional', searchTerm: 'wonderwall oasis karaoke playback' },
+                { title: 'Shape of You', artist: 'Ed Sheeran', genre: 'internacional', searchTerm: 'shape of you ed sheeran karaoke playback' },
+                { title: 'Perfect', artist: 'Ed Sheeran', genre: 'internacional', searchTerm: 'perfect ed sheeran karaoke playback' },
+                { title: 'Thinking Out Loud', artist: 'Ed Sheeran', genre: 'internacional', searchTerm: 'thinking out loud ed sheeran karaoke playback' },
+                { title: 'Someone Like You', artist: 'Adele', genre: 'internacional', searchTerm: 'someone like you adele karaoke playback' },
+                { title: 'Hello', artist: 'Adele', genre: 'internacional', searchTerm: 'hello adele karaoke playback' },
+                { title: 'Rolling in the Deep', artist: 'Adele', genre: 'internacional', searchTerm: 'rolling deep adele karaoke playback' },
+                { title: 'Despacito', artist: 'Luis Fonsi', genre: 'internacional', searchTerm: 'despacito luis fonsi karaoke playback' },
+                { title: 'La Vida Es Una Fiesta', artist: 'Manu Chao', genre: 'internacional', searchTerm: 'la vida fiesta manu chao karaoke playback' },
+                { title: 'Havana', artist: 'Camila Cabello', genre: 'internacional', searchTerm: 'havana camila cabello karaoke playback' },
+                { title: 'Senorita', artist: 'Shawn Mendes', genre: 'internacional', searchTerm: 'senorita shawn mendes karaoke playback' },
+                { title: 'Blinding Lights', artist: 'The Weeknd', genre: 'internacional', searchTerm: 'blinding lights weeknd karaoke playback' }
+            ];
+        }
+
+        // População inteligente
+        async function smartPopulate() {
+            addStatus('🧠 Iniciando população inteligente...', 'info');
+            addLog('🧠 POPULAÇÃO INTELIGENTE INICIADA');
+            updateProgress(0);
+            updateStats({ current: 0, results: { inserted: 0, duplicates: 0, errors: 0 } });
+
+            try {
+                await ensureAuth();
+                addLog('✅ Autenticação realizada com sucesso');
+                updateProgress(10);
+
+                // Carregar músicas do banco local
+                addLog('📊 Carregando banco de dados local...');
+                const musicDatabase = await loadLocalMusicDatabase();
+                updateProgress(20);
+
+                if (!musicDatabase || !Array.isArray(musicDatabase)) {
+                    throw new Error('Erro ao carregar banco de dados local');
+                }
+
+                addLog(`📊 Carregadas ${musicDatabase.length} músicas do banco local`);
+                updateProgress(30);
+
+                // Processar com verificação de duplicatas
+                addLog('🔍 Iniciando inserção com verificação de duplicatas...');
+                
+                const results = await insertSongsWithDeduplication(db, musicDatabase, (progress) => {
+                    const percent = 30 + (progress.current / progress.total) * 60;
+                    updateProgress(percent);
+                    updateStats(progress);
+                    
+                    if (progress.current % 10 === 0) {
+                        addLog(`📈 Progresso: ${progress.current}/${progress.total} - Inseridas: ${progress.results.inserted}, Duplicatas: ${progress.results.duplicates}`);
+                    }
+                });
+
+                updateProgress(100);
+                updateStats({ current: results.total, results });
+
+                addStatus('✅ População inteligente concluída!', 'info');
+                addLog('✅ POPULAÇÃO INTELIGENTE FINALIZADA');
+                addLog(`📊 Resultados finais:`);
+                addLog(`   - Total processadas: ${results.total}`);
+                addLog(`   - Novas inseridas: ${results.inserted}`);
+                addLog(`   - Duplicatas evitadas: ${results.duplicates}`);
+                addLog(`   - Erros: ${results.errors}`);
+                addLog(`   - Ignoradas: ${results.skipped}`);
+
+            } catch (error) {
+                addStatus(`❌ Erro na população: ${error.message}`, 'error');
+                addLog(`❌ ERRO: ${error.message}`);
+                console.error('Erro completo:', error);
+            }
+        }
+
+        // Limpeza de duplicatas
+        async function cleanDuplicates() {
+            addStatus('🧹 Iniciando limpeza de duplicatas...', 'info');
+            addLog('🧹 LIMPEZA DE DUPLICATAS INICIADA');
+            updateProgress(0);
+
+            try {
+                await ensureAuth();
+                addLog('✅ Autenticação realizada com sucesso');
+                updateProgress(10);
+
+                const results = await removeDuplicatesFromCollection(db, (progress) => {
+                    const percent = 10 + (progress.current / progress.total) * 80;
+                    updateProgress(percent);
+                    
+                    if (progress.current % 5 === 0) {
+                        addLog(`📈 Progresso: ${progress.current}/${progress.total} duplicatas removidas`);
+                    }
+                });
+
+                updateProgress(100);
+
+                addStatus('✅ Limpeza de duplicatas concluída!', 'info');
+                addLog('✅ LIMPEZA DE DUPLICATAS FINALIZADA');
+                addLog(`📊 Resultados:`);
+                addLog(`   - Duplicatas removidas: ${results.removed}`);
+                addLog(`   - Músicas mantidas: ${results.kept}`);
+
+            } catch (error) {
+                addStatus(`❌ Erro na limpeza: ${error.message}`, 'error');
+                addLog(`❌ ERRO: ${error.message}`);
+                console.error('Erro completo:', error);
+            }
+        }
+
+        // Teste de conexão
+        async function testConnection() {
+            addStatus('🧪 Testando conexão...', 'info');
+            addLog('🧪 TESTE DE CONEXÃO INICIADO');
+            updateProgress(0);
+
+            try {
+                await ensureAuth();
+                addLog('✅ Autenticação funcionando');
+                updateProgress(25);
+
+                // Testar escrita
+                addLog('✍️ Testando escrita no Firebase...');
+                const testRef = db.collection('debug_test');
+                await testRef.add({
+                    test: 'smart_populate_test',
+                    timestamp: Date.now(),
+                    status: 'success'
+                });
+                updateProgress(50);
+
+                // Testar leitura
+                addLog('📖 Testando leitura do Firebase...');
+                const snapshot = await testRef.limit(1).get();
+                if (snapshot.empty) {
+                    throw new Error('Falha na leitura');
+                }
+                updateProgress(75);
+
+                // Verificar coleção songs
+                addLog('🔍 Verificando coleção songs...');
+                const songsSnapshot = await db.collection('songs').limit(5).get();
+                const songsCount = songsSnapshot.size;
+                updateProgress(100);
+
+                addStatus('✅ Conexão funcionando perfeitamente!', 'info');
+                addLog('✅ TESTE DE CONEXÃO FINALIZADO');
+                addLog(`📊 Músicas na coleção: ${songsCount} (amostra)`);
+
+            } catch (error) {
+                addStatus(`❌ Erro na conexão: ${error.message}`, 'error');
+                addLog(`❌ ERRO: ${error.message}`);
+            }
+        }
+
+        // Inicialização
+        addLog('🚀 Sistema carregado e pronto para uso!');
+    </script>
+</body>
+</html>
