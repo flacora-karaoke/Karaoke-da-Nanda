@@ -827,8 +827,28 @@ async function searchYouTubeAndDisplay(query) {
         
         if (results && results.length > 0) {
             console.log(`✅ Encontrados ${results.length} resultados`);
-            allSongs = results;
-            filteredSongs = results;
+            
+            // Normalizar a estrutura dos resultados para compatibilidade com openSongModal
+            const normalizedResults = results.map(result => {
+                // Se já é um resultado fallback, manter como está
+                if (result.isFallback) {
+                    return result;
+                }
+                
+                // Normalizar resultados da API do YouTube
+                return {
+                    ...result,
+                    title: result.snippet?.title || result.title || 'Título não disponível',
+                    artist: result.snippet?.channelTitle || result.artist || 'Artista não disponível',
+                    genre: 'youtube',
+                    videoId: result.id?.videoId || result.videoId,
+                    thumbnail: result.snippet?.thumbnails?.medium?.url || result.snippet?.thumbnails?.default?.url || 'placeholder-karaoke.svg',
+                    description: result.snippet?.description || ''
+                };
+            });
+            
+            allSongs = normalizedResults;
+            filteredSongs = normalizedResults;
             currentPage = 1;
             renderSongs();
             renderPagination();
