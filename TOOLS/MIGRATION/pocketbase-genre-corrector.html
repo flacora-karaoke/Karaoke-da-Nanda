@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Correção de Gêneros - PocketBase</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .setup-section {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .setup-section h3 {
+            color: #2d3748;
+            margin-top: 0;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #4a5568;
+        }
+        
+        input[type="text"], input[type="url"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        input[type="text"]:focus, input[type="url"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .button:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 2px solid #9ae6b4;
+        }
+        
+        .status.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 2px solid #fc8181;
+        }
+        
+        .status.info {
+            background: #bee3f8;
+            color: #2a4365;
+            border: 2px solid #63b3ed;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #48bb78, #38a169);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #4a5568;
+            font-size: 0.9em;
+        }
+        
+        .log {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        
+        .warning {
+            background: #fef5e7;
+            color: #744210;
+            border: 2px solid #f6e05e;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .instructions {
+            background: #e6fffa;
+            border: 2px solid #4fd1c7;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .instructions h4 {
+            color: #234e52;
+            margin-top: 0;
+        }
+        
+        .instructions ol {
+            color: #2d3748;
+        }
+        
+        .instructions code {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Correção de Gêneros Musicais - PocketBase</h1>
+        
+        <div class="instructions">
+            <h4>📋 Como configurar o PocketBase:</h4>
+            <ol>
+                <li>Baixe o PocketBase em <strong>https://pocketbase.io/</strong></li>
+                <li>Execute o arquivo <code>pocketbase.exe serve</code></li>
+                <li>Acesse <code>http://127.0.0.1:8090/_/</code> para criar uma conta admin</li>
+                <li>Crie uma coleção chamada <strong>"songs"</strong> com os campos:
+                    <ul>
+                        <li><code>title</code> (text)</li>
+                        <li><code>artist</code> (text)</li>
+                        <li><code>genre</code> (text)</li>
+                        <li><code>corrected_genre</code> (text, opcional)</li>
+                        <li><code>confidence</code> (number, opcional)</li>
+                    </ul>
+                </li>
+                <li>Configure as permissões da coleção para permitir leitura/escrita</li>
+                <li>Insira a URL do PocketBase abaixo (geralmente <code>http://127.0.0.1:8090</code>)</li>
+            </ol>
+        </div>
+        
+        <div class="setup-section">
+            <h3>⚙️ Configuração do PocketBase</h3>
+            <div class="input-group">
+                <label for="pocketbaseUrl">URL do PocketBase:</label>
+                <input type="url" id="pocketbaseUrl" value="http://127.0.0.1:8090" placeholder="http://127.0.0.1:8090">
+            </div>
+            <div class="input-group">
+                <label for="adminEmail">Email Admin (opcional):</label>
+                <input type="text" id="adminEmail" placeholder="admin@example.com">
+            </div>
+            <div class="input-group">
+                <label for="adminPassword">Senha Admin (opcional):</label>
+                <input type="text" id="adminPassword" placeholder="senha123">
+            </div>
+            <button class="button" onclick="connectToPocketBase()">🔗 Conectar ao PocketBase</button>
+            <button class="button" onclick="testConnection()">🧪 Testar Conexão</button>
+        </div>
+        
+        <div id="status"></div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalSongs">0</div>
+                <div class="stat-label">Total de Músicas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="processedSongs">0</div>
+                <div class="stat-label">Processadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="correctedSongs">0</div>
+                <div class="stat-label">Corrigidas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="errorCount">0</div>
+                <div class="stat-label">Erros</div>
+            </div>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <div style="text-align: center; margin: 20px 0;">
+            <button class="button" onclick="loadSongs()" id="loadBtn">📥 Carregar Músicas</button>
+            <button class="button" onclick="startCorrection()" id="correctBtn" disabled>🔧 Iniciar Correção</button>
+            <button class="button" onclick="exportResults()" id="exportBtn" disabled>💾 Exportar Resultados</button>
+            <button class="button" onclick="clearLog()">🗑️ Limpar Log</button>
+        </div>
+        
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        let pb = null;
+        let songs = [];
+        let processedCount = 0;
+        let correctedCount = 0;
+        let errorCount = 0;
+        
+        // Mapeamento de gêneros musicais
+        const genreMapping = {
+            // Pop e variações
+            'pop': 'Pop',
+            'pop rock': 'Pop Rock',
+            'pop nacional': 'Pop Nacional',
+            'pop internacional': 'Pop Internacional',
+            'electropop': 'Electropop',
+            'synthpop': 'Synthpop',
+            
+            // Rock e subgêneros
+            'rock': 'Rock',
+            'rock nacional': 'Rock Nacional',
+            'rock internacional': 'Rock Internacional',
+            'hard rock': 'Hard Rock',
+            'soft rock': 'Soft Rock',
+            'classic rock': 'Classic Rock',
+            'alternative rock': 'Alternative Rock',
+            'indie rock': 'Indie Rock',
+            'punk rock': 'Punk Rock',
+            'progressive rock': 'Progressive Rock',
+            
+            // MPB e música brasileira
+            'mpb': 'MPB',
+            'samba': 'Samba',
+            'bossa nova': 'Bossa Nova',
+            'forró': 'Forró',
+            'axé': 'Axé',
+            'pagode': 'Pagode',
+            'sertanejo': 'Sertanejo',
+            'sertanejo universitário': 'Sertanejo Universitário',
+            'música caipira': 'Música Caipira',
+            'tropicália': 'Tropicália',
+            'choro': 'Choro',
+            
+            // Eletrônica
+            'eletrônica': 'Eletrônica',
+            'electronic': 'Eletrônica',
+            'dance': 'Dance',
+            'house': 'House',
+            'techno': 'Techno',
+            'trance': 'Trance',
+            'dubstep': 'Dubstep',
+            'edm': 'EDM',
+            
+            // Hip Hop e Rap
+            'hip hop': 'Hip Hop',
+            'rap': 'Rap',
+            'rap nacional': 'Rap Nacional',
+            'trap': 'Trap',
+            
+            // R&B e Soul
+            'r&b': 'R&B',
+            'soul': 'Soul',
+            'funk': 'Funk',
+            'funk carioca': 'Funk Carioca',
+            
+            // Jazz e Blues
+            'jazz': 'Jazz',
+            'blues': 'Blues',
+            'smooth jazz': 'Smooth Jazz',
+            
+            // Reggae
+            'reggae': 'Reggae',
+            'reggaeton': 'Reggaeton',
+            
+            // Country
+            'country': 'Country',
+            'folk': 'Folk',
+            
+            // Metal
+            'metal': 'Metal',
+            'heavy metal': 'Heavy Metal',
+            'death metal': 'Death Metal',
+            'black metal': 'Black Metal',
+            
+            // Clássica
+            'clássica': 'Clássica',
+            'classical': 'Clássica',
+            'erudita': 'Erudita',
+            
+            // Internacional
+            'latina': 'Latina',
+            'salsa': 'Salsa',
+            'merengue': 'Merengue',
+            'bachata': 'Bachata',
+            
+            // Outros
+            'gospel': 'Gospel',
+            'new age': 'New Age',
+            'ambient': 'Ambient',
+            'world music': 'World Music',
+            'instrumental': 'Instrumental'
+        };
+        
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+            logElement.textContent += logEntry;
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            console.log(`[PocketBase Corrector] ${message}`);
+        }
+        
+        function showStatus(message, type = 'info') {
+            const statusElement = document.getElementById('status');
+            statusElement.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+        
+        function updateStats() {
+            document.getElementById('totalSongs').textContent = songs.length;
+            document.getElementById('processedSongs').textContent = processedCount;
+            document.getElementById('correctedSongs').textContent = correctedCount;
+            document.getElementById('errorCount').textContent = errorCount;
+            
+            if (songs.length > 0) {
+                const progress = (processedCount / songs.length) * 100;
+                document.getElementById('progressFill').style.width = `${progress}%`;
+            }
+        }
+        
+        async function connectToPocketBase() {
+            const url = document.getElementById('pocketbaseUrl').value.trim();
+            const email = document.getElementById('adminEmail').value.trim();
+            const password = document.getElementById('adminPassword').value.trim();
+            
+            if (!url) {
+                showStatus('❌ Por favor, insira a URL do PocketBase', 'error');
+                return;
+            }
+            
+            try {
+                // Importar PocketBase SDK
+                if (!window.PocketBase) {
+                    const script = document.createElement('script');
+                    script.src = 'https://unpkg.com/pocketbase@0.21.1/dist/pocketbase.umd.js';
+                    document.head.appendChild(script);
+                    
+                    await new Promise((resolve, reject) => {
+                        script.onload = resolve;
+                        script.onerror = reject;
+                    });
+                }
+                
+                pb = new PocketBase(url);
+                
+                // Tentar autenticação se credenciais fornecidas
+                if (email && password) {
+                    try {
+                        await pb.admins.authWithPassword(email, password);
+                        log('✅ Autenticado como admin com sucesso');
+                    } catch (authError) {
+                        log(`⚠️ Falha na autenticação admin: ${authError.message}`);
+                        log('ℹ️ Continuando sem autenticação...');
+                    }
+                }
+                
+                showStatus('✅ Conectado ao PocketBase com sucesso!', 'success');
+                log(`✅ Conectado ao PocketBase: ${url}`);
+                
+                // Habilitar botões
+                document.getElementById('loadBtn').disabled = false;
+                
+            } catch (error) {
+                showStatus(`❌ Erro ao conectar: ${error.message}`, 'error');
+                log(`❌ Erro de conexão: ${error.message}`);
+            }
+        }
+        
+        async function testConnection() {
+            if (!pb) {
+                showStatus('❌ Conecte-se ao PocketBase primeiro', 'error');
+                return;
+            }
+            
+            try {
+                // Testar listando coleções
+                const collections = await pb.collections.getList();
+                log(`✅ Conexão OK - ${collections.items.length} coleções encontradas`);
+                
+                // Verificar se existe a coleção 'songs'
+                const songsCollection = collections.items.find(c => c.name === 'songs');
+                if (songsCollection) {
+                    log('✅ Coleção "songs" encontrada');
+                    showStatus('✅ Conexão testada com sucesso! Coleção "songs" encontrada.', 'success');
+                } else {
+                    log('⚠️ Coleção "songs" não encontrada');
+                    showStatus('⚠️ Conexão OK, mas coleção "songs" não encontrada. Crie-a no admin do PocketBase.', 'error');
+                }
+                
+            } catch (error) {
+                showStatus(`❌ Erro no teste: ${error.message}`, 'error');
+                log(`❌ Erro no teste de conexão: ${error.message}`);
+            }
+        }
+        
+        async function loadSongs() {
+            if (!pb) {
+                showStatus('❌ Conecte-se ao PocketBase primeiro', 'error');
+                return;
+            }
+            
+            try {
+                showStatus('📥 Carregando músicas...', 'info');
+                log('📥 Iniciando carregamento das músicas...');
+                
+                // Carregar todas as músicas da coleção
+                const records = await pb.collection('songs').getFullList({
+                    sort: 'created',
+                });
+                
+                songs = records;
+                processedCount = 0;
+                correctedCount = 0;
+                errorCount = 0;
+                
+                updateStats();
+                
+                log(`✅ ${songs.length} músicas carregadas com sucesso`);
+                showStatus(`✅ ${songs.length} músicas carregadas!`, 'success');
+                
+                // Habilitar botão de correção
+                document.getElementById('correctBtn').disabled = false;
+                
+            } catch (error) {
+                showStatus(`❌ Erro ao carregar: ${error.message}`, 'error');
+                log(`❌ Erro ao carregar músicas: ${error.message}`);
+            }
+        }
+        
+        function correctGenre(currentGenre) {
+            if (!currentGenre) return null;
+            
+            const normalized = currentGenre.toLowerCase().trim();
+            
+            // Busca exata
+            if (genreMapping[normalized]) {
+                return {
+                    corrected: genreMapping[normalized],
+                    confidence: 100
+                };
+            }
+            
+            // Busca por similaridade
+            for (const [key, value] of Object.entries(genreMapping)) {
+                if (normalized.includes(key) || key.includes(normalized)) {
+                    return {
+                        corrected: value,
+                        confidence: 85
+                    };
+                }
+            }
+            
+            // Busca por palavras-chave
+            const keywords = {
+                'rock': 'Rock',
+                'pop': 'Pop',
+                'samba': 'Samba',
+                'forró': 'Forró',
+                'sertanejo': 'Sertanejo',
+                'eletrônica': 'Eletrônica',
+                'electronic': 'Eletrônica',
+                'jazz': 'Jazz',
+                'blues': 'Blues',
+                'reggae': 'Reggae',
+                'metal': 'Metal',
+                'funk': 'Funk',
+                'rap': 'Rap',
+                'hip': 'Hip Hop',
+                'country': 'Country',
+                'gospel': 'Gospel'
+            };
+            
+            for (const [keyword, genre] of Object.entries(keywords)) {
+                if (normalized.includes(keyword)) {
+                    return {
+                        corrected: genre,
+                        confidence: 70
+                    };
+                }
+            }
+            
+            return null;
+        }
+        
+        async function startCorrection() {
+            if (!pb || songs.length === 0) {
+                showStatus('❌ Carregue as músicas primeiro', 'error');
+                return;
+            }
+            
+            showStatus('🔧 Iniciando correção de gêneros...', 'info');
+            log('🔧 Iniciando processo de correção...');
+            
+            // Desabilitar botões durante o processo
+            document.getElementById('correctBtn').disabled = true;
+            document.getElementById('loadBtn').disabled = true;
+            
+            const batchSize = 5; // Processar 5 músicas por vez
+            const delayBetweenBatches = 1000; // 1 segundo entre lotes
+            
+            try {
+                for (let i = 0; i < songs.length; i += batchSize) {
+                    const batch = songs.slice(i, i + batchSize);
+                    
+                    log(`📦 Processando lote ${Math.floor(i/batchSize) + 1}/${Math.ceil(songs.length/batchSize)} (${batch.length} músicas)`);
+                    
+                    // Processar lote em paralelo
+                    const promises = batch.map(song => processSong(song));
+                    await Promise.allSettled(promises);
+                    
+                    updateStats();
+                    
+                    // Delay entre lotes
+                    if (i + batchSize < songs.length) {
+                        await new Promise(resolve => setTimeout(resolve, delayBetweenBatches));
+                    }
+                }
+                
+                log(`✅ Correção concluída! ${correctedCount} gêneros corrigidos de ${songs.length} músicas`);
+                showStatus(`✅ Correção concluída! ${correctedCount} gêneros corrigidos.`, 'success');
+                
+                // Habilitar botão de exportação
+                document.getElementById('exportBtn').disabled = false;
+                
+            } catch (error) {
+                log(`❌ Erro durante a correção: ${error.message}`);
+                showStatus(`❌ Erro durante a correção: ${error.message}`, 'error');
+            } finally {
+                // Reabilitar botões
+                document.getElementById('correctBtn').disabled = false;
+                document.getElementById('loadBtn').disabled = false;
+            }
+        }
+        
+        async function processSong(song) {
+            try {
+                const correction = correctGenre(song.genre);
+                processedCount++;
+                
+                if (correction && correction.confidence >= 70) {
+                    // Atualizar no PocketBase
+                    await pb.collection('songs').update(song.id, {
+                        corrected_genre: correction.corrected,
+                        confidence: correction.confidence
+                    });
+                    
+                    correctedCount++;
+                    log(`✅ ${song.title} - ${song.artist}: "${song.genre}" → "${correction.corrected}" (${correction.confidence}%)`);
+                } else {
+                    log(`ℹ️ ${song.title} - ${song.artist}: Gênero "${song.genre}" mantido (sem correção encontrada)`);
+                }
+                
+            } catch (error) {
+                errorCount++;
+                log(`❌ Erro ao processar "${song.title}": ${error.message}`);
+            }
+        }
+        
+        async function exportResults() {
+            if (!pb || songs.length === 0) {
+                showStatus('❌ Nenhum dado para exportar', 'error');
+                return;
+            }
+            
+            try {
+                log('💾 Exportando resultados...');
+                
+                // Recarregar dados atualizados
+                const updatedSongs = await pb.collection('songs').getFullList({
+                    sort: 'created',
+                });
+                
+                // Preparar dados para exportação
+                const exportData = updatedSongs.map(song => ({
+                    id: song.id,
+                    title: song.title,
+                    artist: song.artist,
+                    original_genre: song.genre,
+                    corrected_genre: song.corrected_genre || song.genre,
+                    confidence: song.confidence || 0,
+                    was_corrected: !!song.corrected_genre
+                }));
+                
+                // Criar arquivo JSON
+                const jsonData = JSON.stringify(exportData, null, 2);
+                const blob = new Blob([jsonData], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                // Download
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `genre_corrections_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                log('✅ Resultados exportados com sucesso!');
+                showStatus('✅ Resultados exportados!', 'success');
+                
+            } catch (error) {
+                log(`❌ Erro na exportação: ${error.message}`);
+                showStatus(`❌ Erro na exportação: ${error.message}`, 'error');
+            }
+        }
+        
+        function clearLog() {
+            document.getElementById('log').textContent = '';
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🎵 Sistema de Correção de Gêneros - PocketBase iniciado');
+            log('ℹ️ Configure a conexão com o PocketBase para começar');
+            showStatus('⚙️ Configure a conexão com o PocketBase para começar', 'info');
+        });
+    </script>
+</body>
+</html>

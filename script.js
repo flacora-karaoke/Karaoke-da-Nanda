@@ -185,6 +185,18 @@ function setupEventListeners() {
         });
     });
     
+    // Favorites button
+    const favoritesBtn = document.getElementById('favoritesBtn');
+    if (favoritesBtn) {
+        favoritesBtn.addEventListener('click', () => {
+            genreButtons.forEach(b => b.classList.remove('active'));
+            favoritesBtn.classList.add('active');
+            currentGenre = 'favorites';
+            currentPage = 1;
+            applyFiltersAndSort();
+        });
+    }
+    
     // Sort
     sortSelect.addEventListener('change', () => {
         currentSort = sortSelect.value;
@@ -970,8 +982,15 @@ function applyFiltersAndSort(searchTerm = '') {
         );
     }
     
-    // Apply genre filter
-    if (currentGenre !== 'all') {
+    // Apply favorites filter
+    if (currentGenre === 'favorites') {
+        filtered = filtered.filter(song => {
+            const songKey = `${song.title} - ${song.artist}`;
+            return favorites.includes(songKey);
+        });
+    }
+    // Apply genre filter (only if not showing favorites)
+    else if (currentGenre !== 'all') {
         filtered = filtered.filter(song => song.genre === currentGenre);
     }
     
@@ -1001,14 +1020,26 @@ function renderSongs() {
     const songsToShow = filteredSongs.slice(startIndex, endIndex);
     
     if (songsToShow.length === 0) {
-        songsContainer.innerHTML = `
-            <div class="no-results">
-                <i class="fas fa-search" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
-                <h3>Nenhuma música encontrada</h3>
-                <p>Tente ajustar os filtros ou termo de busca</p>
-                <p><strong>💡 Dica:</strong> Digite "youtube: nome da música" para buscar diretamente no YouTube</p>
-            </div>
-        `;
+        // Mensagem específica para favoritos vazios
+        if (currentGenre === 'favorites') {
+            songsContainer.innerHTML = `
+                <div class="no-results">
+                    <i class="fas fa-heart" style="font-size: 3rem; color: #ff6b6b; margin-bottom: 1rem;"></i>
+                    <h3>Nenhum favorito ainda</h3>
+                    <p>Você ainda não adicionou nenhuma música aos favoritos</p>
+                    <p><strong>💡 Dica:</strong> Clique no ❤️ nas músicas que você mais gosta!</p>
+                </div>
+            `;
+        } else {
+            songsContainer.innerHTML = `
+                <div class="no-results">
+                    <i class="fas fa-search" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
+                    <h3>Nenhuma música encontrada</h3>
+                    <p>Tente ajustar os filtros ou termo de busca</p>
+                    <p><strong>💡 Dica:</strong> Digite "youtube: nome da música" para buscar diretamente no YouTube</p>
+                </div>
+            `;
+        }
         return;
     }
     
@@ -1245,6 +1276,8 @@ function toggleCardFavorite(title, artist, button) {
         button.classList.add('active');
     }
     
+    // Atualizar contador de favoritos
+    
     // Salvar no Firebase primeiro
     saveFavoritesToFirebase(favorites);
     
@@ -1328,6 +1361,7 @@ function toggleFavorite() {
         addToFavoritesBtn.innerHTML = '<i class="fas fa-heart"></i> Remover dos Favoritos';
         addToFavoritesBtn.className = 'btn btn-secondary';
     }
+    
     
     // Salvar no Firebase (permanente)
     saveFavoritesToFirebase(favorites);
@@ -1693,7 +1727,7 @@ async function expandMusicDatabase() {
         }
         
         // Abrir janela de população em lotes
-        const popupWindow = window.open('batch-populate.html', 'expandMusic', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+        const popupWindow = window.open('TOOLS/batch-populate.html', 'expandMusic', 'width=1200,height=800,scrollbars=yes,resizable=yes');
         
         if (!popupWindow) {
             alert('Por favor, permita pop-ups para usar a função de expansão do banco de músicas.');

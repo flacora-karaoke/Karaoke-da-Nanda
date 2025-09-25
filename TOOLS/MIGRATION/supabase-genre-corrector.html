@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Correção de Gêneros - Supabase</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #3ecf8e 0%, #3b82f6 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #1f2937;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .setup-section {
+            background: #f0fdf4;
+            border: 2px solid #22c55e;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .setup-section h3 {
+            color: #15803d;
+            margin-top: 0;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #374151;
+        }
+        
+        input[type="text"], input[type="url"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #d1d5db;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        textarea {
+            height: 100px;
+            resize: vertical;
+            font-family: 'Courier New', monospace;
+        }
+        
+        input[type="text"]:focus, input[type="url"]:focus, textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .button {
+            background: linear-gradient(135deg, #3ecf8e 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #34d399;
+        }
+        
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #f87171;
+        }
+        
+        .status.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 2px solid #60a5fa;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #059669);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+        
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9em;
+        }
+        
+        .log {
+            background: #111827;
+            color: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        
+        .instructions {
+            background: #eff6ff;
+            border: 2px solid #3b82f6;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .instructions h4 {
+            color: #1e40af;
+            margin-top: 0;
+        }
+        
+        .instructions ol {
+            color: #374151;
+        }
+        
+        .instructions code {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .config-example {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Correção de Gêneros Musicais - Supabase</h1>
+        
+        <div class="instructions">
+            <h4>📋 Como configurar o Supabase:</h4>
+            <ol>
+                <li>Crie uma conta gratuita em <strong>https://supabase.com/</strong></li>
+                <li>Crie um novo projeto</li>
+                <li>Vá em <strong>Settings → API</strong> e copie:
+                    <ul>
+                        <li>Project URL</li>
+                        <li>anon public key</li>
+                    </ul>
+                </li>
+                <li>Vá em <strong>SQL Editor</strong> e execute o script abaixo para criar a tabela:</li>
+            </ol>
+            
+            <div class="config-example">-- Criar tabela songs
+CREATE TABLE songs (
+    id SERIAL PRIMARY KEY,
+    title TEXT NOT NULL,
+    artist TEXT NOT NULL,
+    genre TEXT,
+    corrected_genre TEXT,
+    confidence INTEGER,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Habilitar RLS (Row Level Security)
+ALTER TABLE songs ENABLE ROW LEVEL SECURITY;
+
+-- Política para permitir leitura/escrita para todos
+CREATE POLICY "Allow all operations" ON songs
+FOR ALL USING (true) WITH CHECK (true);
+
+-- Índices para performance
+CREATE INDEX idx_songs_genre ON songs(genre);
+CREATE INDEX idx_songs_artist ON songs(artist);</div>
+        </div>
+        
+        <div class="setup-section">
+            <h3>⚙️ Configuração do Supabase</h3>
+            <div class="input-group">
+                <label for="supabaseUrl">Project URL:</label>
+                <input type="url" id="supabaseUrl" placeholder="https://seu-projeto.supabase.co">
+            </div>
+            <div class="input-group">
+                <label for="supabaseKey">Anon Public Key:</label>
+                <textarea id="supabaseKey" placeholder="Cole aqui sua chave pública anônima do Supabase"></textarea>
+            </div>
+            <button class="button" onclick="connectToSupabase()">🔗 Conectar ao Supabase</button>
+            <button class="button" onclick="testConnection()">🧪 Testar Conexão</button>
+            <button class="button" onclick="createSampleData()">📝 Criar Dados de Exemplo</button>
+        </div>
+        
+        <div id="status"></div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalSongs">0</div>
+                <div class="stat-label">Total de Músicas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="processedSongs">0</div>
+                <div class="stat-label">Processadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="correctedSongs">0</div>
+                <div class="stat-label">Corrigidas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="errorCount">0</div>
+                <div class="stat-label">Erros</div>
+            </div>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <div style="text-align: center; margin: 20px 0;">
+            <button class="button" onclick="loadSongs()" id="loadBtn" disabled>📥 Carregar Músicas</button>
+            <button class="button" onclick="startCorrection()" id="correctBtn" disabled>🔧 Iniciar Correção</button>
+            <button class="button" onclick="exportResults()" id="exportBtn" disabled>💾 Exportar Resultados</button>
+            <button class="button" onclick="clearLog()">🗑️ Limpar Log</button>
+        </div>
+        
+        <div class="log" id="log"></div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        let supabase = null;
+        let songs = [];
+        let processedCount = 0;
+        let correctedCount = 0;
+        let errorCount = 0;
+        
+        // Mapeamento de gêneros musicais (mesmo do PocketBase)
+        const genreMapping = {
+            // Pop e variações
+            'pop': 'Pop',
+            'pop rock': 'Pop Rock',
+            'pop nacional': 'Pop Nacional',
+            'pop internacional': 'Pop Internacional',
+            'electropop': 'Electropop',
+            'synthpop': 'Synthpop',
+            
+            // Rock e subgêneros
+            'rock': 'Rock',
+            'rock nacional': 'Rock Nacional',
+            'rock internacional': 'Rock Internacional',
+            'hard rock': 'Hard Rock',
+            'soft rock': 'Soft Rock',
+            'classic rock': 'Classic Rock',
+            'alternative rock': 'Alternative Rock',
+            'indie rock': 'Indie Rock',
+            'punk rock': 'Punk Rock',
+            'progressive rock': 'Progressive Rock',
+            
+            // MPB e música brasileira
+            'mpb': 'MPB',
+            'samba': 'Samba',
+            'bossa nova': 'Bossa Nova',
+            'forró': 'Forró',
+            'axé': 'Axé',
+            'pagode': 'Pagode',
+            'sertanejo': 'Sertanejo',
+            'sertanejo universitário': 'Sertanejo Universitário',
+            'música caipira': 'Música Caipira',
+            'tropicália': 'Tropicália',
+            'choro': 'Choro',
+            
+            // Eletrônica
+            'eletrônica': 'Eletrônica',
+            'electronic': 'Eletrônica',
+            'dance': 'Dance',
+            'house': 'House',
+            'techno': 'Techno',
+            'trance': 'Trance',
+            'dubstep': 'Dubstep',
+            'edm': 'EDM',
+            
+            // Hip Hop e Rap
+            'hip hop': 'Hip Hop',
+            'rap': 'Rap',
+            'rap nacional': 'Rap Nacional',
+            'trap': 'Trap',
+            
+            // R&B e Soul
+            'r&b': 'R&B',
+            'soul': 'Soul',
+            'funk': 'Funk',
+            'funk carioca': 'Funk Carioca',
+            
+            // Jazz e Blues
+            'jazz': 'Jazz',
+            'blues': 'Blues',
+            'smooth jazz': 'Smooth Jazz',
+            
+            // Reggae
+            'reggae': 'Reggae',
+            'reggaeton': 'Reggaeton',
+            
+            // Country
+            'country': 'Country',
+            'folk': 'Folk',
+            
+            // Metal
+            'metal': 'Metal',
+            'heavy metal': 'Heavy Metal',
+            'death metal': 'Death Metal',
+            'black metal': 'Black Metal',
+            
+            // Clássica
+            'clássica': 'Clássica',
+            'classical': 'Clássica',
+            'erudita': 'Erudita',
+            
+            // Internacional
+            'latina': 'Latina',
+            'salsa': 'Salsa',
+            'merengue': 'Merengue',
+            'bachata': 'Bachata',
+            
+            // Outros
+            'gospel': 'Gospel',
+            'new age': 'New Age',
+            'ambient': 'Ambient',
+            'world music': 'World Music',
+            'instrumental': 'Instrumental'
+        };
+        
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+            logElement.textContent += logEntry;
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            console.log(`[Supabase Corrector] ${message}`);
+        }
+        
+        function showStatus(message, type = 'info') {
+            const statusElement = document.getElementById('status');
+            statusElement.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+        
+        function updateStats() {
+            document.getElementById('totalSongs').textContent = songs.length;
+            document.getElementById('processedSongs').textContent = processedCount;
+            document.getElementById('correctedSongs').textContent = correctedCount;
+            document.getElementById('errorCount').textContent = errorCount;
+            
+            if (songs.length > 0) {
+                const progress = (processedCount / songs.length) * 100;
+                document.getElementById('progressFill').style.width = `${progress}%`;
+            }
+        }
+        
+        async function connectToSupabase() {
+            const url = document.getElementById('supabaseUrl').value.trim();
+            const key = document.getElementById('supabaseKey').value.trim();
+            
+            if (!url || !key) {
+                showStatus('❌ Por favor, insira a URL e a chave do Supabase', 'error');
+                return;
+            }
+            
+            try {
+                supabase = window.supabase.createClient(url, key);
+                
+                showStatus('✅ Conectado ao Supabase com sucesso!', 'success');
+                log(`✅ Conectado ao Supabase: ${url}`);
+                
+                // Habilitar botões
+                document.getElementById('loadBtn').disabled = false;
+                
+            } catch (error) {
+                showStatus(`❌ Erro ao conectar: ${error.message}`, 'error');
+                log(`❌ Erro de conexão: ${error.message}`);
+            }
+        }
+        
+        async function testConnection() {
+            if (!supabase) {
+                showStatus('❌ Conecte-se ao Supabase primeiro', 'error');
+                return;
+            }
+            
+            try {
+                // Testar com uma consulta simples
+                const { data, error } = await supabase
+                    .from('songs')
+                    .select('count', { count: 'exact', head: true });
+                
+                if (error) {
+                    throw error;
+                }
+                
+                log('✅ Conexão testada com sucesso!');
+                showStatus('✅ Conexão testada com sucesso! Tabela "songs" acessível.', 'success');
+                
+            } catch (error) {
+                showStatus(`❌ Erro no teste: ${error.message}`, 'error');
+                log(`❌ Erro no teste de conexão: ${error.message}`);
+                
+                if (error.message.includes('relation "songs" does not exist')) {
+                    showStatus('❌ Tabela "songs" não existe. Execute o script SQL fornecido.', 'error');
+                }
+            }
+        }
+        
+        async function createSampleData() {
+            if (!supabase) {
+                showStatus('❌ Conecte-se ao Supabase primeiro', 'error');
+                return;
+            }
+            
+            const sampleSongs = [
+                { title: 'Bohemian Rhapsody', artist: 'Queen', genre: 'rock' },
+                { title: 'Garota de Ipanema', artist: 'Tom Jobim', genre: 'bossa nova' },
+                { title: 'Imagine', artist: 'John Lennon', genre: 'pop rock' },
+                { title: 'Aquarela', artist: 'Toquinho', genre: 'mpb' },
+                { title: 'Hotel California', artist: 'Eagles', genre: 'classic rock' },
+                { title: 'Evidências', artist: 'Chitãozinho & Xororó', genre: 'sertanejo' },
+                { title: 'Billie Jean', artist: 'Michael Jackson', genre: 'pop' },
+                { title: 'Mas Que Nada', artist: 'Jorge Ben Jor', genre: 'samba' },
+                { title: 'Stairway to Heaven', artist: 'Led Zeppelin', genre: 'hard rock' },
+                { title: 'Asa Branca', artist: 'Luiz Gonzaga', genre: 'forró' }
+            ];
+            
+            try {
+                log('📝 Criando dados de exemplo...');
+                
+                const { data, error } = await supabase
+                    .from('songs')
+                    .insert(sampleSongs)
+                    .select();
+                
+                if (error) {
+                    throw error;
+                }
+                
+                log(`✅ ${sampleSongs.length} músicas de exemplo criadas!`);
+                showStatus(`✅ ${sampleSongs.length} músicas de exemplo criadas!`, 'success');
+                
+            } catch (error) {
+                log(`❌ Erro ao criar dados de exemplo: ${error.message}`);
+                showStatus(`❌ Erro ao criar dados: ${error.message}`, 'error');
+            }
+        }
+        
+        async function loadSongs() {
+            if (!supabase) {
+                showStatus('❌ Conecte-se ao Supabase primeiro', 'error');
+                return;
+            }
+            
+            try {
+                showStatus('📥 Carregando músicas...', 'info');
+                log('📥 Iniciando carregamento das músicas...');
+                
+                const { data, error } = await supabase
+                    .from('songs')
+                    .select('*')
+                    .order('created_at', { ascending: true });
+                
+                if (error) {
+                    throw error;
+                }
+                
+                songs = data || [];
+                processedCount = 0;
+                correctedCount = 0;
+                errorCount = 0;
+                
+                updateStats();
+                
+                log(`✅ ${songs.length} músicas carregadas com sucesso`);
+                showStatus(`✅ ${songs.length} músicas carregadas!`, 'success');
+                
+                // Habilitar botão de correção
+                document.getElementById('correctBtn').disabled = false;
+                
+            } catch (error) {
+                showStatus(`❌ Erro ao carregar: ${error.message}`, 'error');
+                log(`❌ Erro ao carregar músicas: ${error.message}`);
+            }
+        }
+        
+        function correctGenre(currentGenre) {
+            if (!currentGenre) return null;
+            
+            const normalized = currentGenre.toLowerCase().trim();
+            
+            // Busca exata
+            if (genreMapping[normalized]) {
+                return {
+                    corrected: genreMapping[normalized],
+                    confidence: 100
+                };
+            }
+            
+            // Busca por similaridade
+            for (const [key, value] of Object.entries(genreMapping)) {
+                if (normalized.includes(key) || key.includes(normalized)) {
+                    return {
+                        corrected: value,
+                        confidence: 85
+                    };
+                }
+            }
+            
+            // Busca por palavras-chave
+            const keywords = {
+                'rock': 'Rock',
+                'pop': 'Pop',
+                'samba': 'Samba',
+                'forró': 'Forró',
+                'sertanejo': 'Sertanejo',
+                'eletrônica': 'Eletrônica',
+                'electronic': 'Eletrônica',
+                'jazz': 'Jazz',
+                'blues': 'Blues',
+                'reggae': 'Reggae',
+                'metal': 'Metal',
+                'funk': 'Funk',
+                'rap': 'Rap',
+                'hip': 'Hip Hop',
+                'country': 'Country',
+                'gospel': 'Gospel'
+            };
+            
+            for (const [keyword, genre] of Object.entries(keywords)) {
+                if (normalized.includes(keyword)) {
+                    return {
+                        corrected: genre,
+                        confidence: 70
+                    };
+                }
+            }
+            
+            return null;
+        }
+        
+        async function startCorrection() {
+            if (!supabase || songs.length === 0) {
+                showStatus('❌ Carregue as músicas primeiro', 'error');
+                return;
+            }
+            
+            showStatus('🔧 Iniciando correção de gêneros...', 'info');
+            log('🔧 Iniciando processo de correção...');
+            
+            // Desabilitar botões durante o processo
+            document.getElementById('correctBtn').disabled = true;
+            document.getElementById('loadBtn').disabled = true;
+            
+            const batchSize = 10; // Supabase suporta mais operações simultâneas
+            const delayBetweenBatches = 500; // 500ms entre lotes
+            
+            try {
+                for (let i = 0; i < songs.length; i += batchSize) {
+                    const batch = songs.slice(i, i + batchSize);
+                    
+                    log(`📦 Processando lote ${Math.floor(i/batchSize) + 1}/${Math.ceil(songs.length/batchSize)} (${batch.length} músicas)`);
+                    
+                    // Processar lote em paralelo
+                    const promises = batch.map(song => processSong(song));
+                    await Promise.allSettled(promises);
+                    
+                    updateStats();
+                    
+                    // Delay entre lotes
+                    if (i + batchSize < songs.length) {
+                        await new Promise(resolve => setTimeout(resolve, delayBetweenBatches));
+                    }
+                }
+                
+                log(`✅ Correção concluída! ${correctedCount} gêneros corrigidos de ${songs.length} músicas`);
+                showStatus(`✅ Correção concluída! ${correctedCount} gêneros corrigidos.`, 'success');
+                
+                // Habilitar botão de exportação
+                document.getElementById('exportBtn').disabled = false;
+                
+            } catch (error) {
+                log(`❌ Erro durante a correção: ${error.message}`);
+                showStatus(`❌ Erro durante a correção: ${error.message}`, 'error');
+            } finally {
+                // Reabilitar botões
+                document.getElementById('correctBtn').disabled = false;
+                document.getElementById('loadBtn').disabled = false;
+            }
+        }
+        
+        async function processSong(song) {
+            try {
+                const correction = correctGenre(song.genre);
+                processedCount++;
+                
+                if (correction && correction.confidence >= 70) {
+                    // Atualizar no Supabase
+                    const { error } = await supabase
+                        .from('songs')
+                        .update({
+                            corrected_genre: correction.corrected,
+                            confidence: correction.confidence,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', song.id);
+                    
+                    if (error) {
+                        throw error;
+                    }
+                    
+                    correctedCount++;
+                    log(`✅ ${song.title} - ${song.artist}: "${song.genre}" → "${correction.corrected}" (${correction.confidence}%)`);
+                } else {
+                    log(`ℹ️ ${song.title} - ${song.artist}: Gênero "${song.genre}" mantido (sem correção encontrada)`);
+                }
+                
+            } catch (error) {
+                errorCount++;
+                log(`❌ Erro ao processar "${song.title}": ${error.message}`);
+            }
+        }
+        
+        async function exportResults() {
+            if (!supabase || songs.length === 0) {
+                showStatus('❌ Nenhum dado para exportar', 'error');
+                return;
+            }
+            
+            try {
+                log('💾 Exportando resultados...');
+                
+                // Recarregar dados atualizados
+                const { data: updatedSongs, error } = await supabase
+                    .from('songs')
+                    .select('*')
+                    .order('created_at', { ascending: true });
+                
+                if (error) {
+                    throw error;
+                }
+                
+                // Preparar dados para exportação
+                const exportData = updatedSongs.map(song => ({
+                    id: song.id,
+                    title: song.title,
+                    artist: song.artist,
+                    original_genre: song.genre,
+                    corrected_genre: song.corrected_genre || song.genre,
+                    confidence: song.confidence || 0,
+                    was_corrected: !!song.corrected_genre,
+                    created_at: song.created_at,
+                    updated_at: song.updated_at
+                }));
+                
+                // Criar arquivo JSON
+                const jsonData = JSON.stringify(exportData, null, 2);
+                const blob = new Blob([jsonData], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                // Download
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `supabase_genre_corrections_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                log('✅ Resultados exportados com sucesso!');
+                showStatus('✅ Resultados exportados!', 'success');
+                
+            } catch (error) {
+                log(`❌ Erro na exportação: ${error.message}`);
+                showStatus(`❌ Erro na exportação: ${error.message}`, 'error');
+            }
+        }
+        
+        function clearLog() {
+            document.getElementById('log').textContent = '';
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🎵 Sistema de Correção de Gêneros - Supabase iniciado');
+            log('ℹ️ Configure a conexão com o Supabase para começar');
+            showStatus('⚙️ Configure a conexão com o Supabase para começar', 'info');
+        });
+    </script>
+</body>
+</html>

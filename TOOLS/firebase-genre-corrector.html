@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 Corretor Automático de Gêneros - Firebase</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: 2.5em;
+        }
+        .step {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #4CAF50;
+        }
+        .step h3 {
+            margin-top: 0;
+            color: #4CAF50;
+        }
+        .button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        .button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .danger {
+            background: linear-gradient(45deg, #f44336, #d32f2f);
+        }
+        .warning {
+            background: linear-gradient(45deg, #ff9800, #f57c00);
+        }
+        .info {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        .log {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        .progress {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            height: 20px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+        .confidence-filter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .confidence-filter input {
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .confidence-filter input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .correction-preview {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .correction-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 3px solid #4CAF50;
+        }
+        .correction-item.low-confidence {
+            border-left-color: #ff9800;
+        }
+        .correction-item.very-low-confidence {
+            border-left-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Corretor Automático de Gêneros</h1>
+        <p style="text-align: center; font-size: 1.2em; opacity: 0.9;">
+            Ferramenta para corrigir automaticamente os gêneros das suas 578 músicas no Firebase
+        </p>
+    </div>
+
+    <!-- PASSO 1: BACKUP -->
+    <div class="container">
+        <div class="step">
+            <h3>🛡️ PASSO 1: Backup de Segurança</h3>
+            <p>Antes de fazer qualquer alteração, vamos criar um backup completo dos dados atuais.</p>
+            <button class="button info" onclick="createBackup()">Criar Backup</button>
+            <div id="backupStatus"></div>
+        </div>
+    </div>
+
+    <!-- PASSO 2: ANÁLISE -->
+    <div class="container">
+        <div class="step">
+            <h3>🔍 PASSO 2: Análise das Músicas</h3>
+            <p>Carregar todas as músicas do Firebase e analisar quais precisam de correção.</p>
+            <button class="button" onclick="analyzeMusic()" id="analyzeBtn">Analisar Músicas</button>
+            
+            <div class="stats" id="analysisStats" style="display: none;">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalSongs">0</div>
+                    <div>Total de Músicas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="needsCorrection">0</div>
+                    <div>Precisam Correção</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="highConfidence">0</div>
+                    <div>Alta Confiança (≥85%)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="lowConfidence">0</div>
+                    <div>Baixa Confiança (<85%)</div>
+                </div>
+            </div>
+
+            <div class="progress" id="analysisProgress" style="display: none;">
+                <div class="progress-bar" id="analysisProgressBar"></div>
+            </div>
+            <div class="log" id="analysisLog" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- PASSO 3: CONFIGURAÇÃO -->
+    <div class="container">
+        <div class="step">
+            <h3>⚙️ PASSO 3: Configuração da Correção</h3>
+            <p>Configure os critérios para correção automática.</p>
+            
+            <div class="confidence-filter">
+                <label>Confiança mínima para correção automática:</label>
+                <input type="number" id="minConfidence" value="85" min="0" max="100">
+                <span>%</span>
+            </div>
+            
+            <div class="confidence-filter">
+                <label>
+                    <input type="checkbox" id="previewMode" checked>
+                    Modo Preview (não aplicar alterações, apenas mostrar)
+                </label>
+            </div>
+            
+            <button class="button warning" onclick="generateCorrectionPlan()">Gerar Plano de Correção</button>
+        </div>
+    </div>
+
+    <!-- PASSO 4: PREVIEW -->
+    <div class="container" id="previewContainer" style="display: none;">
+        <div class="step">
+            <h3>👀 PASSO 4: Preview das Correções</h3>
+            <p>Revise as correções propostas antes de aplicar.</p>
+            
+            <div class="correction-preview" id="correctionPreview"></div>
+            
+            <button class="button danger" onclick="applyCorrections()" id="applyBtn">
+                🚀 Aplicar Correções no Firebase
+            </button>
+        </div>
+    </div>
+
+    <!-- PASSO 5: EXECUÇÃO -->
+    <div class="container" id="executionContainer" style="display: none;">
+        <div class="step">
+            <h3>🚀 PASSO 5: Aplicando Correções</h3>
+            <div class="progress">
+                <div class="progress-bar" id="correctionProgressBar"></div>
+            </div>
+            <div class="log" id="correctionLog"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="../config.js"></script>
+    <script src="../genre-classifier.js"></script>
+    <script>
+        let musicData = [];
+        let correctionPlan = [];
+        let backupData = null;
+
+        // Função para monitorar cotas e limites do Firebase
+        function addQuotaMonitoring() {
+            const originalFirestore = firebase.firestore;
+            let operationCount = 0;
+            let lastResetTime = Date.now();
+            const QUOTA_RESET_INTERVAL = 60000; // 1 minuto
+            const MAX_OPERATIONS_PER_MINUTE = 100; // Limite conservador
+            
+            firebase.firestore = function() {
+                const db = originalFirestore.apply(this, arguments);
+                const originalCollection = db.collection;
+                
+                db.collection = function(path) {
+                    const collection = originalCollection.apply(this, arguments);
+                    const originalDoc = collection.doc;
+                    
+                    collection.doc = function(docId) {
+                        const doc = originalDoc.apply(this, arguments);
+                        const originalUpdate = doc.update;
+                        
+                        doc.update = function(data) {
+                            // Reset contador se passou 1 minuto
+                            const now = Date.now();
+                            if (now - lastResetTime > QUOTA_RESET_INTERVAL) {
+                                operationCount = 0;
+                                lastResetTime = now;
+                                console.log('🔄 Contador de operações resetado');
+                            }
+                            
+                            operationCount++;
+                            console.log(`📊 Operação ${operationCount}/${MAX_OPERATIONS_PER_MINUTE} (último minuto)`);
+                            
+                            // Aviso se aproximando do limite
+                            if (operationCount > MAX_OPERATIONS_PER_MINUTE * 0.8) {
+                                console.warn('⚠️ Aproximando do limite de operações por minuto');
+                            }
+                            
+                            // Delay se exceder limite
+                            if (operationCount > MAX_OPERATIONS_PER_MINUTE) {
+                                const waitTime = QUOTA_RESET_INTERVAL - (now - lastResetTime);
+                                console.warn(`🚫 Limite excedido. Aguardando ${waitTime}ms...`);
+                                return new Promise(resolve => {
+                                    setTimeout(() => {
+                                        operationCount = 1;
+                                        lastResetTime = Date.now();
+                                        resolve(originalUpdate.apply(this, arguments));
+                                    }, waitTime);
+                                });
+                            }
+                            
+                            return originalUpdate.apply(this, arguments);
+                        };
+                        
+                        return doc;
+                    };
+                    
+                    return collection;
+                };
+                
+                return db;
+            };
+        }
+        window.addEventListener('DOMContentLoaded', async function() {
+            console.log('🎵 Corretor de Gêneros carregado');
+            
+            // Verificar se Firebase está configurado
+            if (typeof firebase === 'undefined') {
+                console.error('Firebase não carregado!');
+                alert('Erro: Firebase não está configurado. Verifique o arquivo config.js');
+                return;
+            }
+            
+            // Inicializar Firebase
+            try {
+                if (typeof firebaseConfig !== 'undefined') {
+                    firebase.initializeApp(firebaseConfig);
+                    console.log('🔥 Firebase inicializado com sucesso');
+                    
+                    // Adicionar monitoramento de cotas
+                    addQuotaMonitoring();
+                    console.log('📊 Sistema de monitoramento de cotas ativado');
+                    
+                    // Configurar Firestore
+                    const db = firebase.firestore();
+                    
+                    // Autenticação anônima para acessar o Firestore
+                    const auth = firebase.auth();
+                    await auth.signInAnonymously();
+                    console.log('🔐 Autenticação Firebase realizada com sucesso');
+                    
+                } else {
+                    console.error('Configuração do Firebase não encontrada!');
+                    alert('Erro: Configuração do Firebase não encontrada no config.js');
+                    return;
+                }
+            } catch (error) {
+                console.error('Erro ao inicializar Firebase:', error);
+                alert('Erro ao inicializar Firebase: ' + error.message);
+                return;
+            }
+            
+            // Verificar se classificador está disponível
+            if (typeof classifyGenre !== 'function') {
+                console.error('Classificador de gêneros não carregado!');
+                alert('Erro: Sistema de classificação não está disponível. Verifique o arquivo genre-classifier.js');
+                return;
+            }
+            
+            console.log('✅ Todos os sistemas carregados com sucesso');
+        });
+
+        // PASSO 1: Criar Backup
+        async function createBackup() {
+            const statusDiv = document.getElementById('backupStatus');
+            statusDiv.innerHTML = '<p>🔄 Criando backup...</p>';
+            
+            try {
+                const db = firebase.firestore();
+                const snapshot = await db.collection('songs').get();
+                
+                backupData = [];
+                snapshot.forEach(doc => {
+                    backupData.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                // Salvar backup localmente
+                const backupJson = JSON.stringify(backupData, null, 2);
+                const blob = new Blob([backupJson], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `firebase-backup-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
+                a.click();
+                
+                statusDiv.innerHTML = `
+                    <p style="color: #4CAF50;">✅ Backup criado com sucesso!</p>
+                    <p>📁 ${backupData.length} músicas salvas no backup</p>
+                    <p>💾 Arquivo baixado automaticamente</p>
+                `;
+                
+                // Habilitar próximo passo
+                document.getElementById('analyzeBtn').disabled = false;
+                
+            } catch (error) {
+                console.error('Erro ao criar backup:', error);
+                statusDiv.innerHTML = `<p style="color: #f44336;">❌ Erro ao criar backup: ${error.message}</p>`;
+            }
+        }
+
+        // PASSO 2: Analisar Músicas
+        async function analyzeMusic() {
+            const logDiv = document.getElementById('analysisLog');
+            const progressDiv = document.getElementById('analysisProgress');
+            const progressBar = document.getElementById('analysisProgressBar');
+            const statsDiv = document.getElementById('analysisStats');
+            
+            logDiv.style.display = 'block';
+            progressDiv.style.display = 'block';
+            statsDiv.style.display = 'grid';
+            
+            logDiv.innerHTML = '';
+            
+            function addLog(message) {
+                logDiv.innerHTML += `<div>${new Date().toLocaleTimeString()} - ${message}</div>`;
+                logDiv.scrollTop = logDiv.scrollHeight;
+            }
+            
+            try {
+                addLog('🔄 Carregando músicas do Firebase...');
+                
+                const db = firebase.firestore();
+                const snapshot = await db.collection('songs').get();
+                
+                musicData = [];
+                snapshot.forEach(doc => {
+                    musicData.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                addLog(`📊 ${musicData.length} músicas carregadas`);
+                
+                // Analisar cada música
+                let processed = 0;
+                let needsCorrection = 0;
+                let highConfidence = 0;
+                let lowConfidence = 0;
+                
+                for (const music of musicData) {
+                    const result = classifyGenre(music.artist, music.title);
+                    music.suggestedGenre = result.genre;
+                    music.confidence = result.confidence;
+                    music.method = result.method;
+                    music.details = result.details;
+                    
+                    // Verificar se precisa correção
+                    if (music.genre !== result.genre) {
+                        needsCorrection++;
+                        if (result.confidence >= 85) {
+                            highConfidence++;
+                        } else {
+                            lowConfidence++;
+                        }
+                    }
+                    
+                    processed++;
+                    const progress = (processed / musicData.length) * 100;
+                    progressBar.style.width = progress + '%';
+                    
+                    if (processed % 50 === 0) {
+                        addLog(`📈 Processadas ${processed}/${musicData.length} músicas`);
+                    }
+                }
+                
+                // Atualizar estatísticas
+                document.getElementById('totalSongs').textContent = musicData.length;
+                document.getElementById('needsCorrection').textContent = needsCorrection;
+                document.getElementById('highConfidence').textContent = highConfidence;
+                document.getElementById('lowConfidence').textContent = lowConfidence;
+                
+                addLog(`✅ Análise concluída!`);
+                addLog(`📊 ${needsCorrection} músicas precisam de correção`);
+                addLog(`🎯 ${highConfidence} com alta confiança (≥85%)`);
+                addLog(`⚠️ ${lowConfidence} com baixa confiança (<85%)`);
+                
+            } catch (error) {
+                console.error('Erro na análise:', error);
+                addLog(`❌ Erro na análise: ${error.message}`);
+            }
+        }
+
+        // PASSO 3: Gerar Plano de Correção
+        function generateCorrectionPlan() {
+            const minConfidence = parseInt(document.getElementById('minConfidence').value);
+            const previewContainer = document.getElementById('previewContainer');
+            const previewDiv = document.getElementById('correctionPreview');
+            
+            correctionPlan = musicData.filter(music => {
+                return music.genre !== music.suggestedGenre && music.confidence >= minConfidence;
+            });
+            
+            let html = `<h4>📋 Plano de Correção (${correctionPlan.length} músicas)</h4>`;
+            
+            correctionPlan.forEach((music, index) => {
+                const confidenceClass = music.confidence >= 85 ? '' : 
+                                      music.confidence >= 60 ? 'low-confidence' : 'very-low-confidence';
+                
+                html += `
+                    <div class="correction-item ${confidenceClass}">
+                        <strong>${music.title} - ${music.artist}</strong><br>
+                        <span style="color: #f44336;">Atual: ${music.genre}</span> → 
+                        <span style="color: #4CAF50;">Novo: ${music.suggestedGenre}</span><br>
+                        <small>Confiança: ${music.confidence}% | Método: ${music.method}</small>
+                    </div>
+                `;
+            });
+            
+            previewDiv.innerHTML = html;
+            previewContainer.style.display = 'block';
+        }
+
+        // PASSO 4: Aplicar Correções com tratamento robusto de erros
+        async function applyCorrections() {
+            const previewMode = document.getElementById('previewMode').checked;
+            const executionContainer = document.getElementById('executionContainer');
+            const progressBar = document.getElementById('correctionProgressBar');
+            const logDiv = document.getElementById('correctionLog');
+            
+            if (previewMode) {
+                alert('⚠️ Modo Preview ativado. Desmarque a opção para aplicar as correções realmente.');
+                return;
+            }
+            
+            if (!correctionPlan || correctionPlan.length === 0) {
+                alert('❌ Nenhuma correção para aplicar. Execute a análise primeiro.');
+                return;
+            }
+            
+            if (!confirm(`🚨 ATENÇÃO! Você está prestes a alterar ${correctionPlan.length} músicas no Firebase. Tem certeza?`)) {
+                return;
+            }
+            
+            executionContainer.style.display = 'block';
+            logDiv.innerHTML = '';
+            
+            function addLog(message) {
+                logDiv.innerHTML += `<div>${new Date().toLocaleTimeString()} - ${message}</div>`;
+                logDiv.scrollTop = logDiv.scrollHeight;
+            }
+            
+            const batchSize = 10; // Processar em lotes menores
+            const maxRetries = 3;
+            
+            // Função para delay entre operações
+            const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+            
+            // Função para retry com backoff exponencial
+            const retryWithBackoff = async (operation, retries = maxRetries) => {
+                for (let i = 0; i < retries; i++) {
+                    try {
+                        return await operation();
+                    } catch (error) {
+                        if (i === retries - 1) throw error;
+                        
+                        const backoffTime = Math.pow(2, i) * 1000; // 1s, 2s, 4s
+                        addLog(`⏳ Tentativa ${i + 1} falhou, aguardando ${backoffTime}ms...`);
+                        await delay(backoffTime);
+                    }
+                }
+            };
+            
+            try {
+                const db = firebase.firestore();
+                let processed = 0;
+                let successful = 0;
+                let failed = 0;
+                
+                addLog(`🚀 Iniciando correção de ${correctionPlan.length} músicas...`);
+                
+                // Processar em lotes
+                for (let i = 0; i < correctionPlan.length; i += batchSize) {
+                    const batch = correctionPlan.slice(i, i + batchSize);
+                    
+                    addLog(`📦 Processando lote ${Math.floor(i/batchSize) + 1}/${Math.ceil(correctionPlan.length/batchSize)}`);
+                    
+                    // Processar cada item do lote
+                    for (const music of batch) {
+                        try {
+                            await retryWithBackoff(async () => {
+                                await db.collection('songs').doc(music.id).update({
+                                    genre: music.suggestedGenre
+                                });
+                            });
+                            
+                            successful++;
+                            addLog(`✅ ${music.title} - ${music.artist}: ${music.genre} → ${music.suggestedGenre}`);
+                            
+                        } catch (error) {
+                            failed++;
+                            addLog(`❌ Erro em ${music.title}: ${error.message}`);
+                        }
+                        
+                        processed++;
+                        const progress = (processed / correctionPlan.length) * 100;
+                        progressBar.style.width = progress + '%';
+                    }
+                    
+                    // Delay entre lotes para não sobrecarregar o Firebase
+                    if (i + batchSize < correctionPlan.length) {
+                        await delay(500);
+                    }
+                }
+                
+                addLog(`🎉 Correção concluída!`);
+                addLog(`✅ ${successful} músicas corrigidas com sucesso`);
+                addLog(`❌ ${failed} falhas`);
+                
+                alert(`🎉 Correção concluída!\n✅ ${successful} sucessos\n❌ ${failed} falhas`);
+                
+            } catch (error) {
+                console.error('Erro na correção:', error);
+                addLog(`❌ Erro geral: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>

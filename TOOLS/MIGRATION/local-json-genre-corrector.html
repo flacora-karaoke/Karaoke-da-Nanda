@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Correção de Gêneros - Sistema Híbrido Local</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .setup-section {
+            background: #fff5f5;
+            border: 2px solid #ff6b6b;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .setup-section h3 {
+            color: #c53030;
+            margin-top: 0;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        input[type="file"], select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        .button {
+            background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .button:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 2px solid #9ae6b4;
+        }
+        
+        .status.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 2px solid #fc8181;
+        }
+        
+        .status.info {
+            background: #bee3f8;
+            color: #2a4365;
+            border: 2px solid #63b3ed;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+        
+        .stat-label {
+            color: #4a5568;
+            font-size: 0.9em;
+        }
+        
+        .log {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        
+        .instructions {
+            background: #f0fff4;
+            border: 2px solid #4ecdc4;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .instructions h4 {
+            color: #2d5a27;
+            margin-top: 0;
+        }
+        
+        .instructions ol {
+            color: #2d3748;
+        }
+        
+        .advantages {
+            background: #fffbeb;
+            border: 2px solid #f59e0b;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .advantages h4 {
+            color: #92400e;
+            margin-top: 0;
+        }
+        
+        .advantages ul {
+            color: #78350f;
+        }
+        
+        .file-drop {
+            border: 3px dashed #cbd5e0;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .file-drop.dragover {
+            border-color: #4ecdc4;
+            background: #f0fff4;
+        }
+        
+        .file-drop p {
+            margin: 0;
+            color: #718096;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Correção de Gêneros - Sistema Híbrido Local</h1>
+        
+        <div class="instructions">
+            <h4>💡 Como funciona este sistema:</h4>
+            <ol>
+                <li><strong>Leitura:</strong> Carrega dados do Firebase (sem escrever)</li>
+                <li><strong>Processamento:</strong> Corrige gêneros localmente</li>
+                <li><strong>Armazenamento:</strong> Salva correções em arquivo JSON local</li>
+                <li><strong>Exportação:</strong> Gera relatórios e backups</li>
+            </ol>
+        </div>
+        
+        <div class="advantages">
+            <h4>✅ Vantagens do Sistema Híbrido:</h4>
+            <ul>
+                <li><strong>Sem limites de cota:</strong> Não escreve no Firebase</li>
+                <li><strong>Offline:</strong> Funciona sem internet após carregar dados</li>
+                <li><strong>Backup local:</strong> Seus dados ficam seguros</li>
+                <li><strong>Rápido:</strong> Processamento local instantâneo</li>
+                <li><strong>Flexível:</strong> Pode importar/exportar facilmente</li>
+            </ul>
+        </div>
+        
+        <div class="setup-section">
+            <h3>⚙️ Configuração</h3>
+            <div class="input-group">
+                <label for="dataSource">Fonte dos Dados:</label>
+                <select id="dataSource" onchange="toggleDataSource()">
+                    <option value="firebase">Firebase (Leitura apenas)</option>
+                    <option value="json">Arquivo JSON Local</option>
+                    <option value="manual">Dados de Exemplo</option>
+                </select>
+            </div>
+            
+            <div id="firebaseSection" style="display: block;">
+                <button class="button" onclick="loadFromFirebase()">📥 Carregar do Firebase</button>
+            </div>
+            
+            <div id="jsonSection" style="display: none;">
+                <div class="file-drop" id="fileDrop">
+                    <p>📁 Arraste um arquivo JSON aqui ou clique para selecionar</p>
+                    <input type="file" id="jsonFile" accept=".json" style="display: none;" onchange="loadFromJSON()">
+                </div>
+            </div>
+            
+            <div id="manualSection" style="display: none;">
+                <button class="button" onclick="createSampleData()">📝 Criar Dados de Exemplo</button>
+            </div>
+        </div>
+        
+        <div id="status"></div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalSongs">0</div>
+                <div class="stat-label">Total de Músicas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="processedSongs">0</div>
+                <div class="stat-label">Processadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="correctedSongs">0</div>
+                <div class="stat-label">Corrigidas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="savedLocal">0</div>
+                <div class="stat-label">Salvas Localmente</div>
+            </div>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <div style="text-align: center; margin: 20px 0;">
+            <button class="button" onclick="startCorrection()" id="correctBtn" disabled>🔧 Iniciar Correção</button>
+            <button class="button" onclick="saveToLocal()" id="saveBtn" disabled>💾 Salvar Localmente</button>
+            <button class="button" onclick="exportResults()" id="exportBtn" disabled>📤 Exportar Resultados</button>
+            <button class="button" onclick="clearLog()">🗑️ Limpar Log</button>
+        </div>
+        
+        <div class="log" id="log"></div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <script>
+        let songs = [];
+        let correctedSongs = [];
+        let processedCount = 0;
+        let correctedCount = 0;
+        let savedLocalCount = 0;
+        
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOJF2gOhBBh_wfqOCOlJhJhJhJhJhJhJh",
+            authDomain: "karaokeyoutube-default-rtdb.firebaseapp.com",
+            databaseURL: "https://karaokeyoutube-default-rtdb-default-rtdb.firebaseio.com",
+            projectId: "karaokeyoutube-default-rtdb",
+            storageBucket: "karaokeyoutube-default-rtdb.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdefghijklmnop"
+        };
+        
+        // Mapeamento de gêneros musicais
+        const genreMapping = {
+            // Pop e variações
+            'pop': 'Pop',
+            'pop rock': 'Pop Rock',
+            'pop nacional': 'Pop Nacional',
+            'pop internacional': 'Pop Internacional',
+            'electropop': 'Electropop',
+            'synthpop': 'Synthpop',
+            
+            // Rock e subgêneros
+            'rock': 'Rock',
+            'rock nacional': 'Rock Nacional',
+            'rock internacional': 'Rock Internacional',
+            'hard rock': 'Hard Rock',
+            'soft rock': 'Soft Rock',
+            'classic rock': 'Classic Rock',
+            'alternative rock': 'Alternative Rock',
+            'indie rock': 'Indie Rock',
+            'punk rock': 'Punk Rock',
+            'progressive rock': 'Progressive Rock',
+            
+            // MPB e música brasileira
+            'mpb': 'MPB',
+            'samba': 'Samba',
+            'bossa nova': 'Bossa Nova',
+            'forró': 'Forró',
+            'axé': 'Axé',
+            'pagode': 'Pagode',
+            'sertanejo': 'Sertanejo',
+            'sertanejo universitário': 'Sertanejo Universitário',
+            'música caipira': 'Música Caipira',
+            'tropicália': 'Tropicália',
+            'choro': 'Choro',
+            
+            // Eletrônica
+            'eletrônica': 'Eletrônica',
+            'electronic': 'Eletrônica',
+            'dance': 'Dance',
+            'house': 'House',
+            'techno': 'Techno',
+            'trance': 'Trance',
+            'dubstep': 'Dubstep',
+            'edm': 'EDM',
+            
+            // Hip Hop e Rap
+            'hip hop': 'Hip Hop',
+            'rap': 'Rap',
+            'rap nacional': 'Rap Nacional',
+            'trap': 'Trap',
+            
+            // R&B e Soul
+            'r&b': 'R&B',
+            'soul': 'Soul',
+            'funk': 'Funk',
+            'funk carioca': 'Funk Carioca',
+            
+            // Jazz e Blues
+            'jazz': 'Jazz',
+            'blues': 'Blues',
+            'smooth jazz': 'Smooth Jazz',
+            
+            // Reggae
+            'reggae': 'Reggae',
+            'reggaeton': 'Reggaeton',
+            
+            // Country
+            'country': 'Country',
+            'folk': 'Folk',
+            
+            // Metal
+            'metal': 'Metal',
+            'heavy metal': 'Heavy Metal',
+            'death metal': 'Death Metal',
+            'black metal': 'Black Metal',
+            
+            // Clássica
+            'clássica': 'Clássica',
+            'classical': 'Clássica',
+            'erudita': 'Erudita',
+            
+            // Internacional
+            'latina': 'Latina',
+            'salsa': 'Salsa',
+            'merengue': 'Merengue',
+            'bachata': 'Bachata',
+            
+            // Outros
+            'gospel': 'Gospel',
+            'new age': 'New Age',
+            'ambient': 'Ambient',
+            'world music': 'World Music',
+            'instrumental': 'Instrumental'
+        };
+        
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+            logElement.textContent += logEntry;
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            console.log(`[Local Hybrid Corrector] ${message}`);
+        }
+        
+        function showStatus(message, type = 'info') {
+            const statusElement = document.getElementById('status');
+            statusElement.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+        
+        function updateStats() {
+            document.getElementById('totalSongs').textContent = songs.length;
+            document.getElementById('processedSongs').textContent = processedCount;
+            document.getElementById('correctedSongs').textContent = correctedCount;
+            document.getElementById('savedLocal').textContent = savedLocalCount;
+            
+            if (songs.length > 0) {
+                const progress = (processedCount / songs.length) * 100;
+                document.getElementById('progressFill').style.width = `${progress}%`;
+            }
+        }
+        
+        function toggleDataSource() {
+            const source = document.getElementById('dataSource').value;
+            
+            document.getElementById('firebaseSection').style.display = source === 'firebase' ? 'block' : 'none';
+            document.getElementById('jsonSection').style.display = source === 'json' ? 'block' : 'none';
+            document.getElementById('manualSection').style.display = source === 'manual' ? 'block' : 'none';
+        }
+        
+        async function loadFromFirebase() {
+            try {
+                showStatus('🔗 Conectando ao Firebase...', 'info');
+                log('🔗 Inicializando Firebase...');
+                
+                // Inicializar Firebase
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                
+                // Autenticação anônima
+                await firebase.auth().signInAnonymously();
+                log('✅ Autenticação anônima realizada');
+                
+                const db = firebase.firestore();
+                
+                showStatus('📥 Carregando músicas do Firebase...', 'info');
+                log('📥 Carregando coleção "songs"...');
+                
+                const snapshot = await db.collection('songs').get();
+                
+                songs = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    songs.push({
+                        id: doc.id,
+                        title: data.title || 'Título não informado',
+                        artist: data.artist || 'Artista não informado',
+                        genre: data.genre || 'Gênero não informado',
+                        source: 'firebase'
+                    });
+                });
+                
+                processedCount = 0;
+                correctedCount = 0;
+                savedLocalCount = 0;
+                correctedSongs = [];
+                
+                updateStats();
+                
+                log(`✅ ${songs.length} músicas carregadas do Firebase`);
+                showStatus(`✅ ${songs.length} músicas carregadas do Firebase!`, 'success');
+                
+                // Habilitar botão de correção
+                document.getElementById('correctBtn').disabled = false;
+                
+            } catch (error) {
+                log(`❌ Erro ao carregar do Firebase: ${error.message}`);
+                showStatus(`❌ Erro ao carregar do Firebase: ${error.message}`, 'error');
+            }
+        }
+        
+        function loadFromJSON() {
+            const fileInput = document.getElementById('jsonFile');
+            const file = fileInput.files[0];
+            
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (Array.isArray(data)) {
+                        songs = data.map((song, index) => ({
+                            id: song.id || `local_${index}`,
+                            title: song.title || 'Título não informado',
+                            artist: song.artist || 'Artista não informado',
+                            genre: song.genre || 'Gênero não informado',
+                            source: 'json'
+                        }));
+                    } else {
+                        throw new Error('Arquivo JSON deve conter um array de músicas');
+                    }
+                    
+                    processedCount = 0;
+                    correctedCount = 0;
+                    savedLocalCount = 0;
+                    correctedSongs = [];
+                    
+                    updateStats();
+                    
+                    log(`✅ ${songs.length} músicas carregadas do arquivo JSON`);
+                    showStatus(`✅ ${songs.length} músicas carregadas do arquivo JSON!`, 'success');
+                    
+                    // Habilitar botão de correção
+                    document.getElementById('correctBtn').disabled = false;
+                    
+                } catch (error) {
+                    log(`❌ Erro ao processar arquivo JSON: ${error.message}`);
+                    showStatus(`❌ Erro ao processar arquivo JSON: ${error.message}`, 'error');
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        function createSampleData() {
+            songs = [
+                { id: 'sample_1', title: 'Bohemian Rhapsody', artist: 'Queen', genre: 'rock', source: 'sample' },
+                { id: 'sample_2', title: 'Garota de Ipanema', artist: 'Tom Jobim', genre: 'bossa nova', source: 'sample' },
+                { id: 'sample_3', title: 'Imagine', artist: 'John Lennon', genre: 'pop rock', source: 'sample' },
+                { id: 'sample_4', title: 'Aquarela', artist: 'Toquinho', genre: 'mpb', source: 'sample' },
+                { id: 'sample_5', title: 'Hotel California', artist: 'Eagles', genre: 'classic rock', source: 'sample' },
+                { id: 'sample_6', title: 'Evidências', artist: 'Chitãozinho & Xororó', genre: 'sertanejo', source: 'sample' },
+                { id: 'sample_7', title: 'Billie Jean', artist: 'Michael Jackson', genre: 'pop', source: 'sample' },
+                { id: 'sample_8', title: 'Mas Que Nada', artist: 'Jorge Ben Jor', genre: 'samba', source: 'sample' },
+                { id: 'sample_9', title: 'Stairway to Heaven', artist: 'Led Zeppelin', genre: 'hard rock', source: 'sample' },
+                { id: 'sample_10', title: 'Asa Branca', artist: 'Luiz Gonzaga', genre: 'forró', source: 'sample' }
+            ];
+            
+            processedCount = 0;
+            correctedCount = 0;
+            savedLocalCount = 0;
+            correctedSongs = [];
+            
+            updateStats();
+            
+            log(`✅ ${songs.length} músicas de exemplo criadas`);
+            showStatus(`✅ ${songs.length} músicas de exemplo criadas!`, 'success');
+            
+            // Habilitar botão de correção
+            document.getElementById('correctBtn').disabled = false;
+        }
+        
+        function correctGenre(currentGenre) {
+            if (!currentGenre) return null;
+            
+            const normalized = currentGenre.toLowerCase().trim();
+            
+            // Busca exata
+            if (genreMapping[normalized]) {
+                return {
+                    corrected: genreMapping[normalized],
+                    confidence: 100
+                };
+            }
+            
+            // Busca por similaridade
+            for (const [key, value] of Object.entries(genreMapping)) {
+                if (normalized.includes(key) || key.includes(normalized)) {
+                    return {
+                        corrected: value,
+                        confidence: 85
+                    };
+                }
+            }
+            
+            // Busca por palavras-chave
+            const keywords = {
+                'rock': 'Rock',
+                'pop': 'Pop',
+                'samba': 'Samba',
+                'forró': 'Forró',
+                'sertanejo': 'Sertanejo',
+                'eletrônica': 'Eletrônica',
+                'electronic': 'Eletrônica',
+                'jazz': 'Jazz',
+                'blues': 'Blues',
+                'reggae': 'Reggae',
+                'metal': 'Metal',
+                'funk': 'Funk',
+                'rap': 'Rap',
+                'hip': 'Hip Hop',
+                'country': 'Country',
+                'gospel': 'Gospel'
+            };
+            
+            for (const [keyword, genre] of Object.entries(keywords)) {
+                if (normalized.includes(keyword)) {
+                    return {
+                        corrected: genre,
+                        confidence: 70
+                    };
+                }
+            }
+            
+            return null;
+        }
+        
+        async function startCorrection() {
+            if (songs.length === 0) {
+                showStatus('❌ Carregue as músicas primeiro', 'error');
+                return;
+            }
+            
+            showStatus('🔧 Iniciando correção de gêneros...', 'info');
+            log('🔧 Iniciando processo de correção local...');
+            
+            // Desabilitar botão durante o processo
+            document.getElementById('correctBtn').disabled = true;
+            
+            correctedSongs = [];
+            processedCount = 0;
+            correctedCount = 0;
+            
+            try {
+                for (const song of songs) {
+                    const correction = correctGenre(song.genre);
+                    processedCount++;
+                    
+                    const correctedSong = {
+                        ...song,
+                        original_genre: song.genre,
+                        corrected_genre: correction ? correction.corrected : song.genre,
+                        confidence: correction ? correction.confidence : 0,
+                        was_corrected: !!correction,
+                        processed_at: new Date().toISOString()
+                    };
+                    
+                    correctedSongs.push(correctedSong);
+                    
+                    if (correction && correction.confidence >= 70) {
+                        correctedCount++;
+                        log(`✅ ${song.title} - ${song.artist}: "${song.genre}" → "${correction.corrected}" (${correction.confidence}%)`);
+                    } else {
+                        log(`ℹ️ ${song.title} - ${song.artist}: Gênero "${song.genre}" mantido`);
+                    }
+                    
+                    updateStats();
+                    
+                    // Pequeno delay para não travar a interface
+                    if (processedCount % 10 === 0) {
+                        await new Promise(resolve => setTimeout(resolve, 10));
+                    }
+                }
+                
+                log(`✅ Correção concluída! ${correctedCount} gêneros corrigidos de ${songs.length} músicas`);
+                showStatus(`✅ Correção concluída! ${correctedCount} gêneros corrigidos.`, 'success');
+                
+                // Habilitar botões de salvamento e exportação
+                document.getElementById('saveBtn').disabled = false;
+                document.getElementById('exportBtn').disabled = false;
+                
+            } catch (error) {
+                log(`❌ Erro durante a correção: ${error.message}`);
+                showStatus(`❌ Erro durante a correção: ${error.message}`, 'error');
+            } finally {
+                // Reabilitar botão
+                document.getElementById('correctBtn').disabled = false;
+            }
+        }
+        
+        function saveToLocal() {
+            if (correctedSongs.length === 0) {
+                showStatus('❌ Nenhuma correção para salvar', 'error');
+                return;
+            }
+            
+            try {
+                // Salvar no localStorage
+                const dataToSave = {
+                    songs: correctedSongs,
+                    metadata: {
+                        total_songs: correctedSongs.length,
+                        corrected_songs: correctedCount,
+                        saved_at: new Date().toISOString(),
+                        source: songs[0]?.source || 'unknown'
+                    }
+                };
+                
+                localStorage.setItem('genre_corrections', JSON.stringify(dataToSave));
+                savedLocalCount = correctedSongs.length;
+                updateStats();
+                
+                log('✅ Correções salvas no armazenamento local do navegador');
+                showStatus('✅ Correções salvas localmente!', 'success');
+                
+            } catch (error) {
+                log(`❌ Erro ao salvar localmente: ${error.message}`);
+                showStatus(`❌ Erro ao salvar localmente: ${error.message}`, 'error');
+            }
+        }
+        
+        function exportResults() {
+            if (correctedSongs.length === 0) {
+                showStatus('❌ Nenhum dado para exportar', 'error');
+                return;
+            }
+            
+            try {
+                log('💾 Exportando resultados...');
+                
+                // Preparar dados para exportação
+                const exportData = {
+                    metadata: {
+                        export_date: new Date().toISOString(),
+                        total_songs: correctedSongs.length,
+                        corrected_songs: correctedCount,
+                        source: songs[0]?.source || 'unknown',
+                        system: 'Local Hybrid Corrector'
+                    },
+                    songs: correctedSongs
+                };
+                
+                // Criar arquivo JSON
+                const jsonData = JSON.stringify(exportData, null, 2);
+                const blob = new Blob([jsonData], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                // Download
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `local_genre_corrections_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                log('✅ Resultados exportados com sucesso!');
+                showStatus('✅ Resultados exportados!', 'success');
+                
+            } catch (error) {
+                log(`❌ Erro na exportação: ${error.message}`);
+                showStatus(`❌ Erro na exportação: ${error.message}`, 'error');
+            }
+        }
+        
+        function clearLog() {
+            document.getElementById('log').textContent = '';
+        }
+        
+        // Configurar drag & drop para arquivos JSON
+        function setupFileDrop() {
+            const fileDrop = document.getElementById('fileDrop');
+            const fileInput = document.getElementById('jsonFile');
+            
+            fileDrop.addEventListener('click', () => fileInput.click());
+            
+            fileDrop.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileDrop.classList.add('dragover');
+            });
+            
+            fileDrop.addEventListener('dragleave', () => {
+                fileDrop.classList.remove('dragover');
+            });
+            
+            fileDrop.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileDrop.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0 && files[0].type === 'application/json') {
+                    fileInput.files = files;
+                    loadFromJSON();
+                }
+            });
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🎵 Sistema Híbrido de Correção de Gêneros iniciado');
+            log('ℹ️ Selecione uma fonte de dados para começar');
+            showStatus('⚙️ Selecione uma fonte de dados para começar', 'info');
+            
+            setupFileDrop();
+            
+            // Verificar se há dados salvos localmente
+            const savedData = localStorage.getItem('genre_corrections');
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    log(`ℹ️ Encontrados dados salvos localmente: ${data.metadata.total_songs} músicas`);
+                } catch (error) {
+                    log('⚠️ Dados salvos localmente corrompidos');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

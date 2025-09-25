@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Correção de Gêneros - Appwrite</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .setup-section {
+            background: #fff0f6;
+            border: 2px solid #f093fb;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .setup-section h3 {
+            color: #c53030;
+            margin-top: 0;
+        }
+        
+        .advantages-section {
+            background: #f0fff4;
+            border: 2px solid #38a169;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .advantages-section h3 {
+            color: #2f855a;
+            margin-top: 0;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        input[type="text"], input[type="url"], select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        .button {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .button:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 2px solid #9ae6b4;
+        }
+        
+        .status.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 2px solid #fc8181;
+        }
+        
+        .status.info {
+            background: #bee3f8;
+            color: #2a4365;
+            border: 2px solid #63b3ed;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f093fb, #f5576c);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #f093fb;
+        }
+        
+        .stat-label {
+            color: #4a5568;
+            font-size: 0.9em;
+        }
+        
+        .log {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        
+        .instructions {
+            background: #ebf8ff;
+            border: 2px solid #3182ce;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .instructions h4 {
+            color: #2c5282;
+            margin-top: 0;
+        }
+        
+        .instructions ol {
+            color: #2d3748;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .feature-card {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .feature-card h4 {
+            color: #495057;
+            margin-top: 0;
+        }
+        
+        .feature-card .icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Correção de Gêneros - Appwrite</h1>
+        
+        <div class="advantages-section">
+            <h3>✨ Por que Appwrite é Excelente para 2025:</h3>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="icon">📱</div>
+                    <h4>Mobile-First</h4>
+                    <p>Otimizado para aplicações móveis e PWAs</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔓</div>
+                    <h4>Open Source</h4>
+                    <p>100% código aberto, sem vendor lock-in</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🏠</div>
+                    <h4>Self-Hosted</h4>
+                    <p>Hospede em qualquer lugar, controle total</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">⚡</div>
+                    <h4>Real-time</h4>
+                    <p>Sincronização em tempo real nativa</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔐</div>
+                    <h4>Segurança</h4>
+                    <p>Autenticação e autorização robustas</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🌍</div>
+                    <h4>Multi-linguagem</h4>
+                    <p>SDKs para todas as linguagens populares</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h4>🛠️ Como configurar o Appwrite:</h4>
+            <ol>
+                <li><strong>Instalar Appwrite:</strong> Use Docker ou Appwrite Cloud</li>
+                <li><strong>Criar Projeto:</strong> Configure um novo projeto</li>
+                <li><strong>Configurar Database:</strong> Crie coleções para suas músicas</li>
+                <li><strong>Configurar API:</strong> Obtenha as credenciais de acesso</li>
+                <li><strong>Testar Conexão:</strong> Use esta ferramenta para conectar</li>
+            </ol>
+        </div>
+        
+        <div class="setup-section">
+            <h3>⚙️ Configuração do Appwrite</h3>
+            
+            <div class="input-group">
+                <label for="appwriteEndpoint">Endpoint do Appwrite:</label>
+                <input type="url" id="appwriteEndpoint" placeholder="https://cloud.appwrite.io/v1" value="https://cloud.appwrite.io/v1">
+            </div>
+            
+            <div class="input-group">
+                <label for="appwriteProject">Project ID:</label>
+                <input type="text" id="appwriteProject" placeholder="seu-project-id">
+            </div>
+            
+            <div class="input-group">
+                <label for="appwriteDatabase">Database ID:</label>
+                <input type="text" id="appwriteDatabase" placeholder="seu-database-id">
+            </div>
+            
+            <div class="input-group">
+                <label for="appwriteCollection">Collection ID (Músicas):</label>
+                <input type="text" id="appwriteCollection" placeholder="songs">
+            </div>
+            
+            <button class="button" onclick="connectAppwrite()">🔗 Conectar ao Appwrite</button>
+            <button class="button" onclick="createSampleData()">📝 Criar Dados de Exemplo</button>
+        </div>
+        
+        <div id="status"></div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalSongs">0</div>
+                <div class="stat-label">Total de Músicas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="processedSongs">0</div>
+                <div class="stat-label">Processadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="correctedSongs">0</div>
+                <div class="stat-label">Corrigidas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="savedSongs">0</div>
+                <div class="stat-label">Salvas</div>
+            </div>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <div style="text-align: center; margin: 20px 0;">
+            <button class="button" onclick="loadSongs()" id="loadBtn" disabled>📥 Carregar Músicas</button>
+            <button class="button" onclick="startCorrection()" id="correctBtn" disabled>🔧 Corrigir Gêneros</button>
+            <button class="button" onclick="saveSongs()" id="saveBtn" disabled>💾 Salvar Correções</button>
+            <button class="button" onclick="exportResults()" id="exportBtn" disabled>📤 Exportar</button>
+            <button class="button" onclick="clearLog()">🗑️ Limpar Log</button>
+        </div>
+        
+        <div class="instructions">
+            <h4>📋 Comandos Docker para Appwrite:</h4>
+            <div class="code-block">
+# Instalar Appwrite localmente
+docker run -it --rm \
+    --volume /var/run/docker.sock:/var/run/docker.sock \
+    --volume "$(pwd)"/appwrite:/usr/src/code/appwrite:rw \
+    --entrypoint="install" \
+    appwrite/appwrite:1.4.13
+
+# Iniciar Appwrite
+cd appwrite
+docker compose up -d
+            </div>
+            
+            <h4>🌐 Appwrite Cloud (Alternativa Gratuita):</h4>
+            <p>Acesse <strong>https://cloud.appwrite.io</strong> para usar o Appwrite Cloud gratuitamente!</p>
+        </div>
+        
+        <div class="log" id="log"></div>
+    </div>
+
+    <!-- Appwrite SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.1"></script>
+
+    <script>
+        let appwrite = null;
+        let databases = null;
+        let songs = [];
+        let correctedSongs = [];
+        let processedCount = 0;
+        let correctedCount = 0;
+        let savedCount = 0;
+        
+        // Configurações do Appwrite
+        let config = {
+            endpoint: 'https://cloud.appwrite.io/v1',
+            projectId: '',
+            databaseId: '',
+            collectionId: 'songs'
+        };
+        
+        // Mapeamento de gêneros musicais
+        const genreMapping = {
+            // Pop e variações
+            'pop': 'Pop',
+            'pop rock': 'Pop Rock',
+            'pop nacional': 'Pop Nacional',
+            'pop internacional': 'Pop Internacional',
+            'electropop': 'Electropop',
+            'synthpop': 'Synthpop',
+            
+            // Rock e subgêneros
+            'rock': 'Rock',
+            'rock nacional': 'Rock Nacional',
+            'rock internacional': 'Rock Internacional',
+            'hard rock': 'Hard Rock',
+            'soft rock': 'Soft Rock',
+            'classic rock': 'Classic Rock',
+            'alternative rock': 'Alternative Rock',
+            'indie rock': 'Indie Rock',
+            'punk rock': 'Punk Rock',
+            'progressive rock': 'Progressive Rock',
+            
+            // MPB e música brasileira
+            'mpb': 'MPB',
+            'samba': 'Samba',
+            'bossa nova': 'Bossa Nova',
+            'forró': 'Forró',
+            'axé': 'Axé',
+            'pagode': 'Pagode',
+            'sertanejo': 'Sertanejo',
+            'sertanejo universitário': 'Sertanejo Universitário',
+            'música caipira': 'Música Caipira',
+            'tropicália': 'Tropicália',
+            'choro': 'Choro',
+            
+            // Eletrônica
+            'eletrônica': 'Eletrônica',
+            'electronic': 'Eletrônica',
+            'dance': 'Dance',
+            'house': 'House',
+            'techno': 'Techno',
+            'trance': 'Trance',
+            'dubstep': 'Dubstep',
+            'edm': 'EDM',
+            
+            // Hip Hop e Rap
+            'hip hop': 'Hip Hop',
+            'rap': 'Rap',
+            'rap nacional': 'Rap Nacional',
+            'trap': 'Trap',
+            
+            // R&B e Soul
+            'r&b': 'R&B',
+            'soul': 'Soul',
+            'funk': 'Funk',
+            'funk carioca': 'Funk Carioca',
+            
+            // Jazz e Blues
+            'jazz': 'Jazz',
+            'blues': 'Blues',
+            'smooth jazz': 'Smooth Jazz',
+            
+            // Reggae
+            'reggae': 'Reggae',
+            'reggaeton': 'Reggaeton',
+            
+            // Country
+            'country': 'Country',
+            'folk': 'Folk',
+            
+            // Metal
+            'metal': 'Metal',
+            'heavy metal': 'Heavy Metal',
+            'death metal': 'Death Metal',
+            'black metal': 'Black Metal',
+            
+            // Clássica
+            'clássica': 'Clássica',
+            'classical': 'Clássica',
+            'erudita': 'Erudita',
+            
+            // Internacional
+            'latina': 'Latina',
+            'salsa': 'Salsa',
+            'merengue': 'Merengue',
+            'bachata': 'Bachata',
+            
+            // Outros
+            'gospel': 'Gospel',
+            'new age': 'New Age',
+            'ambient': 'Ambient',
+            'world music': 'World Music',
+            'instrumental': 'Instrumental'
+        };
+        
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+            logElement.textContent += logEntry;
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            console.log(`[Appwrite Genre Corrector] ${message}`);
+        }
+        
+        function showStatus(message, type = 'info') {
+            const statusElement = document.getElementById('status');
+            statusElement.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+        
+        function updateStats() {
+            document.getElementById('totalSongs').textContent = songs.length;
+            document.getElementById('processedSongs').textContent = processedCount;
+            document.getElementById('correctedSongs').textContent = correctedCount;
+            document.getElementById('savedSongs').textContent = savedCount;
+            
+            if (songs.length > 0) {
+                const progress = (processedCount / songs.length) * 100;
+                document.getElementById('progressFill').style.width = `${progress}%`;
+            }
+        }
+        
+        async function connectAppwrite() {
+            try {
+                // Obter configurações da interface
+                config.endpoint = document.getElementById('appwriteEndpoint').value;
+                config.projectId = document.getElementById('appwriteProject').value;
+                config.databaseId = document.getElementById('appwriteDatabase').value;
+                config.collectionId = document.getElementById('appwriteCollection').value;
+                
+                if (!config.projectId || !config.databaseId) {
+                    showStatus('❌ Preencha o Project ID e Database ID', 'error');
+                    return;
+                }
+                
+                showStatus('🔗 Conectando ao Appwrite...', 'info');
+                log('🔗 Inicializando Appwrite...');
+                
+                // Inicializar Appwrite
+                appwrite = new Appwrite.Client();
+                appwrite
+                    .setEndpoint(config.endpoint)
+                    .setProject(config.projectId);
+                
+                databases = new Appwrite.Databases(appwrite);
+                
+                // Testar conexão
+                await databases.get(config.databaseId);
+                
+                log('✅ Conectado ao Appwrite com sucesso!');
+                showStatus('✅ Conectado ao Appwrite!', 'success');
+                
+                // Habilitar próximos botões
+                document.getElementById('loadBtn').disabled = false;
+                
+            } catch (error) {
+                log(`❌ Erro ao conectar ao Appwrite: ${error.message}`);
+                showStatus(`❌ Erro ao conectar: ${error.message}`, 'error');
+            }
+        }
+        
+        async function loadSongs() {
+            if (!databases) {
+                showStatus('❌ Conecte ao Appwrite primeiro', 'error');
+                return;
+            }
+            
+            try {
+                showStatus('📥 Carregando músicas...', 'info');
+                log('📥 Carregando coleção de músicas...');
+                
+                const response = await databases.listDocuments(
+                    config.databaseId,
+                    config.collectionId
+                );
+                
+                songs = response.documents.map(doc => ({
+                    id: doc.$id,
+                    title: doc.title || 'Título não informado',
+                    artist: doc.artist || 'Artista não informado',
+                    genre: doc.genre || 'Gênero não informado',
+                    originalData: doc
+                }));
+                
+                processedCount = 0;
+                correctedCount = 0;
+                savedCount = 0;
+                correctedSongs = [];
+                
+                updateStats();
+                
+                log(`✅ ${songs.length} músicas carregadas do Appwrite`);
+                showStatus(`✅ ${songs.length} músicas carregadas!`, 'success');
+                
+                // Habilitar botão de correção
+                document.getElementById('correctBtn').disabled = false;
+                
+            } catch (error) {
+                log(`❌ Erro ao carregar músicas: ${error.message}`);
+                showStatus(`❌ Erro ao carregar: ${error.message}`, 'error');
+            }
+        }
+        
+        function createSampleData() {
+            songs = [
+                { id: 'sample_1', title: 'Bohemian Rhapsody', artist: 'Queen', genre: 'rock' },
+                { id: 'sample_2', title: 'Garota de Ipanema', artist: 'Tom Jobim', genre: 'bossa nova' },
+                { id: 'sample_3', title: 'Imagine', artist: 'John Lennon', genre: 'pop rock' },
+                { id: 'sample_4', title: 'Aquarela', artist: 'Toquinho', genre: 'mpb' },
+                { id: 'sample_5', title: 'Hotel California', artist: 'Eagles', genre: 'classic rock' },
+                { id: 'sample_6', title: 'Evidências', artist: 'Chitãozinho & Xororó', genre: 'sertanejo' },
+                { id: 'sample_7', title: 'Billie Jean', artist: 'Michael Jackson', genre: 'pop' },
+                { id: 'sample_8', title: 'Mas Que Nada', artist: 'Jorge Ben Jor', genre: 'samba' },
+                { id: 'sample_9', title: 'Stairway to Heaven', artist: 'Led Zeppelin', genre: 'hard rock' },
+                { id: 'sample_10', title: 'Asa Branca', artist: 'Luiz Gonzaga', genre: 'forró' }
+            ];
+            
+            processedCount = 0;
+            correctedCount = 0;
+            savedCount = 0;
+            correctedSongs = [];
+            
+            updateStats();
+            
+            log(`✅ ${songs.length} músicas de exemplo criadas`);
+            showStatus(`✅ ${songs.length} músicas de exemplo criadas!`, 'success');
+            
+            // Habilitar botão de correção
+            document.getElementById('correctBtn').disabled = false;
+        }
+        
+        function correctGenre(currentGenre) {
+            if (!currentGenre) return null;
+            
+            const normalized = currentGenre.toLowerCase().trim();
+            
+            // Busca exata
+            if (genreMapping[normalized]) {
+                return {
+                    corrected: genreMapping[normalized],
+                    confidence: 100
+                };
+            }
+            
+            // Busca por similaridade
+            for (const [key, value] of Object.entries(genreMapping)) {
+                if (normalized.includes(key) || key.includes(normalized)) {
+                    return {
+                        corrected: value,
+                        confidence: 85
+                    };
+                }
+            }
+            
+            // Busca por palavras-chave
+            const keywords = {
+                'rock': 'Rock',
+                'pop': 'Pop',
+                'samba': 'Samba',
+                'forró': 'Forró',
+                'sertanejo': 'Sertanejo',
+                'eletrônica': 'Eletrônica',
+                'electronic': 'Eletrônica',
+                'jazz': 'Jazz',
+                'blues': 'Blues',
+                'reggae': 'Reggae',
+                'metal': 'Metal',
+                'funk': 'Funk',
+                'rap': 'Rap',
+                'hip': 'Hip Hop',
+                'country': 'Country',
+                'gospel': 'Gospel'
+            };
+            
+            for (const [keyword, genre] of Object.entries(keywords)) {
+                if (normalized.includes(keyword)) {
+                    return {
+                        corrected: genre,
+                        confidence: 70
+                    };
+                }
+            }
+            
+            return null;
+        }
+        
+        async function startCorrection() {
+            if (songs.length === 0) {
+                showStatus('❌ Carregue as músicas primeiro', 'error');
+                return;
+            }
+            
+            showStatus('🔧 Iniciando correção de gêneros...', 'info');
+            log('🔧 Iniciando processo de correção...');
+            
+            // Desabilitar botão durante o processo
+            document.getElementById('correctBtn').disabled = true;
+            
+            correctedSongs = [];
+            processedCount = 0;
+            correctedCount = 0;
+            
+            try {
+                for (const song of songs) {
+                    const correction = correctGenre(song.genre);
+                    processedCount++;
+                    
+                    const correctedSong = {
+                        ...song,
+                        original_genre: song.genre,
+                        corrected_genre: correction ? correction.corrected : song.genre,
+                        confidence: correction ? correction.confidence : 0,
+                        was_corrected: !!correction,
+                        processed_at: new Date().toISOString()
+                    };
+                    
+                    correctedSongs.push(correctedSong);
+                    
+                    if (correction && correction.confidence >= 70) {
+                        correctedCount++;
+                        log(`✅ ${song.title} - ${song.artist}: "${song.genre}" → "${correction.corrected}" (${correction.confidence}%)`);
+                    } else {
+                        log(`ℹ️ ${song.title} - ${song.artist}: Gênero "${song.genre}" mantido`);
+                    }
+                    
+                    updateStats();
+                    
+                    // Pequeno delay para não travar a interface
+                    if (processedCount % 10 === 0) {
+                        await new Promise(resolve => setTimeout(resolve, 10));
+                    }
+                }
+                
+                log(`✅ Correção concluída! ${correctedCount} gêneros corrigidos de ${songs.length} músicas`);
+                showStatus(`✅ Correção concluída! ${correctedCount} gêneros corrigidos.`, 'success');
+                
+                // Habilitar botões de salvamento e exportação
+                document.getElementById('saveBtn').disabled = false;
+                document.getElementById('exportBtn').disabled = false;
+                
+            } catch (error) {
+                log(`❌ Erro durante a correção: ${error.message}`);
+                showStatus(`❌ Erro durante a correção: ${error.message}`, 'error');
+            } finally {
+                // Reabilitar botão
+                document.getElementById('correctBtn').disabled = false;
+            }
+        }
+        
+        async function saveSongs() {
+            if (!databases || correctedSongs.length === 0) {
+                showStatus('❌ Nenhuma correção para salvar', 'error');
+                return;
+            }
+            
+            showStatus('💾 Salvando correções no Appwrite...', 'info');
+            log('💾 Iniciando salvamento das correções...');
+            
+            savedCount = 0;
+            
+            try {
+                for (const song of correctedSongs) {
+                    if (song.was_corrected) {
+                        try {
+                            await databases.updateDocument(
+                                config.databaseId,
+                                config.collectionId,
+                                song.id,
+                                {
+                                    genre: song.corrected_genre,
+                                    original_genre: song.original_genre,
+                                    corrected_at: song.processed_at,
+                                    correction_confidence: song.confidence
+                                }
+                            );
+                            
+                            savedCount++;
+                            log(`✅ Salva: ${song.title} - Gênero atualizado para "${song.corrected_genre}"`);
+                            
+                        } catch (error) {
+                            log(`❌ Erro ao salvar ${song.title}: ${error.message}`);
+                        }
+                    }
+                    
+                    updateStats();
+                    
+                    // Delay para não sobrecarregar a API
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                
+                log(`✅ Salvamento concluído! ${savedCount} músicas atualizadas no Appwrite`);
+                showStatus(`✅ ${savedCount} músicas salvas no Appwrite!`, 'success');
+                
+            } catch (error) {
+                log(`❌ Erro durante o salvamento: ${error.message}`);
+                showStatus(`❌ Erro no salvamento: ${error.message}`, 'error');
+            }
+        }
+        
+        function exportResults() {
+            if (correctedSongs.length === 0) {
+                showStatus('❌ Nenhum dado para exportar', 'error');
+                return;
+            }
+            
+            try {
+                log('💾 Exportando resultados...');
+                
+                // Preparar dados para exportação
+                const exportData = {
+                    metadata: {
+                        export_date: new Date().toISOString(),
+                        total_songs: correctedSongs.length,
+                        corrected_songs: correctedCount,
+                        saved_songs: savedCount,
+                        appwrite_config: {
+                            endpoint: config.endpoint,
+                            project: config.projectId,
+                            database: config.databaseId,
+                            collection: config.collectionId
+                        },
+                        system: 'Appwrite Genre Corrector'
+                    },
+                    songs: correctedSongs
+                };
+                
+                // Criar arquivo JSON
+                const jsonData = JSON.stringify(exportData, null, 2);
+                const blob = new Blob([jsonData], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                // Download
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `appwrite_genre_corrections_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                log('✅ Resultados exportados com sucesso!');
+                showStatus('✅ Resultados exportados!', 'success');
+                
+            } catch (error) {
+                log(`❌ Erro na exportação: ${error.message}`);
+                showStatus(`❌ Erro na exportação: ${error.message}`, 'error');
+            }
+        }
+        
+        function clearLog() {
+            document.getElementById('log').textContent = '';
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Corretor de Gêneros Appwrite iniciado');
+            log('ℹ️ Configure as credenciais do Appwrite para começar');
+            showStatus('⚙️ Configure o Appwrite para começar', 'info');
+        });
+    </script>
+</body>
+</html>

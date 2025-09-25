@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste do Classificador de Gêneros</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .test-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 14px;
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid #4ecdc4;
+        }
+        .confidence {
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+        .test-samples {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .sample {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .sample:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        .sample-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .sample-artist {
+            color: #ccc;
+            font-size: 14px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .stat-card {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+        .stat-label {
+            margin-top: 5px;
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Teste do Classificador de Gêneros Musicais</h1>
+        
+        <div class="test-section">
+            <h2>Teste Individual</h2>
+            <div class="test-input">
+                <input type="text" id="testTitle" placeholder="Título da música" value="Bohemian Rhapsody">
+                <input type="text" id="testArtist" placeholder="Artista" value="Queen">
+                <button onclick="testSingle()">Classificar</button>
+            </div>
+            <div id="singleResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Amostras de Teste - Música Internacional</h2>
+            <p>Clique em qualquer amostra para testar:</p>
+            <div class="test-samples" id="internationalSamples"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Amostras de Teste - Música Nacional</h2>
+            <div class="test-samples" id="nationalSamples"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Teste em Lote</h2>
+            <button onclick="testBatch()">Testar Todas as Amostras</button>
+            <div class="stats" id="batchStats"></div>
+            <div id="batchResults"></div>
+        </div>
+    </div>
+
+    <script src="../genre-classifier.js"></script>
+    <script>
+        // Aguardar o carregamento completo da página
+        window.addEventListener('DOMContentLoaded', function() {
+            // Verificar se as funções foram carregadas corretamente
+            console.log('Verificando se classifyGenre está disponível:', typeof classifyGenre);
+            console.log('Verificando ARTIST_GENRE_MAP:', typeof ARTIST_GENRE_MAP);
+            console.log('Verificando GENRE_KEYWORDS:', typeof GENRE_KEYWORDS);
+            
+            // Teste rápido
+            if (typeof classifyGenre === 'function') {
+                console.log('Teste Queen:', classifyGenre('Queen', 'Bohemian Rhapsody'));
+            } else {
+                console.error('classifyGenre não está definida!');
+                // Tentar carregar novamente
+                setTimeout(() => {
+                    if (typeof classifyGenre === 'function') {
+                        console.log('classifyGenre carregada após delay:', classifyGenre('Queen', 'Bohemian Rhapsody'));
+                    }
+                }, 1000);
+            }
+        });
+        
+        // Amostras de teste para música internacional
+        const internationalSamples = [
+            { title: "Bohemian Rhapsody", artist: "Queen" },
+            { title: "Hotel California", artist: "Eagles" },
+            { title: "Imagine", artist: "John Lennon" },
+            { title: "Billie Jean", artist: "Michael Jackson" },
+            { title: "Like a Prayer", artist: "Madonna" },
+            { title: "I Will Always Love You", artist: "Whitney Houston" },
+            { title: "My Heart Will Go On", artist: "Celine Dion" },
+            { title: "Shape of You", artist: "Ed Sheeran" },
+            { title: "Someone Like You", artist: "Adele" },
+            { title: "Despacito", artist: "Luis Fonsi" },
+            { title: "Blinding Lights", artist: "The Weeknd" },
+            { title: "Bad Guy", artist: "Billie Eilish" },
+            { title: "Watermelon Sugar", artist: "Harry Styles" },
+            { title: "Levitating", artist: "Dua Lipa" },
+            { title: "Anti-Hero", artist: "Taylor Swift" },
+            { title: "As It Was", artist: "Harry Styles" },
+            { title: "Heat Waves", artist: "Glass Animals" },
+            { title: "Stay", artist: "The Kid LAROI & Justin Bieber" },
+            { title: "Good 4 U", artist: "Olivia Rodrigo" },
+            { title: "Peaches", artist: "Justin Bieber" },
+            { title: "Lose Yourself", artist: "Eminem" },
+            { title: "God's Plan", artist: "Drake" },
+            { title: "Uptown Funk", artist: "Mark Ronson ft. Bruno Mars" },
+            { title: "Can't Stop the Feeling", artist: "Justin Timberlake" },
+            { title: "Havana", artist: "Camila Cabello" },
+            { title: "Señorita", artist: "Shawn Mendes & Camila Cabello" },
+            { title: "Bad Romance", artist: "Lady Gaga" },
+            { title: "Roar", artist: "Katy Perry" },
+            { title: "Thank U, Next", artist: "Ariana Grande" },
+            { title: "Umbrella", artist: "Rihanna" }
+        ];
+
+        // Amostras de teste para música nacional
+        const nationalSamples = [
+            { title: "Evidências", artist: "Chitãozinho & Xororó" },
+            { title: "Ai Se Eu Te Pego", artist: "Michel Teló" },
+            { title: "Garota de Ipanema", artist: "Tom Jobim" },
+            { title: "Aquarela", artist: "Toquinho" },
+            { title: "Baile de Favela", artist: "MC João" },
+            { title: "Jenifer", artist: "Gabriel Diniz" },
+            { title: "Thiaguinho", artist: "Ousadia & Alegria" },
+            { title: "Exagerado", artist: "Cazuza" },
+            { title: "Como É Grande o Meu Amor Por Você", artist: "Roberto Carlos" },
+            { title: "Alagados", artist: "Paralamas do Sucesso" }
+        ];
+
+        function renderSamples() {
+            const internationalContainer = document.getElementById('internationalSamples');
+            const nationalContainer = document.getElementById('nationalSamples');
+
+            internationalContainer.innerHTML = internationalSamples.map(sample => `
+                <div class="sample" onclick="testSample('${sample.title}', '${sample.artist}')">
+                    <div class="sample-title">${sample.title}</div>
+                    <div class="sample-artist">${sample.artist}</div>
+                </div>
+            `).join('');
+
+            nationalContainer.innerHTML = nationalSamples.map(sample => `
+                <div class="sample" onclick="testSample('${sample.title}', '${sample.artist}')">
+                    <div class="sample-title">${sample.title}</div>
+                    <div class="sample-artist">${sample.artist}</div>
+                </div>
+            `).join('');
+        }
+
+        function testSingle() {
+            const artist = document.getElementById('testArtist').value.trim();
+            const title = document.getElementById('testTitle').value.trim();
+            const resultDiv = document.getElementById('singleResult');
+            
+            try {
+                // Verificar se a função existe
+                if (typeof classifyGenre !== 'function') {
+                    throw new Error('Função classifyGenre não está disponível. Verifique se o arquivo genre-classifier.js foi carregado corretamente.');
+                }
+                
+                if (!artist) {
+                    throw new Error('Por favor, digite o nome do artista.');
+                }
+                
+                console.log('Testando:', artist, title);
+                const result = classifyGenre(artist, title);
+                console.log('Resultado:', result);
+                
+                if (!result || typeof result !== 'object') {
+                    throw new Error('Resultado inválido da classificação.');
+                }
+                
+                resultDiv.innerHTML = `
+                    <div class="result-card">
+                        <h3>${title || 'Sem título'} - ${artist}</h3>
+                        <div class="result-item"><strong>Gênero:</strong> ${result.genre || 'N/A'}</div>
+                        <div class="result-item"><strong>Confiança:</strong> ${result.confidence || 0}%</div>
+                        <div class="result-item"><strong>Método:</strong> ${result.method || 'N/A'}</div>
+                        <div class="result-item"><strong>Detalhes:</strong> ${result.details || 'N/A'}</div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Erro na classificação:', error);
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <strong>Erro:</strong> ${error.message}
+                        <br><br>
+                        <small>
+                            Verifique o console do navegador (F12) para mais detalhes.<br>
+                            Certifique-se de que o arquivo genre-classifier.js foi carregado corretamente.
+                        </small>
+                    </div>
+                `;
+            }
+        }
+
+        function testSample(title, artist) {
+            document.getElementById('testTitle').value = title;
+            document.getElementById('testArtist').value = artist;
+            testSingle();
+        }
+
+        function testBatch() {
+            const allSamples = [...internationalSamples, ...nationalSamples];
+            const results = allSamples.map(sample => ({
+                ...sample,
+                result: classifyGenre(sample.title, sample.artist)
+            }));
+
+            // Calcular estatísticas
+            const stats = {
+                total: results.length,
+                internacional: results.filter(r => r.result.genre === 'internacional').length,
+                nacional: results.filter(r => r.result.genre !== 'internacional').length,
+                highConfidence: results.filter(r => r.result.confidence >= 80).length,
+                mediumConfidence: results.filter(r => r.result.confidence >= 60 && r.result.confidence < 80).length,
+                lowConfidence: results.filter(r => r.result.confidence < 60).length
+            };
+
+            displayBatchStats(stats);
+            displayBatchResults(results);
+        }
+
+        function displayResult(containerId, sample, result) {
+            const container = document.getElementById(containerId);
+            const confidenceColor = result.confidence >= 80 ? '#4ecdc4' : 
+                                   result.confidence >= 60 ? '#f39c12' : '#e74c3c';
+            
+            container.innerHTML = `
+                <div class="result">
+                    <strong>${sample.title}</strong> - ${sample.artist}<br>
+                    <strong>Gênero:</strong> ${result.genre}<br>
+                    <strong>Confiança:</strong> <span class="confidence" style="color: ${confidenceColor}">${result.confidence}%</span><br>
+                    <strong>Método:</strong> ${result.method}<br>
+                    ${result.details ? `<strong>Detalhes:</strong> ${result.details}` : ''}
+                </div>
+            `;
+        }
+
+        function displayBatchStats(stats) {
+            const container = document.getElementById('batchStats');
+            container.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${stats.total}</div>
+                    <div class="stat-label">Total de Testes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.internacional}</div>
+                    <div class="stat-label">Internacional</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.nacional}</div>
+                    <div class="stat-label">Nacional</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.highConfidence}</div>
+                    <div class="stat-label">Alta Confiança (≥80%)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.mediumConfidence}</div>
+                    <div class="stat-label">Média Confiança (60-79%)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.lowConfidence}</div>
+                    <div class="stat-label">Baixa Confiança (<60%)</div>
+                </div>
+            `;
+        }
+
+        function displayBatchResults(results) {
+            const container = document.getElementById('batchResults');
+            const sortedResults = results.sort((a, b) => b.result.confidence - a.result.confidence);
+            
+            container.innerHTML = `
+                <h3>Resultados Detalhados (ordenados por confiança)</h3>
+                ${sortedResults.map(item => {
+                    const confidenceColor = item.result.confidence >= 80 ? '#4ecdc4' : 
+                                           item.result.confidence >= 60 ? '#f39c12' : '#e74c3c';
+                    return `
+                        <div class="result" style="margin-bottom: 10px;">
+                            <strong>${item.title}</strong> - ${item.artist}<br>
+                            <strong>Gênero:</strong> ${item.result.genre} | 
+                            <strong>Confiança:</strong> <span style="color: ${confidenceColor}">${item.result.confidence}%</span> | 
+                            <strong>Método:</strong> ${item.result.method}
+                        </div>
+                    `;
+                }).join('')}
+            `;
+        }
+
+        // Inicializar a página
+        renderSamples();
+    </script>
+</body>
+</html>

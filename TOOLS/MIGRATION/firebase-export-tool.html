@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exportação Completa do Firebase</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .warning-section {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .warning-section h3 {
+            color: #856404;
+            margin-top: 0;
+        }
+        
+        .info-section {
+            background: #d1ecf1;
+            border: 2px solid #17a2b8;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .info-section h3 {
+            color: #0c5460;
+            margin-top: 0;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .button:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .button.danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        }
+        
+        .button.success {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 2px solid #9ae6b4;
+        }
+        
+        .status.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 2px solid #fc8181;
+        }
+        
+        .status.info {
+            background: #bee3f8;
+            color: #2a4365;
+            border: 2px solid #63b3ed;
+        }
+        
+        .status.warning {
+            background: #fefcbf;
+            color: #744210;
+            border: 2px solid #f6e05e;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #4a5568;
+            font-size: 0.9em;
+        }
+        
+        .log {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        
+        .collection-list {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .collection-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .collection-item:last-child {
+            border-bottom: none;
+        }
+        
+        .collection-name {
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .collection-count {
+            background: #667eea;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+        }
+        
+        .export-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .export-card {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .export-card h4 {
+            color: #495057;
+            margin-top: 0;
+        }
+        
+        .export-card.selected {
+            border-color: #667eea;
+            background: #e3f2fd;
+        }
+        
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📤 Exportação Completa do Firebase</h1>
+        
+        <div class="warning-section">
+            <h3>⚠️ Importante - Leia Antes de Usar</h3>
+            <ul>
+                <li><strong>Cotas do Firebase:</strong> Esta ferramenta faz muitas leituras. Use com cuidado!</li>
+                <li><strong>Tempo:</strong> Exportações grandes podem demorar vários minutos</li>
+                <li><strong>Memória:</strong> Grandes volumes de dados podem consumir muita RAM</li>
+                <li><strong>Backup:</strong> Sempre mantenha backups dos seus dados originais</li>
+            </ul>
+        </div>
+        
+        <div class="info-section">
+            <h3>ℹ️ O que esta ferramenta faz:</h3>
+            <ul>
+                <li><strong>Exporta todas as coleções</strong> do seu projeto Firebase</li>
+                <li><strong>Gera arquivos JSON</strong> compatíveis com outras plataformas</li>
+                <li><strong>Preserva metadados</strong> como timestamps e IDs</li>
+                <li><strong>Cria backups completos</strong> para migração segura</li>
+                <li><strong>Suporte a múltiplos formatos</strong> de exportação</li>
+            </ul>
+        </div>
+        
+        <div class="input-group">
+            <label for="exportMode">Modo de Exportação:</label>
+            <select id="exportMode" onchange="toggleExportMode()">
+                <option value="all">Exportar Tudo (Todas as Coleções)</option>
+                <option value="selective">Exportação Seletiva</option>
+                <option value="sample">Apenas Amostras (Teste)</option>
+            </select>
+        </div>
+        
+        <div id="collectionsSection" style="display: none;">
+            <h4>📁 Coleções Disponíveis:</h4>
+            <div class="collection-list" id="collectionsList">
+                <div class="collection-item">
+                    <span class="collection-name">Carregando...</span>
+                </div>
+            </div>
+            
+            <div class="checkbox-group" id="collectionsCheckbox" style="display: none;">
+                <!-- Checkboxes serão inseridos aqui -->
+            </div>
+        </div>
+        
+        <div class="export-options">
+            <div class="export-card" onclick="selectExportFormat('json')">
+                <h4>📄 JSON Padrão</h4>
+                <p>Formato universal, compatível com qualquer plataforma</p>
+            </div>
+            <div class="export-card" onclick="selectExportFormat('supabase')">
+                <h4>🐘 Supabase Ready</h4>
+                <p>Formato otimizado para importação no Supabase</p>
+            </div>
+            <div class="export-card" onclick="selectExportFormat('pocketbase')">
+                <h4>📦 PocketBase Ready</h4>
+                <p>Formato otimizado para importação no PocketBase</p>
+            </div>
+            <div class="export-card" onclick="selectExportFormat('csv')">
+                <h4>📊 CSV/Excel</h4>
+                <p>Para análise em planilhas e relatórios</p>
+            </div>
+        </div>
+        
+        <div id="status"></div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalCollections">0</div>
+                <div class="stat-label">Coleções</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalDocuments">0</div>
+                <div class="stat-label">Documentos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="exportedCollections">0</div>
+                <div class="stat-label">Exportadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="exportSize">0 MB</div>
+                <div class="stat-label">Tamanho</div>
+            </div>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <div style="text-align: center; margin: 20px 0;">
+            <button class="button" onclick="connectFirebase()" id="connectBtn">🔗 Conectar ao Firebase</button>
+            <button class="button" onclick="scanCollections()" id="scanBtn" disabled>🔍 Escanear Coleções</button>
+            <button class="button success" onclick="startExport()" id="exportBtn" disabled>📤 Iniciar Exportação</button>
+            <button class="button danger" onclick="stopExport()" id="stopBtn" disabled>⏹️ Parar</button>
+            <button class="button" onclick="clearLog()">🗑️ Limpar Log</button>
+        </div>
+        
+        <div class="log" id="log"></div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <script>
+        let db = null;
+        let collections = [];
+        let selectedCollections = [];
+        let exportFormat = 'json';
+        let exportData = {};
+        let isExporting = false;
+        let exportedCount = 0;
+        let totalSize = 0;
+        
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOJF2gOhBBh_wfqOCOlJhJhJhJhJhJhJh",
+            authDomain: "karaokeyoutube-default-rtdb.firebaseapp.com",
+            databaseURL: "https://karaokeyoutube-default-rtdb-default-rtdb.firebaseio.com",
+            projectId: "karaokeyoutube-default-rtdb",
+            storageBucket: "karaokeyoutube-default-rtdb.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdefghijklmnop"
+        };
+        
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+            logElement.textContent += logEntry;
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            console.log(`[Firebase Export Tool] ${message}`);
+        }
+        
+        function showStatus(message, type = 'info') {
+            const statusElement = document.getElementById('status');
+            statusElement.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+        
+        function updateStats() {
+            document.getElementById('totalCollections').textContent = collections.length;
+            document.getElementById('exportedCollections').textContent = exportedCount;
+            document.getElementById('exportSize').textContent = `${(totalSize / 1024 / 1024).toFixed(2)} MB`;
+            
+            if (collections.length > 0) {
+                const progress = (exportedCount / collections.length) * 100;
+                document.getElementById('progressFill').style.width = `${progress}%`;
+            }
+        }
+        
+        function toggleExportMode() {
+            const mode = document.getElementById('exportMode').value;
+            const collectionsSection = document.getElementById('collectionsSection');
+            const checkboxGroup = document.getElementById('collectionsCheckbox');
+            
+            if (mode === 'selective') {
+                collectionsSection.style.display = 'block';
+                checkboxGroup.style.display = 'grid';
+            } else {
+                collectionsSection.style.display = mode === 'all' ? 'block' : 'none';
+                checkboxGroup.style.display = 'none';
+            }
+        }
+        
+        function selectExportFormat(format, element = null) {
+            exportFormat = format;
+            
+            // Remover seleção anterior
+            document.querySelectorAll('.export-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Adicionar seleção atual
+            if (element) {
+                element.closest('.export-card').classList.add('selected');
+            } else if (event && event.target) {
+                event.target.closest('.export-card').classList.add('selected');
+            } else {
+                // Fallback para inicialização
+                const cards = document.querySelectorAll('.export-card');
+                if (format === 'json' && cards[0]) cards[0].classList.add('selected');
+                if (format === 'supabase' && cards[1]) cards[1].classList.add('selected');
+                if (format === 'pocketbase' && cards[2]) cards[2].classList.add('selected');
+                if (format === 'csv' && cards[3]) cards[3].classList.add('selected');
+            }
+            
+            log(`📋 Formato de exportação selecionado: ${format.toUpperCase()}`);
+        }
+        
+        async function connectFirebase() {
+            try {
+                showStatus('🔗 Conectando ao Firebase...', 'info');
+                log('🔗 Inicializando Firebase...');
+                
+                // Inicializar Firebase
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                
+                // Autenticação anônima
+                await firebase.auth().signInAnonymously();
+                log('✅ Autenticação anônima realizada');
+                
+                db = firebase.firestore();
+                
+                log('✅ Conectado ao Firebase com sucesso!');
+                showStatus('✅ Conectado ao Firebase!', 'success');
+                
+                // Habilitar próximo botão
+                document.getElementById('connectBtn').disabled = true;
+                document.getElementById('scanBtn').disabled = false;
+                
+            } catch (error) {
+                log(`❌ Erro ao conectar ao Firebase: ${error.message}`);
+                showStatus(`❌ Erro ao conectar: ${error.message}`, 'error');
+            }
+        }
+        
+        async function scanCollections() {
+            if (!db) {
+                showStatus('❌ Conecte ao Firebase primeiro', 'error');
+                return;
+            }
+            
+            try {
+                showStatus('🔍 Escaneando coleções...', 'info');
+                log('🔍 Iniciando escaneamento de coleções...');
+                
+                // Lista de coleções conhecidas (Firebase não permite listar todas automaticamente)
+                const knownCollections = [
+                    'songs', 'users', 'playlists', 'favorites', 'history', 
+                    'artists', 'albums', 'genres', 'settings', 'logs',
+                    'comments', 'ratings', 'statistics', 'cache'
+                ];
+                
+                collections = [];
+                let totalDocs = 0;
+                
+                for (const collectionName of knownCollections) {
+                    try {
+                        const snapshot = await db.collection(collectionName).limit(1).get();
+                        if (!snapshot.empty) {
+                            // Contar documentos na coleção
+                            const countSnapshot = await db.collection(collectionName).get();
+                            const docCount = countSnapshot.size;
+                            
+                            collections.push({
+                                name: collectionName,
+                                count: docCount
+                            });
+                            
+                            totalDocs += docCount;
+                            log(`📁 Encontrada coleção "${collectionName}": ${docCount} documentos`);
+                        }
+                    } catch (error) {
+                        // Coleção não existe ou sem permissão
+                        log(`⚠️ Coleção "${collectionName}" não acessível`);
+                    }
+                }
+                
+                document.getElementById('totalDocuments').textContent = totalDocs;
+                
+                // Atualizar interface
+                displayCollections();
+                updateStats();
+                
+                log(`✅ Escaneamento concluído: ${collections.length} coleções encontradas`);
+                showStatus(`✅ ${collections.length} coleções encontradas!`, 'success');
+                
+                // Habilitar exportação
+                document.getElementById('scanBtn').disabled = true;
+                document.getElementById('exportBtn').disabled = false;
+                
+            } catch (error) {
+                log(`❌ Erro no escaneamento: ${error.message}`);
+                showStatus(`❌ Erro no escaneamento: ${error.message}`, 'error');
+            }
+        }
+        
+        function displayCollections() {
+            const collectionsList = document.getElementById('collectionsList');
+            const checkboxGroup = document.getElementById('collectionsCheckbox');
+            
+            // Lista visual
+            collectionsList.innerHTML = '';
+            checkboxGroup.innerHTML = '';
+            
+            collections.forEach(collection => {
+                // Item da lista
+                const item = document.createElement('div');
+                item.className = 'collection-item';
+                item.innerHTML = `
+                    <span class="collection-name">${collection.name}</span>
+                    <span class="collection-count">${collection.count} docs</span>
+                `;
+                collectionsList.appendChild(item);
+                
+                // Checkbox para seleção
+                const checkboxItem = document.createElement('div');
+                checkboxItem.className = 'checkbox-item';
+                checkboxItem.innerHTML = `
+                    <input type="checkbox" id="col_${collection.name}" value="${collection.name}" checked>
+                    <label for="col_${collection.name}">${collection.name} (${collection.count})</label>
+                `;
+                checkboxGroup.appendChild(checkboxItem);
+            });
+            
+            document.getElementById('collectionsSection').style.display = 'block';
+        }
+        
+        function getSelectedCollections() {
+            const mode = document.getElementById('exportMode').value;
+            
+            if (mode === 'all') {
+                return collections.map(c => c.name);
+            } else if (mode === 'selective') {
+                const selected = [];
+                collections.forEach(collection => {
+                    const checkbox = document.getElementById(`col_${collection.name}`);
+                    if (checkbox && checkbox.checked) {
+                        selected.push(collection.name);
+                    }
+                });
+                return selected;
+            } else if (mode === 'sample') {
+                return collections.slice(0, 2).map(c => c.name); // Apenas 2 primeiras
+            }
+            
+            return [];
+        }
+        
+        async function startExport() {
+            if (!db || collections.length === 0) {
+                showStatus('❌ Escaneie as coleções primeiro', 'error');
+                return;
+            }
+            
+            selectedCollections = getSelectedCollections();
+            
+            if (selectedCollections.length === 0) {
+                showStatus('❌ Selecione pelo menos uma coleção', 'error');
+                return;
+            }
+            
+            if (!exportFormat) {
+                showStatus('❌ Selecione um formato de exportação', 'error');
+                return;
+            }
+            
+            isExporting = true;
+            exportedCount = 0;
+            exportData = {};
+            totalSize = 0;
+            
+            // Atualizar interface
+            document.getElementById('exportBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            
+            showStatus(`📤 Exportando ${selectedCollections.length} coleções...`, 'info');
+            log(`📤 Iniciando exportação de ${selectedCollections.length} coleções no formato ${exportFormat.toUpperCase()}`);
+            
+            try {
+                for (const collectionName of selectedCollections) {
+                    if (!isExporting) break;
+                    
+                    await exportCollection(collectionName);
+                    exportedCount++;
+                    updateStats();
+                }
+                
+                if (isExporting) {
+                    await generateExportFiles();
+                    log('✅ Exportação concluída com sucesso!');
+                    showStatus('✅ Exportação concluída!', 'success');
+                } else {
+                    log('⚠️ Exportação interrompida pelo usuário');
+                    showStatus('⚠️ Exportação interrompida', 'warning');
+                }
+                
+            } catch (error) {
+                log(`❌ Erro durante a exportação: ${error.message}`);
+                showStatus(`❌ Erro na exportação: ${error.message}`, 'error');
+            } finally {
+                isExporting = false;
+                document.getElementById('exportBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = true;
+            }
+        }
+        
+        async function exportCollection(collectionName) {
+            log(`📥 Exportando coleção "${collectionName}"...`);
+            
+            const snapshot = await db.collection(collectionName).get();
+            const documents = [];
+            
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                
+                // Converter timestamps para strings
+                const processedData = processFirebaseData(data);
+                
+                documents.push({
+                    id: doc.id,
+                    ...processedData
+                });
+            });
+            
+            exportData[collectionName] = documents;
+            
+            // Calcular tamanho aproximado
+            const jsonSize = JSON.stringify(documents).length;
+            totalSize += jsonSize;
+            
+            log(`✅ Coleção "${collectionName}" exportada: ${documents.length} documentos`);
+        }
+        
+        function processFirebaseData(data) {
+            const processed = {};
+            
+            for (const [key, value] of Object.entries(data)) {
+                if (value && typeof value === 'object') {
+                    if (value.toDate && typeof value.toDate === 'function') {
+                        // Timestamp do Firebase
+                        processed[key] = value.toDate().toISOString();
+                    } else if (value.seconds !== undefined && value.nanoseconds !== undefined) {
+                        // Timestamp em formato objeto
+                        processed[key] = new Date(value.seconds * 1000).toISOString();
+                    } else {
+                        // Objeto aninhado
+                        processed[key] = processFirebaseData(value);
+                    }
+                } else {
+                    processed[key] = value;
+                }
+            }
+            
+            return processed;
+        }
+        
+        async function generateExportFiles() {
+            log('📦 Gerando arquivos de exportação...');
+            
+            const metadata = {
+                export_date: new Date().toISOString(),
+                export_format: exportFormat,
+                total_collections: selectedCollections.length,
+                total_documents: Object.values(exportData).reduce((sum, docs) => sum + docs.length, 0),
+                collections: selectedCollections,
+                firebase_project: firebaseConfig.projectId,
+                tool_version: '1.0.0'
+            };
+            
+            switch (exportFormat) {
+                case 'json':
+                    await generateJSONExport(metadata);
+                    break;
+                case 'supabase':
+                    await generateSupabaseExport(metadata);
+                    break;
+                case 'pocketbase':
+                    await generatePocketBaseExport(metadata);
+                    break;
+                case 'csv':
+                    await generateCSVExport(metadata);
+                    break;
+            }
+        }
+        
+        async function generateJSONExport(metadata) {
+            const exportPackage = {
+                metadata,
+                data: exportData
+            };
+            
+            const jsonData = JSON.stringify(exportPackage, null, 2);
+            downloadFile(jsonData, `firebase_export_${new Date().toISOString().split('T')[0]}.json`, 'application/json');
+            
+            log('✅ Arquivo JSON gerado e baixado');
+        }
+        
+        async function generateSupabaseExport(metadata) {
+            // Formato otimizado para Supabase (PostgreSQL)
+            const supabaseData = {
+                metadata,
+                sql_scripts: {},
+                json_data: exportData
+            };
+            
+            // Gerar scripts SQL para cada coleção
+            for (const [collectionName, documents] of Object.entries(exportData)) {
+                if (documents.length > 0) {
+                    supabaseData.sql_scripts[collectionName] = generateSQLScript(collectionName, documents);
+                }
+            }
+            
+            const jsonData = JSON.stringify(supabaseData, null, 2);
+            downloadFile(jsonData, `supabase_export_${new Date().toISOString().split('T')[0]}.json`, 'application/json');
+            
+            log('✅ Arquivo Supabase gerado e baixado');
+        }
+        
+        async function generatePocketBaseExport(metadata) {
+            // Formato otimizado para PocketBase
+            const pocketbaseData = {
+                metadata,
+                collections: {}
+            };
+            
+            for (const [collectionName, documents] of Object.entries(exportData)) {
+                pocketbaseData.collections[collectionName] = {
+                    name: collectionName,
+                    type: 'base',
+                    schema: generatePocketBaseSchema(documents),
+                    records: documents.map(doc => ({
+                        id: doc.id,
+                        ...doc
+                    }))
+                };
+            }
+            
+            const jsonData = JSON.stringify(pocketbaseData, null, 2);
+            downloadFile(jsonData, `pocketbase_export_${new Date().toISOString().split('T')[0]}.json`, 'application/json');
+            
+            log('✅ Arquivo PocketBase gerado e baixado');
+        }
+        
+        async function generateCSVExport(metadata) {
+            // Gerar um CSV para cada coleção
+            for (const [collectionName, documents] of Object.entries(exportData)) {
+                if (documents.length > 0) {
+                    const csv = convertToCSV(documents);
+                    downloadFile(csv, `${collectionName}_${new Date().toISOString().split('T')[0]}.csv`, 'text/csv');
+                }
+            }
+            
+            // Arquivo de metadados
+            const metadataCSV = convertToCSV([metadata]);
+            downloadFile(metadataCSV, `export_metadata_${new Date().toISOString().split('T')[0]}.csv`, 'text/csv');
+            
+            log('✅ Arquivos CSV gerados e baixados');
+        }
+        
+        function generateSQLScript(tableName, documents) {
+            if (documents.length === 0) return '';
+            
+            const columns = Object.keys(documents[0]).filter(key => key !== 'id');
+            const createTable = `CREATE TABLE IF NOT EXISTS ${tableName} (\n  id TEXT PRIMARY KEY,\n${columns.map(col => `  ${col} TEXT`).join(',\n')}\n);`;
+            
+            const insertStatements = documents.map(doc => {
+                const values = ['id', ...columns].map(col => {
+                    const value = doc[col];
+                    return value === null || value === undefined ? 'NULL' : `'${String(value).replace(/'/g, "''")}'`;
+                });
+                return `INSERT INTO ${tableName} (id, ${columns.join(', ')}) VALUES (${values.join(', ')});`;
+            });
+            
+            return [createTable, '', ...insertStatements].join('\n');
+        }
+        
+        function generatePocketBaseSchema(documents) {
+            if (documents.length === 0) return [];
+            
+            const sampleDoc = documents[0];
+            const schema = [];
+            
+            for (const [key, value] of Object.entries(sampleDoc)) {
+                if (key === 'id') continue;
+                
+                let type = 'text';
+                if (typeof value === 'number') type = 'number';
+                else if (typeof value === 'boolean') type = 'bool';
+                else if (value && value.includes && (value.includes('T') && value.includes(':'))) type = 'date';
+                
+                schema.push({
+                    name: key,
+                    type: type,
+                    required: false
+                });
+            }
+            
+            return schema;
+        }
+        
+        function convertToCSV(data) {
+            if (data.length === 0) return '';
+            
+            const headers = Object.keys(data[0]);
+            const csvRows = [headers.join(',')];
+            
+            for (const row of data) {
+                const values = headers.map(header => {
+                    const value = row[header];
+                    return value === null || value === undefined ? '' : `"${String(value).replace(/"/g, '""')}"`;
+                });
+                csvRows.push(values.join(','));
+            }
+            
+            return csvRows.join('\n');
+        }
+        
+        function downloadFile(content, filename, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        function stopExport() {
+            isExporting = false;
+            log('⏹️ Parando exportação...');
+        }
+        
+        function clearLog() {
+            document.getElementById('log').textContent = '';
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            log('📤 Ferramenta de Exportação do Firebase iniciada');
+            log('ℹ️ Conecte ao Firebase para começar');
+            showStatus('⚙️ Conecte ao Firebase para começar', 'info');
+            
+            // Selecionar formato JSON por padrão
+            selectExportFormat('json');
+        });
+    </script>
+</body>
+</html>
